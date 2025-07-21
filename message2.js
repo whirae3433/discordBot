@@ -13,7 +13,7 @@ const partyMessage = `
 8. 지노 ( 지노 숍 )
 9. 상현 ( 로드 예비리저 )
 10. 하늘   ( 프리 리프 )
-11. 다건  ( 럭키 리프 )
+11. 또띠  ( 럭키 리프 )
 `;
 
 module.exports = partyMessage;
