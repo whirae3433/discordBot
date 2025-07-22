@@ -1,9 +1,10 @@
 const { sheets } = require('../config/googleAuth');
 const parseRewardArgs = require('../utils/parseRewardArgs');
-
-const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
+const channelConfigMap = require('../config');
 
 module.exports.rewardCommand = async function (message) {
+  console.log('채널 ID:', message.channel.id);
+
   if (!message.content.startsWith('!')) return false;
 
   const args = message.content.slice(1).trim().split(/\s+/);
@@ -20,9 +21,18 @@ module.exports.rewardCommand = async function (message) {
   const { name, week } = parsed;
   const range = `${week}주차!B20:C25`;
 
+  const channelId = message.channel.id;
+  const config = channelConfigMap[channelId];
+  const spreadsheetId = config?.spreadsheetId;
+
+  if (!spreadsheetId) {
+    message.reply(`준비되면 말 걸어`);
+    return true;
+  }
+
   try {
     const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID,
+      spreadsheetId,
       range,
     });
 
@@ -34,7 +44,7 @@ module.exports.rewardCommand = async function (message) {
 
     const targetRow = rows.find((row) => row[0] === name);
     if (!targetRow) {
-      message.reply(`${name}가 뭔데?`);
+      message.reply(`${name}? 그게 뭔데?`);
       return true;
     }
 

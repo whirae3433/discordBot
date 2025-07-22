@@ -1,0 +1,16 @@
+{
+  "1392654036620148937": {
+    "spreadsheetId": "10l0CALXBo1BOf0wEjWM6YMKcuSF3FMCbzuqGVabK9fk",
+    "commands": {
+      "!지노": { "type": "image", "file": "images/jino/지노.jpg" },
+      "!사슴": { "type": "image", "file": "images/jino/사슴.jpeg" },
+      "!노을": { "type": "image", "file": "images/jino/베르세르크.png" },
+      "!이케아": { "type": "image", "file": "images/jino/dumb.jpg" },
+      "!C흥": { "type": "image", "file": "images/jino/피카츄.png" }
+    },
+    "schedule": {
+      "cron": "10 23 * * 1-5",
+      "messageFile": "../schedule/jinoSchedule.js"
+    }
+  }
+}
