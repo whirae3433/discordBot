@@ -9,8 +9,8 @@
       "!C흥": { "type": "image", "file": "images/jino/피카츄.png" }
     },
     "schedule": {
-      "cron": "10 23 * * 1-5",
-      "messageFile": "../schedule/jinoSchedule.js"
+      "cron": "15 23 * * 1-5",
+      "messageFile": "schedule/jinoSchedule.js"
     }
   }
 }

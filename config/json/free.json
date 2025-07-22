@@ -11,7 +11,7 @@
     },
     "schedule": {
       "cron": "25 20 * * 1-5",
-      "messageFile": "../schedule/freeSchedule.js"
+      "messageFile": "schedule/freeSchedule.js"
     }
   }
 }
