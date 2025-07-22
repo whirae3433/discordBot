@@ -20,14 +20,16 @@ module.exports.scheduleDailyMessage = (client) => {
       continue;
     }
 
-    schedule.scheduleJob(cron, async () => {
-      try {
-        const channel = await client.channels.fetch(channelId);
-        if (channel && channel.isTextBased()) {
-          channel.send(`@everyone\n${messageText}`);
+    schedule.scheduleJob({ rule: cron, tz: 'Asia/Seoul' }, async () => {
+      {
+        try {
+          const channel = await client.channels.fetch(channelId);
+          if (channel && channel.isTextBased()) {
+            channel.send(`@everyone\n${messageText}`);
+          }
+        } catch (error) {
+          console.error(`채널 ID ${channelId} 메시지 전송 실패:`, error);
         }
-      } catch (error) {
-        console.error(`채널 ID ${channelId} 메시지 전송 실패:`, error);
       }
     });
   }
