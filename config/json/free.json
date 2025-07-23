@@ -7,7 +7,8 @@
       "!프리": { "type": "image", "file": "images/free/프리.jpeg" },
       "!이케아": { "type": "image", "file": "images/free/dumb.jpg" },
       "!럭키": { "type": "image", "file": "images/free/럭키.jpg" },
-      "!도리": { "type": "image", "file": "images/free/도리.jpg" }
+      "!도리": { "type": "image", "file": "images/free/도리.jpg" },
+      "!무영": { "type": "image", "file": "images/free/무영.jpg" }
     },
     "schedule": {
       "cron": "25 20 * * 1-5",
