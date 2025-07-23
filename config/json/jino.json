@@ -7,7 +7,7 @@
       "!노을": { "type": "image", "file": "images/jino/베르세르크.png" },
       "!이케아": { "type": "image", "file": "images/jino/dumb.jpg" },
       "!C흥": { "type": "image", "file": "images/jino/피카츄.png" },
-      "!무영": { "type": "image", "file": "images/free/무영.jpg" }
+      "!리스": { "type": "image", "file": "images/jino/메용.jpg" }
     },
     "schedule": {
       "cron": "15 23 * * 1-5",
