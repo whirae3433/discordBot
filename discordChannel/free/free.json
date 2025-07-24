@@ -1,6 +1,7 @@
 {
   "1395048230642778284": {
     "folderName": "free",
+    "admins": ["1211483619613220886"],
     "spreadsheetId": "14qNJ9awtlbfvus3i-RDx2SWfhsJ4LAHpG7bV9Qarj44",
     "commands": {
       "!지노": { "type": "image", "file": "images/해트트릭.jpg" },
