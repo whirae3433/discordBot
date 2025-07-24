@@ -1,0 +1,39 @@
+{
+  "1395048230642778284": {
+    "spreadsheetId": "14qNJ9awtlbfvus3i-RDx2SWfhsJ4LAHpG7bV9Qarj44",
+    "commands": {
+      "!지노": {
+        "type": "image",
+        "file": "discordChannel/free/images/해트트릭.jpg"
+      },
+      "!로드": {
+        "type": "image",
+        "file": "discordChannel/free/images/주상현.webp"
+      },
+      "!프리": {
+        "type": "image",
+        "file": "discordChannel/free/images/프리.jpeg"
+      },
+      "!이케아": {
+        "type": "image",
+        "file": "discordChannel/free/images/dumb.jpg"
+      },
+      "!럭키": {
+        "type": "image",
+        "file": "discordChannel/free/images/럭키.jpg"
+      },
+      "!도리": {
+        "type": "image",
+        "file": "discordChannel/free/images/도리.jpg"
+      },
+      "!무영": {
+        "type": "image",
+        "file": "discordChannel/free/images/무영.jpg"
+      }
+    },
+    "schedule": {
+      "cron": "25 20 * * 1-5",
+      "messageFile": "discordChannel/free/freeSchedule.js"
+    }
+  }
+}
