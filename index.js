@@ -20,7 +20,7 @@ client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
   for (const handler of messageHandlers) {
-    const handled = await handler(message);
+    const handled = await handler(message, client);
     if (handled) break;
   }
 });

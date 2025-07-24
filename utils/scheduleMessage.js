@@ -8,11 +8,15 @@ module.exports.scheduleDailyMessage = (client) => {
     if (!scheduleConfig) continue;
 
     const { cron, messageFile } = scheduleConfig;
+    const folderName = config.folderName;
     let messageText;
 
     try {
       // require 캐시 삭제 (항상 최신 메시지 반영되도록)
-      const resolvedPath = path.resolve(__dirname, '..', messageFile);
+      const resolvedPath = path.resolve(
+        __dirname,
+        `../discordChannel/${folderName}/${messageFile}`
+      );
       delete require.cache[resolvedPath];
       messageText = require(resolvedPath);
     } catch (err) {
