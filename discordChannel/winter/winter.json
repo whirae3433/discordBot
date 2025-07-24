@@ -1,15 +1,16 @@
 {
   "1256648495599849626": {
+    "folderName": "winter",
     "commands": {
       "!윈터": {
         "type": "image",
         "files": [
-          "discordChannel/winter/images/윈터1.jpeg",
-          "discordChannel/winter/images/윈터2.jpeg",
-          "discordChannel/winter/images/윈터3.jpeg",
-          "discordChannel/winter/images/윈터4.jpeg",
-          "discordChannel/winter/images/윈터5.jpeg",
-          "discordChannel/winter/images/윈터6.jpeg"
+          "images/윈터1.jpeg",
+          "images/윈터2.jpeg",
+          "images/윈터3.jpeg",
+          "images/윈터4.jpeg",
+          "images/윈터5.jpeg",
+          "images/윈터6.jpeg"
         ]
       }
     }

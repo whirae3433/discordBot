@@ -1,3 +1,4 @@
+const path = require('path');
 const sharp = require('sharp');
 const channelConfigMap = require('../config');
 
@@ -11,6 +12,11 @@ module.exports.specialCommands = function (message) {
   if (!commandConfig) return false;
 
   const { type, file, text, files } = commandConfig;
+  const folderName = config.folderName;
+
+  // 절대 경로 생성
+  const resolvePath = (p) =>
+    path.resolve(__dirname, `../discordChannel/${folderName}/${p}`);
 
   // !윈터 명령어에 대한 랜덤 이미지 처리
   if (
@@ -20,7 +26,7 @@ module.exports.specialCommands = function (message) {
     files.length > 0
   ) {
     const randomIndex = Math.floor(Math.random() * files.length); // 랜덤으로 인덱스 선택
-    const randomImage = files[randomIndex]; // 랜덤 이미지 선택
+    const randomImage = resolvePath(files[randomIndex]); // 랜덤 이미지 선택
 
     console.log(`📸 Sending random image: ${randomImage}`);
 
@@ -45,7 +51,7 @@ module.exports.specialCommands = function (message) {
 
   if (type === 'image' && file) {
     console.log(`📸 Sending image: ${file}`);
-    message.channel.send({ files: [file] });
+    message.channel.send({ files: [resolvePath(file)] });
   } else if (type === 'text' && text) {
     message.reply(text);
   } else {
