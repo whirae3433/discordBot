@@ -12,5 +12,6 @@ const partyMessage = `## [1 파티] 격수
 9. 윈부캐   ( 노을 단단한 리프 )
 
 ## [3 파티] 버프
-10. 쭈운쓰 ( 지노 예비리저 )`;
+10. 쭈운쓰 ( 지노 예비리저 )
+@everyone`;
 module.exports = partyMessage;

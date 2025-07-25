@@ -10,5 +10,6 @@ const partyMessage = `## [1 파티] 격수
 8. 지노  ( 지노 숍 )
 9. 페니  ( 다온 예비리저 )
 10. 하늘 ( 프리 리프 )
-11. 또띠  ( 럭키 리프 )`;
+11. 또띠  ( 럭키 리프 )
+@마왕발록`;
 module.exports = partyMessage;

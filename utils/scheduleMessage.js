@@ -29,7 +29,7 @@ module.exports.scheduleDailyMessage = (client) => {
         try {
           const channel = await client.channels.fetch(channelId);
           if (channel && channel.isTextBased()) {
-            channel.send(`@everyone\n${messageText}`);
+            channel.send(`${messageText}`);
           }
         } catch (error) {
           console.error(`채널 ID ${channelId} 메시지 전송 실패:`, error);
