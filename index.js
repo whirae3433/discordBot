@@ -11,6 +11,9 @@ const client = new Client({
   ],
 });
 
+// 전역으로 client 저장
+global.botClient = client;
+
 client.once('ready', () => {
   console.log(`✅ 로그인됨: ${client.user.tag}`);
   scheduleDailyMessage(client);

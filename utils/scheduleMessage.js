@@ -1,40 +1,47 @@
-const path = require('path');
 const schedule = require('node-schedule');
-const channelConfigMap = require('../config');
+const { sheets } = require('../config/googleAuth');
+const SPREADSHEET_ID = process.env.SCHEDULE_SHEET;
 
-module.exports.scheduleDailyMessage = (client) => {
-  for (const [channelId, config] of Object.entries(channelConfigMap)) {
-    const scheduleConfig = config.schedule;
-    if (!scheduleConfig) continue;
+module.exports.scheduleDailyMessage = async () => {
+  const client = global.botCLient; // 전역 client 참조
 
-    const { cron, messageFile } = scheduleConfig;
-    const folderName = config.folderName;
-    let messageText;
+  try {
+    // 구글 시트에서 데이터 가져오기
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: 'Schedules!A:C', // A: channelId, B: message, C: cron
+    });
 
-    try {
-      // require 캐시 삭제 (항상 최신 메시지 반영되도록)
-      const resolvedPath = path.resolve(
-        __dirname,
-        `../discordChannel/${folderName}/${messageFile}`
-      );
-      delete require.cache[resolvedPath];
-      messageText = require(resolvedPath);
-    } catch (err) {
-      console.error(`❌ 스케줄 실패 (${messageFile}):`, err);
-      continue;
-    }
+    const rows = res.data.values || [];
 
-    schedule.scheduleJob({ rule: cron, tz: 'Asia/Seoul' }, async () => {
-      {
+    // 시트에 있는 각 행마다 스케줄 등록
+    rows.forEach(([channelId, messageText, cronExp]) => {
+      if (!channelId || !messageText || !cronExp) return;
+
+      schedule.scheduleJob({ rule: cronExp, tz: 'Asia/Seoul' }, async () => {
+        const client = global.botClient; // 여기서 매번 불러옴
+
+        if (!client) {
+          console.error('❌ global.botClient가 정의되지 않았습니다.');
+          return;
+        }
+
         try {
-          const channel = await client.channels.fetch(channelId);
+          const channel =
+            client.channels.cache.get(channelId) ||
+            (await client.channels.fetch(channelId).catch(() => null));
+
           if (channel && channel.isTextBased()) {
-            channel.send(`${messageText}`);
+            channel.send(messageText);
           }
         } catch (error) {
           console.error(`채널 ID ${channelId} 메시지 전송 실패:`, error);
         }
-      }
+      });
     });
+
+    console.log(`✅ ${rows.length}개의 스케줄이 등록되었습니다.`);
+  } catch (err) {
+    console.error('❌ Google Sheets에서 스케줄 로드 실패:', err);
   }
 };
