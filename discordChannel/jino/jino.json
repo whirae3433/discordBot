@@ -9,7 +9,8 @@
       "!노을": { "type": "image", "file": "images/베르세르크.png" },
       "!이케아": { "type": "image", "file": "images/dumb.jpg" },
       "!C흥": { "type": "image", "file": "images/피카츄.png" },
-      "!리스": { "type": "image", "file": "images/메용.jpg" }
+      "!리스": { "type": "image", "file": "images/메용.jpg" },
+      "!테스트": { "type": "text", "text": "테스트" }
     },
     "schedule": {
       "cron": "10 23 * * 1-5",
