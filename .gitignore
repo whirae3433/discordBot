@@ -1,1 +1,11 @@
-.env 
+.env
+node_modules/
+# 로그 파일
+*.log
+npm-debug.log*
+
+# PM2 관련 파일
+.pnpm-debug.log*
+.pids
+.dump
+
