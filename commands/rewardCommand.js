@@ -1,6 +1,7 @@
 const { sheets } = require('../config/googleAuth');
 const parseRewardArgs = require('../utils/parseRewardArgs');
 const channelConfigMap = require('../config');
+const { wrapMessage } = require('../utils/format');
 
 module.exports.rewardCommand = async function (message) {
   console.log('채널 ID:', message.channel.id);
@@ -55,7 +56,9 @@ module.exports.rewardCommand = async function (message) {
     }
 
     message.reply(
-      `어디보자... \n${name}의 ${week}주차 분배금은: ${wageValue} 이야!`
+      wrapMessage(
+        `어디보자... \n${name}의 ${week}주차 분배금은 \`${wageValue}\` 메소야!`
+      )
     );
     return true;
   } catch (error) {

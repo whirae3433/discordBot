@@ -2,6 +2,7 @@ const path = require('path');
 const sharp = require('sharp');
 const channelConfigMap = require('../config');
 
+
 module.exports.specialCommands = function (message) {
   const channelId = message.channel.id;
   const config = channelConfigMap[channelId];
