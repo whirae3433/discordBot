@@ -13,7 +13,7 @@ module.exports = {
     }
 
     const { name } = parsed;
-    const range = `복대!AT5:AU87`; // 스프레드시트 범위
+    const range = `복대!AT5:AW87`; // 스프레드시트 범위
 
     // 채널별 config 확인
     const serverId = message.guild.id; // 서버 ID
@@ -41,15 +41,27 @@ module.exports = {
       }
 
       // 이름 매칭
-      const targetRow = rows.find((row) => row[0] === name);
-      if (!targetRow) {
+      const matchedRows = rows.filter((row) => row[0] === name);
+      if (matchedRows.length === 0) {
         return message.reply(`${name}? 그런 이름은 없는데요?`);
       }
 
-      const wageValue = targetRow[1] || 0;
+      // 금액 합산 (row[1]을 숫자로 변환 후 합산)
+      const totalAmount = matchedRows.reduce((sum, row) => {
+        const rawValue = row[1] || '0';
+        const status = row[3] || ''; // 상태 (분배완료 여부)
+        const numericValue = parseInt(rawValue.replace(/,/g, ''), 10) || 0;
+        // 상태가 '분배완료'면 0으로 처리
+        const effectiveValue = status.trim() !== '' ? 0 : numericValue;
+
+        return sum + effectiveValue;
+      }, 0);
+
+      const formattedTotal = totalAmount.toLocaleString('ko-KR');
+
       return message.reply(
         wrapMessage(
-          `어디보자...\n${name}의 분배금은 \`${wageValue}\` 메소입니다!`
+          `어디보자...\n${name}의 분배금은 \`${formattedTotal}\` 메소입니다!`
         )
       );
     } catch (error) {
