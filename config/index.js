@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const baseDir = path.join(__dirname, '../discordChannel');
+const baseDir = path.join(__dirname, '../data/discordServers');
 const channelConfigMap = {};
 
 // 폴더 내 json 파일 재귀 탐색

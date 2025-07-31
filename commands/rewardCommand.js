@@ -1,69 +1,60 @@
-const { sheets } = require('../config/googleAuth');
-const parseRewardArgs = require('../utils/parseRewardArgs');
+const { sheets } = require('../utils/googleSheets');
 const channelConfigMap = require('../config');
 const { wrapMessage } = require('../utils/format');
+const parseArgs = require('../utils/parseArgs');
 
-module.exports.rewardCommand = async function (message) {
-  console.log('채널 ID:', message.channel.id);
-
-  if (!message.content.startsWith('!')) return false;
-
-  const args = message.content.slice(1).trim().split(/\s+/);
-
-  if (!args.includes('분배금')) return false;
-
-  const parsed = parseRewardArgs(args);
-
-  if (parsed.error) {
-    await message.reply(parsed.error);
-    return true;
-  }
-
-  const { name, week } = parsed;
-  const range = `${week}주차!B20:C25`;
-
-  const channelId = message.channel.id;
-  const config = channelConfigMap[channelId];
-  const spreadsheetId = config?.spreadsheetId;
-
-  if (!spreadsheetId) {
-    message.reply(`준비되면 말 걸어`);
-    return true;
-  }
-
-  try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range,
-    });
-
-    const rows = res.data.values;
-    if (!rows || rows.length === 0) {
-      message.reply('데이터를 찾을 수 없어...');
-      return true;
+module.exports = {
+  name: '!분배금',
+  discription: '닉네임으로 분배금을 조회합니다.',
+  execute: async (message, args) => {
+    const parsed = parseArgs(args, { requireName: true });
+    if (parsed.error) {
+      return message.reply(parsed.error);
     }
 
-    const targetRow = rows.find((row) => row[0] === name);
-    if (!targetRow) {
-      message.reply(`${name}? 그게 뭔데?`);
-      return true;
+    const { name } = parsed;
+    const range = `복대!AT5:AU87`; // 스프레드시트 범위
+
+    // 채널별 config 확인
+    const serverId = message.guild.id; // 서버 ID
+    const serverConfig = channelConfigMap[serverId];
+
+    if (
+      !serverConfig ||
+      !serverConfig.allowedChannels.includes(message.channel.id)
+    ) {
+      return message.reply('❌ 이 채널은 아직 준비되지 않았습니다.');
     }
 
-    const wageValue = targetRow[1];
-    if (!wageValue) {
-      message.reply(`${name}의 ${week}주차 분배금은 빵원이야`);
-      return true;
-    }
+    const spreadsheetId = serverConfig.spreadsheetId;
 
-    message.reply(
-      wrapMessage(
-        `어디보자... \n${name}의 ${week}주차 분배금은 \`${wageValue}\` 메소야!`
-      )
-    );
-    return true;
-  } catch (error) {
-    console.error(error);
-    message.reply('띠용 -_- 에러 발생!');
-    return true;
-  }
+    try {
+      // Google Sheets에서 데이터 가져오기
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range,
+      });
+
+      const rows = res.data.values;
+      if (!rows || rows.length === 0) {
+        return message.reply('데이터를 찾을 수 없습니다.');
+      }
+
+      // 이름 매칭
+      const targetRow = rows.find((row) => row[0] === name);
+      if (!targetRow) {
+        return message.reply(`${name}? 그런 이름은 없는데요?`);
+      }
+
+      const wageValue = targetRow[1] || 0;
+      return message.reply(
+        wrapMessage(
+          `어디보자...\n${name}의 분배금은 \`${wageValue}\` 메소입니다!`
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      return message.reply('에러 발생! 잠시 후 다시 시도해주세요.');
+    }
+  },
 };
