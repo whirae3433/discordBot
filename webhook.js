@@ -7,7 +7,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// --- GitHub Webhook (자동 배포) ---
+// --- GitHub Webhook (자동 배포)ㅁ ---
 const { exec } = require('child_process');
 
 app.post('/webhook', (req, res) => {
