@@ -23,9 +23,9 @@ module.exports = {
     let daysAgoText = '미기록';
     let color = 0x00ae86; // 기본 색상 (초록)
 
-    if (profile.date) {
+    if (profile.regDate) {
       const currentYear = new Date().getFullYear();
-      const registeredDate = new Date(`${currentYear}-${profile.date}`); // 예: 2025-07-30
+      const registeredDate = new Date(`${currentYear}-${profile.regDate}`); // 예: 2025-07-30
       const diffTime = Date.now() - registeredDate.getTime();
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
@@ -40,6 +40,8 @@ module.exports = {
         daysAgoText = `⚠️ ${daysAgoText}`;
       }
     }
+    // 서버 ID
+    const serverId = message.guild.id;
 
     // 이미지 크롭 & 첨부
     const imagePath = await cropCenterSquare(profile.profileImg);
@@ -49,7 +51,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle(`${profile.nicknameValue}님의 프로필`)
       .setDescription(
-        `[**${profile.nicknameValue}**님의 스펙을 최신화 하세요.](https://example.com/update/${profile.discordId})\n\u200B`
+        `[📝 프로필 확인/수정하기](http://localhost:3001/${serverId}/profile/${profile.discordId}\n\u200B`
       )
       .addFields(
         { name: '레벨', value: profile.level || '없음', inline: true },
@@ -64,7 +66,7 @@ module.exports = {
       )
       .setThumbnail('attachment://thumbnail.png')
       .setColor(color)
-      .setFooter({ text: `마지막 수정 : ${daysAgoText || '미기록'}` });
+      .setFooter({ text: `업데이트 : ${daysAgoText || '미기록'}` });
 
     return message.channel.send({ embeds: [embed], files: [attachment] });
   },
