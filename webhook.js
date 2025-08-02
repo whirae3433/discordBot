@@ -8,17 +8,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // --- GitHub Webhook (자동 배포) ---
-// app.post('/webhook', (req, res) => {
-//   console.log('GitHub webhook triggered');
-//   exec('git pull && pm2 restart discord-bot', (err, stdout, stderr) => {
-//     if (err) {
-//       console.error('Git pull error:', stderr);
-//       return res.status(500).send('Error');
-//     }
-//     console.log('Git pull success:', stdout);
-//     res.send('OK');
-//   });
-// });
+app.post('/webhook', (req, res) => {
+  console.log('GitHub webhook triggered');
+  exec('git pull && pm2 restart discord-bot', (err, stdout, stderr) => {
+    if (err) {
+      console.error('Git pull error:', stderr);
+      return res.status(500).send('Error');
+    }
+    console.log('Git pull success:', stdout);
+    res.send('OK');
+  });
+});
 
 // --- API 라우트 (/api/update) ---
 app.use('/api/update', updateRoutes);
