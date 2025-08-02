@@ -11,9 +11,11 @@ app.use(bodyParser.json());
 const { exec } = require('child_process');
 
 app.post('/webhook', (req, res) => {
+  res.send('OK'); // 즉시 응답 먼저 보내기
   console.log('GitHub webhook triggered');
+
   exec(
-    'git pull && cd frontend && npm install && npm run build && cd .. && pm2 restart discord-bot && pm2 restart web-server',
+    'git pull && cd frontend && npm install && npm run build && cd .. && pm2 restart discord-bot',
     (err, stdout, stderr) => {
       if (err) {
         console.error('Git pull error:', stderr);
