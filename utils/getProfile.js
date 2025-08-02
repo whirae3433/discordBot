@@ -8,43 +8,41 @@ async function getProfileByNickname(message, nickname) {
   const serverConfig = serverConfigs[guildId];
   if (!serverConfig) return null;
 
-  // 채널 권한 체크
-  // if (!serverConfig.allowedChannels.includes(message.channel.id)) {
-  //   return message.reply('❌ 이 채널에서는 명령어를 사용할 수 없습니다.');
-  // }
-
   try {
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: serverConfig.spreadsheetId,
-      range: '길드원!A:K',
+      range: '길드원!A:L',
     });
 
     const rows = res.data.values || [];
-    const dataRows = rows.filter((row) => row.length > 0).slice(1); // 빈 행 제거, 헤더 제외
+    const dataRows = rows.filter((row) => row.length > 0).slice(1); // 헤더 제외
 
-    // 닉네임 검색
+    // 닉네임 검색 (D열 = index 3)
+    const normalizedInput = nickname.trim().toLowerCase();
     const profile = dataRows.find(
-      (row) => row[2] && row[2].toLowerCase() === nickname.toLowerCase()
+      (row) => row[3] && row[3].trim().toLowerCase() === normalizedInput
     );
 
     if (!profile) return null;
 
     const [
-      discordId,
-      profileImg,
-      nicknameValue,
-      ign,
-      jobGroup,
-      job,
-      level,
-      atk,
-      bossDmg,
-      skill,
-      date,
+      discordId, // A
+      id, // B
+      profileImg, // C
+      nicknameValue, // D
+      ign, // E
+      jobGroup, // F
+      job, // G
+      level, // H
+      atk, // I
+      bossDmg, // J
+      skill, // K
+      regDate, // L
     ] = profile;
 
     return {
       discordId,
+      id,
       profileImg,
       nicknameValue,
       ign,
@@ -54,7 +52,7 @@ async function getProfileByNickname(message, nickname) {
       atk,
       bossDmg,
       skill,
-      date,
+      regDate,
     };
   } catch (err) {
     console.error('프로필 조회 중 오류:', err.message);
