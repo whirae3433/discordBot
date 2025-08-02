@@ -7,26 +7,6 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// --- GitHub Webhook (자동 배포)ㅁ ---
-const { exec } = require('child_process');
-
-app.post('/webhook', (req, res) => {
-  res.send('OK'); // 즉시 응답 먼저 보내기
-  console.log('GitHub webhook triggered');
-
-  exec(
-    'git pull && cd frontend && npm install && npm run build && cd .. && pm2 restart discord-bot',
-    (err, stdout, stderr) => {
-      if (err) {
-        console.error('Git pull error:', stderr);
-        return res.status(500).send('Error');
-      }
-      console.log('Git pull success:', stdout);
-      res.send('OK');
-    }
-  );
-});
-
 // --- API 라우트 (/api/update) ---
 app.use('/api/update', updateRoutes);
 
