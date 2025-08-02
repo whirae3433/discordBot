@@ -51,7 +51,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle(`${profile.nicknameValue}님의 프로필`)
       .setDescription(
-        `[📝 프로필 확인/수정하기](https://tmless.store/${serverId}/profile/${profile.discordId})\n\u200B`
+        `[📝 프로필 확인/수정하기](http://tmless.store/${serverId}/profile/${profile.discordId})\n\u200B`
       )
       .addFields(
         { name: '레벨', value: profile.level || '없음', inline: true },
