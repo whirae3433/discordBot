@@ -31,7 +31,7 @@ module.exports = async function deleteCharacter(req, res) {
     // 해당 행 clear
     await sheets.spreadsheets.values.clear({
       spreadsheetId,
-      range: `길드원!A${rowNumber}:L${rowNumber}`,
+      range: `길드원!A${rowNumber}:K${rowNumber}`,
     });
 
     res.json({ success: true, message: '캐릭터 삭제 완료' });

@@ -11,13 +11,13 @@ import Info from './pages/Info';
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: '/:serverId',
     element: <Layout />, // 공통 레이아웃
     errorElement: <NotFound />, // 404 페이지
     children: [
-      { index: true, element: <HomePage /> }, // 기본 페이지
-      { path: ':serverId/profile/:discordId', element: <ProfilePage /> }, // 프로필 페이지
-      { path: '/about', element: <Info /> }, // DLSVH
+      { path: 'home', element: <HomePage /> }, // 기본 페이지
+      { path: 'profile/:discordId', element: <ProfilePage /> }, // 프로필 페이지
+      { path: 'info', element: <Info /> }, // DLSVH
     ],
   },
 ]);

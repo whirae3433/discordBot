@@ -1,12 +1,4 @@
-export default function SpecInfoForm({
-  atk,
-  setAtk,
-  bossDmg,
-  setBossDmg,
-  skill,
-  setSkill,
-}) {
-  const skills = ['리프1', '리프20', '리프30', '리저', '연막', '샾', '뻥'];
+export default function SpecInfoForm({ atk, setAtk, bossDmg, setBossDmg }) {
   return (
     <div>
       {/* 스공 */}
@@ -51,24 +43,6 @@ export default function SpecInfoForm({
         max="15.1"
         className="w-full mb-2 p-2 border border-gray-300 rounded"
       />
-
-      {/* 스킬 선택 */}
-      <select
-        value={skill}
-        onChange={(e) => setSkill(e.target.value)}
-        className={`w-full mb-2 p-2 border border-gray-300 rounded bg-white ${
-          skill ? 'text-gray-900' : 'text-gray-400'
-        }`}
-      >
-        <option value="">
-          (버프캐만) 스킬
-        </option>
-        {skills.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </select>
     </div>
   );
 }

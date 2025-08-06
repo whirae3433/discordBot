@@ -1,12 +1,31 @@
-export default function UserInfo() {
+import { useAuth } from '../../Hooks/useAuth';
+import LoginButton from '../LoginButton';
+
+export default function UserInfo({ serverId }) {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <div className="felx items-center">
+        <LoginButton serverId={serverId} />
+      </div>
+    );
+  }
+
+  const displayName = user.nickname || user.username;
+
   return (
     <div className="flex font-bold text-white text-xl items-center gap-3">
       <img
-        src="/images/avatar-placeholder.png"
+        src={
+          user.avatar
+            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+            : '/images/avatar-placeholder.png'
+        }
         alt="avatar"
         className="w-8 h-8 rounded-full border border-gray-400"
       />
-      <span className="text-white text-sm">이케아 님</span>
+      <span className="text-white text-sm">{displayName} 님</span>
     </div>
   );
 }

@@ -1,8 +1,6 @@
 import JobSelect from './JobSelect';
 
 export default function BasicInfoForm({
-  nickname,
-  setNickname,
   ign,
   setIgn,
   profileImg,
@@ -13,15 +11,9 @@ export default function BasicInfoForm({
   buffJobs,
   mainJobs,
 }) {
+
   return (
     <div>
-      <input
-        type="text"
-        placeholder="디코 닉"
-        value={nickname}
-        onChange={(e) => setNickname(e.target.value)}
-        className="w-full mb-2 p-2 border border-gray-300 rounded"
-      />
       <input
         type="text"
         placeholder="인게임 닉"

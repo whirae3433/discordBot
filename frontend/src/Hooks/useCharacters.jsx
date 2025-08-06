@@ -6,13 +6,19 @@ export function useCharacters(serverId, discordId) {
   const [loading, setLoading] = useState(true);
 
   const fetchCharacters = useCallback(async () => {
+    if (!serverId || !discordId) return;
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await axios.get(`/api/update/characters/${serverId}/${discordId}`);
-      setCharacters(res.data.characters || []);
+      const res = await axios.get(
+        `/api/update/characters/${serverId}/${discordId}`
+      );
+      const data = Array.isArray(res.data.characters)
+        ? res.data.characters
+        : [];
+      setCharacters(data);
     } catch (err) {
-      console.error('캐릭터 불러오기 실패:', err);
-      setCharacters([]);
+      console.error(err);
+      setCharacters([]); // 에러 시 초기화
     } finally {
       setLoading(false);
     }

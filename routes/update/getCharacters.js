@@ -10,7 +10,7 @@ module.exports = async function getCharacters(req, res) {
   }
 
   try {
-    const range = `길드원!A2:L`;
+    const range = `길드원!A2:K`;
     const result = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range,
@@ -30,8 +30,7 @@ module.exports = async function getCharacters(req, res) {
         level: row[7],
         atk: row[8],
         bossDmg: row[9],
-        skill: row[10],
-        regDate: row[11],
+        regDate: row[10],
       }));
 
     res.json({ discordId, characters });

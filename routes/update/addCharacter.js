@@ -13,7 +13,6 @@ module.exports = async function addCharacter(req, res) {
     level,
     atk,
     bossDmg,
-    skill,
   } = req.body;
 
   const spreadsheetId = channelConfigMap[serverId]?.spreadsheetId;
@@ -27,7 +26,7 @@ module.exports = async function addCharacter(req, res) {
   try {
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: '길드원!A:L',
+      range: '길드원!A5:J',
       valueInputOption: 'RAW',
       requestBody: {
         values: [
@@ -42,7 +41,6 @@ module.exports = async function addCharacter(req, res) {
             level,
             atk,
             bossDmg,
-            skill,
             today,
           ],
         ],

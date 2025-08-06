@@ -1,18 +1,31 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import NavItem from './NavItem';
+import { useAuth } from '../../Hooks/useAuth';
 
 export default function Navigation() {
   const location = useLocation();
+  const { serverId } = useParams();
+  const { user } = useAuth();
 
   return (
     <nav className="flex gap-6 font-bold text-sm text-white">
-      <NavItem to="/" label="Home" activePath={location.pathname} />
       <NavItem
-        to="/update/1211483619613220886"
-        label="Profile"
+        to={`/${serverId}/home`}
+        label="Home"
         activePath={location.pathname}
       />
-      <NavItem to="/about" label="Info" activePath={location.pathname} />
+
+      <NavItem
+        to={`/${serverId}/profile/${user ? user.id : 'guest'}`}
+        label={user ? user.nickname || user.username : 'Profile'}
+        activePath={location.pathname}
+      />
+
+      <NavItem
+        to={`/${serverId}/info`}
+        label="Info"
+        activePath={location.pathname}
+      />
     </nav>
   );
 }

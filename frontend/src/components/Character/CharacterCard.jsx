@@ -10,8 +10,7 @@ export default function CharacterCard({
   const { deleteCharacter } = useDeleteCharacter();
 
   const handleDelete = async () => {
-    if (!window.confirm(`${character.nickname} 캐릭터를 삭제하시겠습니까?`))
-      return;
+    if (!window.confirm(`${character.ign} 캐릭터를 삭제하시겠습니까?`)) return;
 
     try {
       await deleteCharacter(serverId, discordId, character.id);
@@ -34,13 +33,13 @@ export default function CharacterCard({
       {/* 프로필 이미지 */}
       <img
         src={character.profileImg}
-        alt={character.nickname}
+        alt={character.ign}
         className="w-16 h-16 rounded-full border border-gray-300 mb-2"
       />
 
-      {/* 닉네임 */}
+      {/* 인게임 닉네임 */}
       <h3 className="text-gray-900 font-semibold text-lg mb-2">
-        {character.nickname}
+        {character.ign}
       </h3>
 
       {/* 정보: 좌측 직업/레벨, 우측 스공/보공 */}

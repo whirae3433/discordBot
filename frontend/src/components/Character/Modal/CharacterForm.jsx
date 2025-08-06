@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import BasicInfoForm from './BasicInfoForm';
 import SpecInfoForm from './SpecInfoForm';
+import { useAuth } from '../../../Hooks/useAuth';
 
 export default function CharacterForm({ onSubmit }) {
-  const buffJobs = ['리프', '리저', '뻥', '연막', '샤프'];
+  const { user } = useAuth();
+  const displayName = user?.nickname || user?.username; // 서버 닉네임 우선
+
+  const buffJobs = ['리프1', '리프30', '리저', '뻥', '연막', '샤프'];
   const mainJobs = [
     '히어로',
     '닼나',
@@ -22,26 +26,23 @@ export default function CharacterForm({ onSubmit }) {
   ];
 
   // 상태
-  const [nickname, setNickname] = useState('');
   const [ign, setIgn] = useState('');
   const [job, setJob] = useState('');
   const [level, setLevel] = useState('');
   const [atk, setAtk] = useState('');
   const [bossDmg, setBossDmg] = useState('');
-  const [skill, setSkill] = useState('');
   const [profileImg, setProfileImg] = useState('');
 
   // 제출 함수
   const handleSubmit = () => {
     const newCharacter = {
-      nickname,
+      nickname: displayName,
       ign,
       profileImg,
       job,
       level: Number(level),
       atk: atk ? Number(atk) : null,
       bossDmg: bossDmg ? Number(bossDmg) : null,
-      skill,
     };
     onSubmit(newCharacter);
   };
@@ -50,8 +51,6 @@ export default function CharacterForm({ onSubmit }) {
     <>
       {/* 기본 정보 섹션 */}
       <BasicInfoForm
-        nickname={nickname}
-        setNickname={setNickname}
         ign={ign}
         setIgn={setIgn}
         profileImg={profileImg}
@@ -71,8 +70,6 @@ export default function CharacterForm({ onSubmit }) {
         setAtk={setAtk}
         bossDmg={bossDmg}
         setBossDmg={setBossDmg}
-        skill={skill}
-        setSkill={setSkill}
       />
       <div className="flex justify-end gap-2 mt-4">
         <button
