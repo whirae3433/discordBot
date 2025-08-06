@@ -14,14 +14,15 @@ async function cropCenterSquare(url, size = 256) {
 
   // 이미지 다운로드
   const response = await axios({ url, responseType: 'arraybuffer' });
+  const imageBuffer = Buffer.from(response.data);
 
-  // 중앙 크롭 후 리사이즈 → 강제 PNG 변환
-  await sharp(response.data)
+  // 중앙 크롭 후 무조건 PNG 변환
+  await sharp(imageBuffer)
     .resize(size, size, { fit: 'cover', position: 'centre' })
-    .png() // <-- 여기 추가: 최종 출력 포맷을 PNG로 고정
+    .png() // ← 입력 포맷 상관없이 무조건 PNG
     .toFile(tempPath);
 
-  return tempPath; // 로컬 경로 반환
+  return tempPath; // PNG 경로 반환
 }
 
 module.exports = { cropCenterSquare };
