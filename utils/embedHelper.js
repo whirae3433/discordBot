@@ -3,6 +3,8 @@ const { cropCenterSquare } = require('./imageHelper');
 const { getDaysAgo } = require('./dateHelper');
 
 const BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3001';
+const DEFAULT_IMAGE_URL =
+  'https://cdn-icons-png.flaticon.com/512/11542/11542598.png';
 
 const getProfileUrl = (serverId, discordId) =>
   `${BASE_URL}/${serverId}/profile/${discordId}`;
@@ -22,14 +24,19 @@ function createRegisterEmbed(serverId, discordId) {
 async function createProfileEmbed(profile, serverId, extraProfiles = []) {
   const { text: daysAgoText, color } = getDaysAgo(profile.regDate);
 
-  const imagePath = await cropCenterSquare(profile.profileImg);
+  // URL 검증 → 잘못된 값이면 기본 이미지 사용
+  const imageUrl =
+    profile.profileImg && profile.profileImg.startsWith('http')
+      ? profile.profileImg
+      : DEFAULT_IMAGE_URL;
+
+  const imagePath = await cropCenterSquare(imageUrl);
   const attachment = new AttachmentBuilder(imagePath, {
     name: 'thumbnail.png',
   });
 
   const embed = new EmbedBuilder()
     .setTitle(`${profile.ign}님의 프로필`)
-    // 링크 + 공백 한 줄
     .setDescription(
       `[📝 프로필 확인/수정하기](${getProfileUrl(
         serverId,
@@ -42,7 +49,6 @@ async function createProfileEmbed(profile, serverId, extraProfiles = []) {
 
   const allProfiles = [profile, ...extraProfiles];
 
-  // 캐릭터 정보 필드
   for (const p of allProfiles) {
     embed.addFields(
       { name: `${p.level || '없음'}`, value: '\u200B', inline: true },

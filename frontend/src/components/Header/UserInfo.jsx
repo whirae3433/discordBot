@@ -12,7 +12,7 @@ export default function UserInfo({ serverId }) {
     );
   }
 
-  const displayName = user.nickname || user.username;
+  const displayName = user.nickname;
 
   return (
     <div className="flex font-bold text-white text-xl items-center gap-3">

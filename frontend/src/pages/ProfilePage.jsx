@@ -40,8 +40,9 @@ export default function ProfilePage() {
       <div className="text-white">
         {/* 상단 닉네임 헤더 */}
         <h1 className="text-2xl font-bold mb-6 text-center">
-          {nickname || username}님의 프로필
+          {nickname}님의 프로필
         </h1>
+
         {hasCharacters ? (
           Object.entries(grouped).map(([ign, chars]) => (
             <CharacterGroup

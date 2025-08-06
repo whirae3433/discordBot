@@ -18,19 +18,22 @@ module.exports = async function getCharacters(req, res) {
     const rows = result.data.values || [];
 
     const characters = rows
-      .filter((row) => row[0] && row[0].toString().trim() === discordId.toString().trim())
+      .filter(
+        (row) =>
+          row[0] && row[0].toString().trim() === discordId.toString().trim()
+      )
       .map((row) => ({
-        id: row[1],
-        discordId: row[0],
-        profileImg: row[2],
-        nickname: row[3],
-        ign: row[4],
-        jobGroup: row[5],
-        job: row[6],
-        level: row[7],
-        atk: row[8],
-        bossDmg: row[9],
-        regDate: row[10],
+        id: row[1], // B열
+        discordId: row[0], // A열
+        profileImg: row[2], // C열
+        nickname: row[3], // D열 (nickname) ← 무조건 이 값만 사용
+        ign: row[4], // E열
+        jobGroup: row[5], // F열
+        job: row[6], // G열
+        level: row[7], // H열
+        atk: row[8], // I열
+        bossDmg: row[9], // J열
+        regDate: row[10], // K열
       }));
 
     res.json({ discordId, characters });

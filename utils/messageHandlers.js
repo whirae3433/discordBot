@@ -8,10 +8,12 @@ module.exports.messageHandlers = async (message, client) => {
   const commandName = args.shift();
 
   // 명령어 찾기
-  const command = commands.find(cmd => cmd.name === commandName);
+  const command = commands.find((cmd) => cmd.name === commandName);
 
   if (command) {
     try {
+      console.log('[DEBUG] args:', args);
+
       await command.execute(message, args, client);
       return true;
     } catch (err) {
