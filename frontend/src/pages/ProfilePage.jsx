@@ -9,7 +9,6 @@ import { useAuth } from '../Hooks/useAuth';
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const { nickname, username } = user || {};
   const { serverId, discordId } = useParams();
   const { characters, loading, fetchCharacters } = useCharacters(
     serverId,
@@ -34,6 +33,8 @@ export default function ProfilePage() {
     return acc;
   }, {});
   const hasCharacters = Object.keys(grouped).length > 0;
+
+  const nickname = user?.nickname;
 
   return (
     <ProtectedRoute discordId={discordId}>

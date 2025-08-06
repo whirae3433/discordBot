@@ -15,9 +15,10 @@ async function cropCenterSquare(url, size = 256) {
   // 이미지 다운로드
   const response = await axios({ url, responseType: 'arraybuffer' });
 
-  // 중앙 크롭 후 리사이즈
+  // 중앙 크롭 후 리사이즈 → 강제 PNG 변환
   await sharp(response.data)
     .resize(size, size, { fit: 'cover', position: 'centre' })
+    .png() // <-- 여기 추가: 최종 출력 포맷을 PNG로 고정
     .toFile(tempPath);
 
   return tempPath; // 로컬 경로 반환
