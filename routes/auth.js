@@ -6,6 +6,7 @@ const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
 const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL;
+const BASE_URL = process.env.BASE_URL;
 
 // 로그인
 router.get('/login', (req, res) => {
@@ -47,9 +48,8 @@ router.get('/callback', async (req, res) => {
 
     const userData = userResponse.data;
 
-    // 닉네임 API (4000 포트) 호출
     const nicknameResponse = await axios.get(
-      `http://localhost:4000/nickname/${serverId}/${userData.id}`
+      `${BASE_URL}/api/nickname/${serverId}/${userData.id}`
     );
 
     // 세션 저장

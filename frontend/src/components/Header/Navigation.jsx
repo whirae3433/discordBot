@@ -17,7 +17,7 @@ export default function Navigation() {
 
       <NavItem
         to={`/${serverId}/profile/${user ? user.id : 'guest'}`}
-        label={user ? user.nickname || user.username : 'Profile'}
+        label='Profile'
         activePath={location.pathname}
       />
 
