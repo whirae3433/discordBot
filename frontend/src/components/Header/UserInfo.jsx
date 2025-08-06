@@ -12,14 +12,14 @@ export default function UserInfo({ serverId }) {
     );
   }
 
-  const displayName = user.nickname;
+  const displayName = user.nickname || user.username;
 
   return (
     <div className="flex font-bold text-white text-xl items-center gap-3">
       <img
         src={
           user.avatar
-            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=256`
             : '/images/avatar-placeholder.png'
         }
         alt="avatar"

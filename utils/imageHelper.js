@@ -3,26 +3,45 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-async function cropCenterSquare(url, size = 256) {
-  // temp 폴더 경로 지정
-  const tempDir = path.resolve(__dirname, '../temp');
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true }); // temp 폴더 없으면 생성
+const isValidImage = (buffer) => {
+  try {
+    // sharp가 이미지 포맷 읽을 수 있는지 확인
+    sharp(buffer);
+    return true;
+  } catch {
+    return false;
   }
+};
 
+async function cropCenterSquare(url, size = 256) {
+  const tempDir = path.resolve(__dirname, '../temp');
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
   const tempPath = path.join(tempDir, 'thumbnail.png');
 
-  // 이미지 다운로드
-  const response = await axios({ url, responseType: 'arraybuffer' });
-  const imageBuffer = Buffer.from(response.data);
+  try {
+    const response = await axios({ url, responseType: 'arraybuffer' });
+    const buffer = Buffer.from(response.data);
 
-  // 중앙 크롭 후 무조건 PNG 변환
-  await sharp(imageBuffer)
-    .resize(size, size, { fit: 'cover', position: 'centre' })
-    .png() // ← 입력 포맷 상관없이 무조건 PNG
-    .toFile(tempPath);
+    if (!isValidImage(buffer)) {
+      // sharp에서 못 읽으면 기본 PNG로 fallback
+      const fallback = path.resolve(__dirname, '../public/기본.jpeg');
+      fs.copyFileSync(fallback, tempPath);
+      return tempPath;
+    }
 
-  return tempPath; // PNG 경로 반환
+    await sharp(buffer)
+      .resize(size, size, { fit: 'cover', position: 'centre' })
+      .png()
+      .toFile(tempPath);
+
+    return tempPath;
+  } catch (err) {
+    console.error('[cropCenterSquare] 변환 실패:', err.message);
+    // fallback 기본 이미지
+    const fallback = path.resolve(__dirname, '../public/default.png');
+    fs.copyFileSync(fallback, tempPath);
+    return tempPath;
+  }
 }
 
 module.exports = { cropCenterSquare };
