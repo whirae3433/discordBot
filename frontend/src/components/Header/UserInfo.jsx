@@ -1,15 +1,10 @@
 import { useAuth } from '../../Hooks/useAuth';
-import LoginButton from '../LoginButton';
 
 export default function UserInfo({ serverId }) {
   const { user } = useAuth();
 
   if (!user) {
-    return (
-      <div className="felx items-center">
-        <LoginButton serverId={serverId} />
-      </div>
-    );
+    return <div className="felx items-center">누구세용</div>;
   }
 
   const displayName = user.nickname || user.username;

@@ -10,7 +10,7 @@ export default function ProtectedRoute({ discordId, children }) {
 
   if (!user) {
   return (
-    <div className="flex items-center justify-center h-screen ">
+    <div className="flex items-start justify-center h-screen ">
       <div className="flex flex-col items-center gap-6 p-8 bg-gray-800 rounded-2xl shadow-lg">
         <p className="text-lg font-semibold text-gray-100">
           로그인이 필요합니다
