@@ -10,7 +10,7 @@ module.exports = async function getCharacters(req, res) {
   }
 
   try {
-    const range = `길드원!A2:K`;
+    const range = `길드원!A:M`;
     const result = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range,
@@ -26,14 +26,16 @@ module.exports = async function getCharacters(req, res) {
         id: row[1], // B열
         discordId: row[0], // A열
         profileImg: row[2], // C열
-        nickname: row[3], // D열 (nickname) ← 무조건 이 값만 사용
+        nickname: row[3], // D열
         ign: row[4], // E열
-        jobGroup: row[5], // F열
-        job: row[6], // G열
-        level: row[7], // H열
-        atk: row[8], // I열
-        bossDmg: row[9], // J열
-        regDate: row[10], // K열
+        accountGroup: row[5], // F열
+        order: row[6], // G열
+        jobGroup: row[7], // H열
+        job: row[8], // I열
+        level: row[9], // J열
+        atk: row[10], // K열
+        bossDmg: row[11], // L열
+        regDate: row[12], // M열
       }));
 
     res.json({ discordId, characters });

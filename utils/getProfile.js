@@ -11,7 +11,7 @@ async function getProfilesByNickname(message, nickname) {
   try {
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: serverConfig.spreadsheetId,
-      range: '길드원!A:K',
+      range: '길드원!A:M',
     });
 
     const rows = res.data.values || [];
@@ -37,12 +37,14 @@ async function getProfilesByNickname(message, nickname) {
           profileImg, // C
           nicknameValue, // D
           ign, // E
-          jobGroup, // F
-          job, // G
-          level, // H
-          atk, // I
-          bossDmg, // J
-          regDate, // K
+          accountGroup, // F
+          order, // G
+          jobGroup, // H
+          job, // I
+          level, // J
+          atk, // K
+          bossDmg, // L
+          regDate, // M
         ] = row;
 
         return {
@@ -51,6 +53,8 @@ async function getProfilesByNickname(message, nickname) {
           profileImg,
           nicknameValue,
           ign,
+          accountGroup,
+          order,
           jobGroup,
           job,
           level,

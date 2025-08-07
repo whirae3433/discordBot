@@ -1,7 +1,10 @@
 require('dotenv').config();
 const { getProfilesByNickname } = require('../../utils/getProfile');
 const parseArgs = require('../../utils/parseArgs');
-const { createRegisterEmbed, createProfileEmbed } = require('../../utils/embedHelper');
+const {
+  createRegisterEmbed,
+  createProfileEmbed,
+} = require('../../utils/embedHelper');
 
 module.exports = {
   name: '!정보',
@@ -18,7 +21,6 @@ module.exports = {
     // 닉네임 파싱
     const parsed = parseArgs(args, { requireName: true });
     if (parsed.error) return message.reply(parsed.error);
-
     const { name: nickname } = parsed;
 
     // 프로필 조회
@@ -28,15 +30,31 @@ module.exports = {
       return message.channel.send({ embeds: [embed] });
     }
 
-    // ign 그룹화
-    const grouped = profiles.reduce((acc, profile) => {
+    // 본계정 / 부계정만 필터링
+    const filtered = profiles.filter(
+      (p) => p.accountGroup === '본계정' || p.accountGroup === '부계정'
+    );
+
+    // ign 기준 그룹화
+    const grouped = filtered.reduce((acc, profile) => {
       if (!acc[profile.ign]) acc[profile.ign] = [];
       acc[profile.ign].push(profile);
       return acc;
     }, {});
 
-    // 그룹별 Embed 생성
-    for (const chars of Object.values(grouped)) {
+    // 본계정 먼저, 부계정은 그 뒤로 정렬
+    const sortedGroups = Object.values(grouped).sort((a, b) => {
+      const groupOrder = {
+        '본계정': 0,
+        '부계정': 1,
+      };
+      const aGroup = groupOrder[a[0]?.accountGroup] ?? 99;
+      const bGroup = groupOrder[b[0]?.accountGroup] ?? 99;
+      return aGroup - bGroup;
+    });
+
+    // embed 생성 및 전송
+    for (const chars of sortedGroups) {
       const [first, ...rest] = chars;
       const result = await createProfileEmbed(first, serverId, rest);
       await message.channel.send(result);

@@ -10,28 +10,56 @@ module.exports = async function deleteCharacter(req, res) {
   }
 
   try {
-    const range = `길드원!A2:L`;
-    const result = await sheets.spreadsheets.values.get({ spreadsheetId, range });
+    // 1. 시트 ID 얻기 (길드원 시트의 내부 ID 조회)
+    const meta = await sheets.spreadsheets.get({ spreadsheetId });
+    const targetSheet = meta.data.sheets.find(
+      (sheet) => sheet.properties.title === '길드원'
+    );
+    if (!targetSheet) {
+      return res.status(404).json({ error: '길드원 시트를 찾을 수 없음' });
+    }
+
+    const sheetId = targetSheet.properties.sheetId;
+
+    // 2. 전체 데이터 가져오기
+    const range = `길드원!A:M`;
+    const result = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range,
+    });
     const rows = result.data.values || [];
 
-    // UUID 비교 (row[1]이 ID 컬럼)
+    // 3. 해당 캐릭터 위치 찾기
     const targetIndex = rows.findIndex(
       (row) =>
-        row[0] && row[0].toString().trim() === discordId.toString().trim() &&
-        row[1] && row[1].toString().trim() === characterId.toString().trim()
+        row[0]?.toString().trim() === discordId.toString().trim() &&
+        row[1]?.toString().trim() === characterId.toString().trim()
     );
 
     if (targetIndex === -1) {
       return res.status(404).json({ error: '캐릭터를 찾을 수 없음' });
     }
 
-    // 시트에서 지울 행 번호 (헤더가 1행, 데이터는 2행부터 시작하니 +2)
-    const rowNumber = targetIndex + 2;
+    // 4. 실제 데이터 행 번호 (헤더 포함이므로 +1 필요)
+    const rowNumber = targetIndex;
 
-    // 해당 행 clear
-    await sheets.spreadsheets.values.clear({
+    // 5. 행 삭제 (헤더 제외 → 데이터는 1행부터 시작하므로 startIndex = rowNumber)
+    await sheets.spreadsheets.batchUpdate({
       spreadsheetId,
-      range: `길드원!A${rowNumber}:K${rowNumber}`,
+      requestBody: {
+        requests: [
+          {
+            deleteDimension: {
+              range: {
+                sheetId,
+                dimension: 'ROWS',
+                startIndex: rowNumber,     // inclusive
+                endIndex: rowNumber + 1,   // exclusive
+              },
+            },
+          },
+        ],
+      },
     });
 
     res.json({ success: true, message: '캐릭터 삭제 완료' });

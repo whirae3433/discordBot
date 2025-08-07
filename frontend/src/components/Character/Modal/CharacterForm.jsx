@@ -7,7 +7,7 @@ export default function CharacterForm({ onSubmit }) {
   const { user } = useAuth();
   const displayName = user?.nickname || user?.username; // 서버 닉네임 우선
 
-  const buffJobs = ['리프1', '리프30', '리저', '뻥', '연막', '샤프'];
+  const buffJobs = ['리프1', '리프30', '리저', '뻥캐', '연막', '샤프'];
   const mainJobs = [
     '히어로',
     '닼나',
@@ -32,6 +32,7 @@ export default function CharacterForm({ onSubmit }) {
   const [atk, setAtk] = useState('');
   const [bossDmg, setBossDmg] = useState('');
   const [profileImg, setProfileImg] = useState('');
+  const [accountGroup, setAccountGroup] = useState('본계정');
 
   // 제출 함수
   const handleSubmit = () => {
@@ -43,6 +44,8 @@ export default function CharacterForm({ onSubmit }) {
       level: Number(level),
       atk: atk ? Number(atk) : null,
       bossDmg: bossDmg ? Number(bossDmg) : null,
+      accountGroup,
+      order: '',
     };
     onSubmit(newCharacter);
   };
@@ -61,6 +64,15 @@ export default function CharacterForm({ onSubmit }) {
         buffJobs={buffJobs}
         mainJobs={mainJobs}
       />
+      <select
+        value={accountGroup}
+        onChange={(e) => setAccountGroup(e.target.value)}
+        className="w-full mb-2 p-2 border border-gray-300 rounded"
+      >
+        <option value="본계정">본계정</option>
+        <option value="부계정">부계정</option>
+        <option value="버프캐">버프캐</option>
+      </select>
 
       <div className="border-t my-4"></div>
 

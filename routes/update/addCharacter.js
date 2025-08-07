@@ -3,11 +3,13 @@ const { v4: uuidv4 } = require('uuid');
 const channelConfigMap = require('../../config');
 
 module.exports = async function addCharacter(req, res) {
-  const { discordId, serverId } = req.params; // <--- 수정
+  const { discordId, serverId } = req.params;
   const {
     profileImg,
     nickname,
     ign,
+    accountGroup,
+    order,
     jobGroup,
     job,
     level,
@@ -26,22 +28,24 @@ module.exports = async function addCharacter(req, res) {
   try {
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: '길드원!A5:J',
+      range: '길드원!A5:M',
       valueInputOption: 'RAW',
       requestBody: {
         values: [
           [
-            discordId,
-            newId,
-            profileImg,
-            nickname,
-            ign,
-            jobGroup,
-            job,
-            level,
-            atk,
-            bossDmg,
-            today,
+            discordId, // A
+            newId, // B
+            profileImg, // C
+            nickname, // D
+            ign, // E
+            accountGroup, // F
+            order, // G
+            jobGroup, // H
+            job, // I
+            level, // J
+            atk, // K
+            bossDmg, // L
+            today, // M
           ],
         ],
       },
