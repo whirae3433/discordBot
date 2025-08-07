@@ -3,8 +3,7 @@ const { cropCenterSquare } = require('./imageHelper');
 const { getDaysAgo } = require('./dateHelper');
 
 const BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3001';
-const DEFAULT_IMAGE_URL =
-  'https://cdn-icons-png.flaticon.com/512/11542/11542598.png';
+const DEFAULT_IMAGE_PATH = path.resolve(__dirname, '../public/기본.jpeg');
 
 const getProfileUrl = (serverId, discordId) =>
   `${BASE_URL}/${serverId}/profile/${discordId}`;
@@ -28,7 +27,7 @@ async function createProfileEmbed(profile, serverId, extraProfiles = []) {
   const imageUrl =
     profile.profileImg && profile.profileImg.startsWith('http')
       ? profile.profileImg
-      : DEFAULT_IMAGE_URL;
+      : DEFAULT_IMAGE_PATH;
 
   const imagePath = await cropCenterSquare(imageUrl);
   const attachment = new AttachmentBuilder(imagePath, {

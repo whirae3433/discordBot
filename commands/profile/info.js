@@ -38,8 +38,8 @@ module.exports = {
     // 그룹별 Embed 생성
     for (const chars of Object.values(grouped)) {
       const [first, ...rest] = chars;
-      const profileEmbed = await createProfileEmbed(first, serverId, rest);
-      await message.channel.send(profileEmbed);
+      const result = await createProfileEmbed(first, serverId, rest);
+      await message.channel.send(result);
     }
   },
 };

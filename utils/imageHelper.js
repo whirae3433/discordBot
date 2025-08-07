@@ -38,7 +38,7 @@ async function cropCenterSquare(url, size = 256) {
   } catch (err) {
     console.error('[cropCenterSquare] 변환 실패:', err.message);
     // fallback 기본 이미지
-    const fallback = path.resolve(__dirname, '../public/default.png');
+    const fallback = path.resolve(__dirname, '../public/기본.jpeg');
     fs.copyFileSync(fallback, tempPath);
     return tempPath;
   }
