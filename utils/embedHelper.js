@@ -1,6 +1,8 @@
 const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const { cropCenterSquare } = require('./imageHelper');
 const { getDaysAgo } = require('./dateHelper');
+const path = require('path'); // ← 이거 꼭 필요함
+
 
 const BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3001';
 const DEFAULT_IMAGE_PATH = path.resolve(__dirname, '../public/기본.jpeg');
