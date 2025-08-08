@@ -1,74 +1,62 @@
-const { sheets } = require('./googleSheets');
-const serverConfigs = require('../config/dataConfig');
+const { getProfilesFromSheet } = require('./profileCache'); // ✅ 캐싱된 버전 사용
 
 async function getProfilesByNickname(message, nickname) {
   if (!message.guild) return [];
 
-  const guildId = String(message.guild.id);
-  const serverConfig = serverConfigs[guildId];
-  if (!serverConfig) return [];
+  const serverId = String(message.guild.id);
+  const normalizedInput = nickname.trim().toLowerCase();
 
-  try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: serverConfig.spreadsheetId,
-      range: '길드원!A:M',
+  const dataRows = await getProfilesFromSheet(serverId); // ✅ 캐싱된 rows 사용
+
+  const matchedDiscordIds = new Set(
+    dataRows
+      .filter((row) => {
+        const nick = row[3]?.trim().toLowerCase() || '';
+        const ign = row[4]?.trim().toLowerCase() || '';
+        return nick.includes(normalizedInput) || ign.includes(normalizedInput);
+      })
+      .map((row) => row[0])
+  );
+
+  if (matchedDiscordIds.size === 0) return [];
+
+  const profiles = dataRows
+    .filter((row) => matchedDiscordIds.has(row[0]))
+    .map((row) => {
+      const [
+        discordId,
+        id,
+        profileImg,
+        nicknameValue,
+        ign,
+        accountGroup,
+        order,
+        jobGroup,
+        job,
+        level,
+        atk,
+        bossDmg,
+        regDate,
+      ] = row;
+
+      return {
+        discordId,
+        id,
+        profileImg,
+        nicknameValue,
+        ign,
+        accountGroup,
+        order,
+        jobGroup,
+        job,
+        level,
+        atk,
+        bossDmg,
+        regDate,
+      };
     });
 
-    const rows = res.data.values || [];
-    const dataRows = rows.filter((row) => row.length > 0).slice(1); // 헤더 제외
-
-    // 1. 닉네임으로 첫 번째 캐릭터 찾아 Discord ID 추출
-    const normalizedInput = nickname.trim().toLowerCase();
-    const matchedRow = dataRows.find(
-      (row) => row[3] && row[3].trim().toLowerCase() === normalizedInput
-    );
-
-    if (!matchedRow) return [];
-
-    const targetDiscordId = matchedRow[0]; // A열 = Discord ID
-
-    // 2. 같은 Discord ID 가진 모든 캐릭터 반환
-    const profiles = dataRows
-      .filter((row) => row[0] === targetDiscordId)
-      .map((row) => {
-        const [
-          discordId, // A
-          id, // B
-          profileImg, // C
-          nicknameValue, // D
-          ign, // E
-          accountGroup, // F
-          order, // G
-          jobGroup, // H
-          job, // I
-          level, // J
-          atk, // K
-          bossDmg, // L
-          regDate, // M
-        ] = row;
-
-        return {
-          discordId,
-          id,
-          profileImg,
-          nicknameValue,
-          ign,
-          accountGroup,
-          order,
-          jobGroup,
-          job,
-          level,
-          atk,
-          bossDmg,
-          regDate,
-        };
-      });
-
-    return profiles;
-  } catch (err) {
-    console.error('프로필 조회 중 오류:', err.message);
-    return [];
-  }
+  return profiles;
 }
 
 module.exports = { getProfilesByNickname };

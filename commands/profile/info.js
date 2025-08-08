@@ -23,6 +23,11 @@ module.exports = {
     if (parsed.error) return message.reply(parsed.error);
     const { name: nickname } = parsed;
 
+    // 2글자 미만이면 차단
+    if (nickname.trim().length < 2) {
+      return message.reply('닉네임은 최소 2글자 이상 입력해주세요.');
+    }
+
     // 프로필 조회
     const profiles = await getProfilesByNickname(message, nickname);
     if (!profiles.length) {
@@ -45,8 +50,8 @@ module.exports = {
     // 본계정 먼저, 부계정은 그 뒤로 정렬
     const sortedGroups = Object.values(grouped).sort((a, b) => {
       const groupOrder = {
-        '본계정': 0,
-        '부계정': 1,
+        본계정: 0,
+        부계정: 1,
       };
       const aGroup = groupOrder[a[0]?.accountGroup] ?? 99;
       const bGroup = groupOrder[b[0]?.accountGroup] ?? 99;
