@@ -2,28 +2,12 @@ import { useState } from 'react';
 import BasicInfoForm from './BasicInfoForm';
 import SpecInfoForm from './SpecInfoForm';
 import { useAuth } from '../../../Hooks/useAuth';
+import Select from './Select';
+import { buffJobs, mainJobs } from './Jobs.js';
 
 export default function CharacterForm({ onSubmit }) {
   const { user } = useAuth();
   const displayName = user?.nickname || user?.username; // 서버 닉네임 우선
-
-  const buffJobs = ['리프1', '리프30', '리저', '뻥캐', '연막', '샤프'];
-  const mainJobs = [
-    '히어로',
-    '닼나',
-    '팔라딘',
-    '보마',
-    '신궁',
-    '썬콜',
-    '불독',
-    '비숍',
-    '나로',
-    '섀도어',
-    '바이퍼',
-    '캡틴',
-    '에반',
-    '아란',
-  ];
 
   // 상태
   const [ign, setIgn] = useState('');
@@ -33,6 +17,16 @@ export default function CharacterForm({ onSubmit }) {
   const [bossDmg, setBossDmg] = useState('');
   const [profileImg, setProfileImg] = useState('');
   const [accountGroup, setAccountGroup] = useState('본계정');
+  const [hp, setHp] = useState('');
+  const [acc, setAcc] = useState('');
+  const [mapleWarrior, setMapleWarrior] = useState('');
+
+  const jobOptions = [
+    '-- 버프 캐릭터 --',
+    ...buffJobs,
+    '-- 메인 캐릭터 --',
+    ...mainJobs,
+  ];
 
   // 제출 함수
   const handleSubmit = () => {
@@ -46,6 +40,9 @@ export default function CharacterForm({ onSubmit }) {
       bossDmg: bossDmg ? Number(bossDmg) : null,
       accountGroup,
       order: '',
+      hp: hp ? Number(hp) : null,
+      acc: acc ? Number(acc) : null,
+      mapleWarrior, // 문자열 그대로
     };
     onSubmit(newCharacter);
   };
@@ -58,21 +55,23 @@ export default function CharacterForm({ onSubmit }) {
         setIgn={setIgn}
         profileImg={profileImg}
         setProfileImg={setProfileImg}
-        setJob={setJob}
         level={level}
         setLevel={setLevel}
-        buffJobs={buffJobs}
-        mainJobs={mainJobs}
       />
-      <select
+
+      <Select
+        options={jobOptions}
+        value={job}
+        onChange={setJob}
+        placeholder="직업 선택"
+      />
+
+      <Select
+        options={['본계정', '부계정', '버프캐']}
         value={accountGroup}
-        onChange={(e) => setAccountGroup(e.target.value)}
-        className="w-full mb-2 p-2 border border-gray-300 rounded"
-      >
-        <option value="본계정">본계정</option>
-        <option value="부계정">부계정</option>
-        <option value="버프캐">버프캐</option>
-      </select>
+        onChange={setAccountGroup}
+        placeholder="계정 그룹 선택"
+      />
 
       <div className="border-t my-4"></div>
 
@@ -82,13 +81,27 @@ export default function CharacterForm({ onSubmit }) {
         setAtk={setAtk}
         bossDmg={bossDmg}
         setBossDmg={setBossDmg}
+        hp={hp}
+        setHp={setHp}
+        acc={acc}
+        setAcc={setAcc}
+        mapleWarrior={mapleWarrior}
+        setMapleWarrior={setMapleWarrior}
       />
-      <div className="flex justify-end gap-2 mt-4">
+
+      <Select
+        options={['없음', '메10', '메20', '메30']}
+        value={mapleWarrior}
+        onChange={setMapleWarrior}
+        placeholder="메용 선택"
+      />
+
+      <div className="flex justify-center mt-4">
         <button
           onClick={handleSubmit}
-          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-4 py-1 bg-black text-white rounded hover:bg-gray-800"
         >
-          추가
+          추가하기
         </button>
       </div>
     </>

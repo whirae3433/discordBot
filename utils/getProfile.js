@@ -31,11 +31,13 @@ async function getProfilesByNickname(message, nickname) {
         ign,
         accountGroup,
         order,
-        jobGroup,
-        job,
         level,
+        hp,
+        acc,
+        job,
         atk,
         bossDmg,
+        mapleWarrior,
         regDate,
       ] = row;
 
@@ -47,11 +49,13 @@ async function getProfilesByNickname(message, nickname) {
         ign,
         accountGroup,
         order,
-        jobGroup,
-        job,
         level,
+        hp,
+        acc,
+        job,
         atk,
         bossDmg,
+        mapleWarrior,
         regDate,
       };
     });

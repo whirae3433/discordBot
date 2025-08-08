@@ -1,5 +1,6 @@
 import { useDeleteCharacter } from '../../Hooks/useDelete';
-import { MdOutlineDeleteForever } from 'react-icons/md';
+import { RiDeleteBinLine } from "react-icons/ri";
+import { GrUpdate } from 'react-icons/gr';
 
 export default function CharacterCard({
   character,
@@ -22,12 +23,20 @@ export default function CharacterCard({
 
   return (
     <div className="relative bg-gray-100 rounded-none p-4 flex flex-col items-center shadow hover:shadow-md transition">
+      {/* 수정 버튼 */}
+      <button
+        onClick={() => alert('수정 기능은 나중에 추가됩니다.')} // TODO: 수정 로직 연결
+        className="absolute top-4 left-4 text-gray-400 hover:text-blue-500 text-xl"
+      >
+        <GrUpdate />
+      </button>
+
       {/* 삭제 버튼 */}
       <button
         onClick={handleDelete}
-        className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-2xl"
+        className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-2xl"
       >
-        <MdOutlineDeleteForever />
+        <RiDeleteBinLine />
       </button>
 
       {/* 프로필 이미지 */}
@@ -42,25 +51,23 @@ export default function CharacterCard({
         {character.ign}
       </h3>
 
-      {/* 정보: 좌측 직업/레벨, 우측 스공/보공 */}
-      <div className="w-full grid grid-cols-2 gap-x-4 text-sm">
-        {/* 왼쪽 컬럼 */}
-        <div className="flex flex-col items-start text-gray-600">
-          <span className="font-semibold">{character.job}</span>
-          <span className="text-gray-500">Lv. {character.level}</span>
-        </div>
+      {/* 1행: Lv / HP / Acc */}
+      <div className="w-full grid grid-cols-3 text-sm mb-1 text-gray-700">
+        <div className="flex justify-start">Lv. {character.level || '-'}</div>
+        <div className="flex justify-center">HP: {character.hp || '-'}</div>
+        <div className="flex justify-end">Acc: {character.acc || '-'}</div>
+      </div>
 
-        {/* 오른쪽 컬럼 */}
-        <div className="flex flex-col text-gray-700 w-full">
-          <div className="flex justify-between">
-            <span>스공 |</span>
-            <span>{character.atk || '-'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>보공 |</span>
-            <span>{character.bossDmg ? `${character.bossDmg}%` : '-'}</span>
-          </div>
+      {/* 2행: Job / Atk|Boss / MapleWarrior */}
+      <div className="w-full grid grid-cols-3 text-sm text-gray-700">
+        <div className="flex justify-start font-semibold">
+          {character.job || '-'}
         </div>
+        <div className="flex justify-center">
+          {character.atk || '-'} |{' '}
+          {character.bossDmg ? `${character.bossDmg}%` : '-'}
+        </div>
+        <div className="flex justify-end">{character.mapleWarrior || '-'}</div>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ module.exports = async function getCharacters(req, res) {
   }
 
   try {
-    const range = `길드원!A:M`;
+    const range = `길드원!A:O`;
     const result = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range,
@@ -23,19 +23,21 @@ module.exports = async function getCharacters(req, res) {
           row[0] && row[0].toString().trim() === discordId.toString().trim()
       )
       .map((row) => ({
-        id: row[1], // B열
-        discordId: row[0], // A열
-        profileImg: row[2], // C열
-        nickname: row[3], // D열
-        ign: row[4], // E열
-        accountGroup: row[5], // F열
-        order: row[6], // G열
-        jobGroup: row[7], // H열
-        job: row[8], // I열
-        level: row[9], // J열
-        atk: row[10], // K열
-        bossDmg: row[11], // L열
-        regDate: row[12], // M열
+        discordId: row[0], // A
+        id: row[1], // B
+        profileImg: row[2], // C
+        nicknameValue: row[3], // D
+        ign: row[4], // E
+        accountGroup: row[5], // F
+        order: row[6], // G
+        level: row[7], // H
+        hp: row[8], // I
+        acc: row[9], // J
+        job: row[10], // K
+        atk: row[11], // L
+        bossDmg: row[12], // M
+        mapleWarrior: row[13], // N
+        regDate: row[14], // O
       }));
 
     res.json({ discordId, characters });

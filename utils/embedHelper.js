@@ -3,7 +3,6 @@ const { cropCenterSquare } = require('./imageHelper');
 const { getDaysAgo } = require('./dateHelper');
 const path = require('path'); // ← 이거 꼭 필요함
 
-
 const BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3001';
 const DEFAULT_IMAGE_PATH = path.resolve(__dirname, '../public/기본.jpeg');
 
@@ -52,12 +51,24 @@ async function createProfileEmbed(profile, serverId, extraProfiles = []) {
 
   for (const p of allProfiles) {
     embed.addFields(
-      { name: `${p.level || '없음'}`, value: '\u200B', inline: true },
-      { name: `${p.job || '없음'}`, value: '\u200B', inline: true },
+      { name: `Lv: ${p.level || '1'}`, value: '', inline: true },
+      { name: `Hp: ${p.hp || '???'}`, value: '', inline: true },
+      { name: `Acc: ${p.acc || '???'}`, value: '', inline: true },
+      { name: `${p.job || '백수'}`, value: '', inline: true },
       {
-        name: `${p.atk || '없음'} | ${p.bossDmg ? p.bossDmg + '%' : '없음'}`,
-        value: '\u200B',
+        name: `${p.atk || '없음'} | ${p.bossDmg ? p.bossDmg + '%' : '0%'}`,
+        value: '',
         inline: true,
+      },
+      {
+        name: `${p.mapleWarrior || '없음'}`, //
+        value: '',
+        inline: true,
+      },
+      {
+        name: '',
+        value: '━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        inline: false,
       }
     );
   }
