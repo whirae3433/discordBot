@@ -5,12 +5,21 @@ const {
   createRegisterEmbed,
   createProfileEmbed,
 } = require('../../utils/embedHelper');
+const { clearCache } = require('../../utils/profileCache');
 
 module.exports = {
   name: '!정보',
   description: '닉네임으로 프로필 정보를 조회합니다.',
   execute: async (message, args) => {
     const serverId = message.guild.id;
+
+    // 캐시 초기화 명령 처리
+    if (args[0] === '업데이트') {
+      clearCache(serverId);
+      return message.reply(
+        '정보를 업데이트 했어. 다음부터 최신 프로필을 불러올게!'
+      );
+    }
 
     // 닉네임 없는 경우
     if (!args.length) {

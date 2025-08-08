@@ -1,17 +1,11 @@
-import JobSelect from './JobSelect';
-
 export default function BasicInfoForm({
   ign,
   setIgn,
   profileImg,
   setProfileImg,
-  setJob,
   level,
   setLevel,
-  buffJobs,
-  mainJobs,
 }) {
-
   return (
     <div>
       <input
@@ -46,12 +40,6 @@ export default function BasicInfoForm({
         value={profileImg}
         onChange={(e) => setProfileImg(e.target.value)}
         className="w-full mb-2 p-2 border border-gray-300 rounded"
-      />
-
-      <JobSelect
-        buffJobs={buffJobs}
-        mainJobs={mainJobs}
-        onChange={(value) => setJob(value)}
       />
     </div>
   );

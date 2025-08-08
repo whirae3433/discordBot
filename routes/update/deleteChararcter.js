@@ -22,7 +22,7 @@ module.exports = async function deleteCharacter(req, res) {
     const sheetId = targetSheet.properties.sheetId;
 
     // 2. 전체 데이터 가져오기
-    const range = `길드원!A:M`;
+    const range = `길드원!A:O`;
     const result = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range,

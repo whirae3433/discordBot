@@ -10,11 +10,13 @@ module.exports = async function addCharacter(req, res) {
     ign,
     accountGroup,
     order,
-    jobGroup,
-    job,
     level,
+    hp,
+    acc,
+    job,
     atk,
     bossDmg,
+    mapleWarrior,
   } = req.body;
 
   const spreadsheetId = channelConfigMap[serverId]?.spreadsheetId;
@@ -28,7 +30,7 @@ module.exports = async function addCharacter(req, res) {
   try {
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: '길드원!A5:M',
+      range: '길드원!A:O',
       valueInputOption: 'RAW',
       requestBody: {
         values: [
@@ -40,12 +42,14 @@ module.exports = async function addCharacter(req, res) {
             ign, // E
             accountGroup, // F
             order, // G
-            jobGroup, // H
-            job, // I
-            level, // J
-            atk, // K
-            bossDmg, // L
-            today, // M
+            level, // H
+            hp, // I
+            acc, // J
+            job, // K
+            atk, // L
+            bossDmg, // M
+            mapleWarrior, // N
+            today, // O
           ],
         ],
       },

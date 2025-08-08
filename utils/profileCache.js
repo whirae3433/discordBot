@@ -18,7 +18,7 @@ async function getProfilesFromSheet(serverId) {
   try {
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: config.spreadsheetId,
-      range: '길드원!A:M',
+      range: '길드원!A:O',
     });
 
     const rows = res.data.values || [];
