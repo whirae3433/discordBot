@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import BasicInfoForm from './BasicInfoForm';
 import SpecInfoForm from './SpecInfoForm';
 import { useAuth } from '../../../Hooks/useAuth';
@@ -7,38 +7,47 @@ import { buffJobs, mainJobs } from './Jobs.js';
 
 export default function CharacterForm({
   onSubmit,
-  initialValues = {},
+  initialValues,
   submitLabel = '추가하기',
 }) {
   const { user } = useAuth();
   const displayName = user?.nickname || user?.username; // 서버 닉네임 우선
 
   // 상태
-  const [ign, setIgn] = useState('');
-  const [job, setJob] = useState('');
-  const [level, setLevel] = useState('');
-  const [atk, setAtk] = useState('');
-  const [bossDmg, setBossDmg] = useState('');
-  const [profileImg, setProfileImg] = useState('');
-  const [accountGroup, setAccountGroup] = useState('본계정');
-  const [hp, setHp] = useState('');
-  const [acc, setAcc] = useState('');
-  const [mapleWarrior, setMapleWarrior] = useState('');
-
-  useEffect(() => {
-    if (!initialValues) return;
-    setIgn(initialValues.ign ?? '');
-    setProfileImg(initialValues.profileImg ?? '');
-    setJob(initialValues.job ?? '');
-    setLevel(initialValues.level ?? '');
-    setAtk(initialValues.atk ?? '');
-    setBossDmg(initialValues.bossDmg ?? '');
-    setAccountGroup(initialValues.accountGroup ?? '본계정');
-    setHp(initialValues.hp ?? '');
-    setAcc(initialValues.acc ?? '');
-    setMapleWarrior(initialValues.mapleWarrior ?? '없음');
-  }, [initialValues]);
-
+  const [ign, setIgn] = useState(() => initialValues?.ign ?? '');
+  const [job, setJob] = useState(() => initialValues?.job ?? '');
+  const [level, setLevel] = useState(() =>
+    initialValues?.level === 0 || initialValues?.level
+      ? String(initialValues.level)
+      : ''
+  );
+  const [atk, setAtk] = useState(() =>
+    initialValues?.atk === 0 || initialValues?.atk
+      ? String(initialValues.atk)
+      : ''
+  );
+  const [bossDmg, setBossDmg] = useState(() =>
+    initialValues?.bossDmg === 0 || initialValues?.bossDmg
+      ? String(initialValues.bossDmg)
+      : ''
+  );
+  const [profileImg, setProfileImg] = useState(
+    () => initialValues?.profileImg ?? ''
+  );
+  const [accountGroup, setAccountGroup] = useState(
+    () => initialValues?.accountGroup ?? '본계정'
+  );
+  const [hp, setHp] = useState(() =>
+    initialValues?.hp === 0 || initialValues?.hp ? String(initialValues.hp) : ''
+  );
+  const [acc, setAcc] = useState(() =>
+    initialValues?.acc === 0 || initialValues?.acc
+      ? String(initialValues.acc)
+      : ''
+  );
+  const [mapleWarrior, setMapleWarrior] = useState(
+    () => initialValues?.mapleWarrior ?? '없음'
+  );
   const jobOptions = [
     '-- 버프 캐릭터 --',
     ...buffJobs,
