@@ -1,5 +1,5 @@
 import { useDeleteCharacter } from '../../Hooks/useDelete';
-import { RiDeleteBinLine } from "react-icons/ri";
+import { RiDeleteBinLine } from 'react-icons/ri';
 import { GrUpdate } from 'react-icons/gr';
 
 export default function CharacterCard({
@@ -7,6 +7,7 @@ export default function CharacterCard({
   serverId,
   discordId,
   onDeleted,
+  onEdit,
 }) {
   const { deleteCharacter } = useDeleteCharacter();
 
@@ -25,7 +26,7 @@ export default function CharacterCard({
     <div className="relative bg-gray-100 rounded-none p-4 flex flex-col items-center shadow hover:shadow-md transition">
       {/* 수정 버튼 */}
       <button
-        onClick={() => alert('수정 기능은 나중에 추가됩니다.')} // TODO: 수정 로직 연결
+        onClick={() => onEdit && onEdit(character)}
         className="absolute top-4 left-4 text-gray-400 hover:text-blue-500 text-xl"
       >
         <GrUpdate />
