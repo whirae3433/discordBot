@@ -1,4 +1,5 @@
 import { useAddCharacter } from '../../../Hooks/useAddCharacter';
+import { useEscClose } from '../../../Hooks/useEscClose';
 import CharacterForm from '../CharacterForm/CharacterForm';
 import { IoBackspaceOutline } from 'react-icons/io5';
 
@@ -9,6 +10,7 @@ export default function AddCharacterModal({
   onSuccess,
 }) {
   const { addCharacter, loading, error } = useAddCharacter();
+  useEscClose(onClose, loading);
 
   const handleFormSubmit = async (data) => {
     try {

@@ -43,7 +43,7 @@ async function createProfileEmbed(profile, serverId, extraProfiles = []) {
         profile.discordId
       )})\n\u200B`
     )
-    .setThumbnail('attachment://thumbnail.png')
+    // .setThumbnail('attachment://thumbnail.png')
     .setColor(color)
     .setFooter({ text: `업데이트 : ${daysAgoText}` });
 
@@ -73,7 +73,8 @@ async function createProfileEmbed(profile, serverId, extraProfiles = []) {
     );
   }
 
-  return { embeds: [embed], files: [attachment] };
+  // return { embeds: [embed], files: [attachment] };
+  return { embeds: [embed]};
 }
 
 module.exports = { createRegisterEmbed, createProfileEmbed };

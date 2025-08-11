@@ -3,13 +3,12 @@ const router = express.Router();
 
 const addCharacter = require('./addCharacter');
 const getCharacters = require('./getCharacters');
-const deleteChararcter = require('./deleteChararcter');
+const deleteCharacter = require('./deleteCharacter');
+const updateCharacter = require('./updateCharacter');
 
 router.post('/characters/:serverId/:discordId', addCharacter);
 router.get('/characters/:serverId/:discordId', getCharacters);
-router.delete(
-  '/characters/:serverId/:discordId/:characterId',
-  deleteChararcter
-);
+router.patch('/characters/:serverId/:discordId/:characterId', updateCharacter);
+router.delete('/characters/:serverId/:discordId/:characterId', deleteCharacter);
 
 module.exports = router;

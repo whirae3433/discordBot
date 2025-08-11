@@ -2,6 +2,7 @@ import { useState } from 'react';
 import CharacterCard from './CharacterCard';
 import AddCharacterCard from './AddCharacterCard';
 import AddCharacterModal from './Modal/AddCharacterModal';
+import EditCharacterModal from './Modal/EditCharacterModal';
 
 export default function CharacterGroup({
   ign,
@@ -11,10 +12,17 @@ export default function CharacterGroup({
   onRefresh,
 }) {
   const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState(null);
 
   const handleClose = () => {
     setShowModal(false);
     if (onRefresh) onRefresh(); // 모달 닫으면서 목록 갱신
+  };
+
+  const openEdit = (char) => setEditing(char); // ✅ 편집 열기
+  const closeEdit = () => {
+    setEditing(null);
+    onRefresh?.(); // 저장/닫기 후 목록 갱신
   };
 
   return (
@@ -30,6 +38,7 @@ export default function CharacterGroup({
             serverId={serverId}
             discordId={discordId}
             onDeleted={onRefresh}
+            onEdit={openEdit}
           />
         ))}
 
@@ -43,6 +52,15 @@ export default function CharacterGroup({
           serverId={serverId}
           discordId={discordId}
           onClose={handleClose}
+          onSuccess={onRefresh}
+        />
+      )}
+      {editing && (
+        <EditCharacterModal
+          serverId={serverId}
+          discordId={discordId}
+          character={editing}
+          onClose={closeEdit}
           onSuccess={onRefresh}
         />
       )}

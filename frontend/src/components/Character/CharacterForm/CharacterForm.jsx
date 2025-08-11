@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BasicInfoForm from './BasicInfoForm';
 import SpecInfoForm from './SpecInfoForm';
 import { useAuth } from '../../../Hooks/useAuth';
 import Select from './Select';
 import { buffJobs, mainJobs } from './Jobs.js';
 
-export default function CharacterForm({ onSubmit }) {
+export default function CharacterForm({
+  onSubmit,
+  initialValues = {},
+  submitLabel = '추가하기',
+}) {
   const { user } = useAuth();
   const displayName = user?.nickname || user?.username; // 서버 닉네임 우선
 
@@ -20,6 +24,20 @@ export default function CharacterForm({ onSubmit }) {
   const [hp, setHp] = useState('');
   const [acc, setAcc] = useState('');
   const [mapleWarrior, setMapleWarrior] = useState('');
+
+  useEffect(() => {
+    if (!initialValues) return;
+    setIgn(initialValues.ign ?? '');
+    setProfileImg(initialValues.profileImg ?? '');
+    setJob(initialValues.job ?? '');
+    setLevel(initialValues.level ?? '');
+    setAtk(initialValues.atk ?? '');
+    setBossDmg(initialValues.bossDmg ?? '');
+    setAccountGroup(initialValues.accountGroup ?? '본계정');
+    setHp(initialValues.hp ?? '');
+    setAcc(initialValues.acc ?? '');
+    setMapleWarrior(initialValues.mapleWarrior ?? '없음');
+  }, [initialValues]);
 
   const jobOptions = [
     '-- 버프 캐릭터 --',
@@ -101,7 +119,7 @@ export default function CharacterForm({ onSubmit }) {
           onClick={handleSubmit}
           className="px-4 py-1 bg-black text-white rounded hover:bg-gray-800"
         >
-          추가하기
+          {submitLabel}
         </button>
       </div>
     </>
