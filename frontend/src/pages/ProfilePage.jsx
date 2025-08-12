@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import AddCharacterModal from '../features/character/components/modals/AddCharacterModal';
 import { useCharacters } from '../hooks/useCharacters';
 import { useAuth } from '../hooks/useAuth';
-import ProtectedRoute from '../components/Auth/ProtectedRoute';
+import ProtectedRoute from '../components/auth/ProtectedRoute';
 import AddCharacterCard from '../features/character/AddCharacterCard';
 import CharacterGroup from '../features/character/CharacterGroup';
 

@@ -1,4 +1,3 @@
-// src/Hooks/useEscClose.js
 import { useEffect } from 'react';
 export function useEscClose(handler, disabled = false) {
   useEffect(() => {
