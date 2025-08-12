@@ -1,4 +1,4 @@
-import { useDeleteCharacter } from '../../Hooks/useDelete';
+import { useDeleteCharacter } from '../../hooks/useDelete';
 import { RiDeleteBinLine } from 'react-icons/ri';
 import { GrUpdate } from 'react-icons/gr';
 

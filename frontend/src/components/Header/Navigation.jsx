@@ -1,6 +1,6 @@
 import { useLocation, useParams } from 'react-router-dom';
 import NavItem from './NavItem';
-import { useAuth } from '../../Hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function Navigation() {
   const location = useLocation();

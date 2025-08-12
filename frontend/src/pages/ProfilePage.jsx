@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import CharacterGroup from '../components/Character/CharacterGroup';
-import AddCharacterCard from '../components/Character/AddCharacterCard';
-import AddCharacterModal from '../components/Character/Modal/AddCharacterModal';
-import { useCharacters } from '../Hooks/useCharacters';
+import AddCharacterModal from '../features/character/components/modals/AddCharacterModal';
+import { useCharacters } from '../hooks/useCharacters';
+import { useAuth } from '../hooks/useAuth';
 import ProtectedRoute from '../components/Auth/ProtectedRoute';
-import { useAuth } from '../Hooks/useAuth';
+import AddCharacterCard from '../features/character/AddCharacterCard';
+import CharacterGroup from '../features/character/CharacterGroup';
 
 export default function ProfilePage() {
   const { user } = useAuth();

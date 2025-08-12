@@ -1,4 +1,4 @@
-import { useAuth } from '../../Hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function UserInfo({ serverId }) {
   const { user } = useAuth();
