@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import CharacterCard from './CharacterCard';
 import AddCharacterCard from './AddCharacterCard';
-import AddCharacterModal from './Modal/AddCharacterModal';
-import EditCharacterModal from './Modal/EditCharacterModal';
+import AddCharacterModal from '../../features/character/components/modals/AddCharacterModal';
+import EditCharacterModal from '../../features/character/components/modals/EditCharacterModal';
 
 export default function CharacterGroup({
   ign,

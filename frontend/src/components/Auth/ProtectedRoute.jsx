@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
-import { useAuth } from '../../Hooks/useAuth';
-import LoginButton from '../LoginButton';
+import { useAuth } from '../../hooks/useAuth';
+import LoginButton from './LoginButton';
 
 export default function ProtectedRoute({ discordId, children }) {
   const { user, loading: authLoading } = useAuth();
@@ -9,18 +9,17 @@ export default function ProtectedRoute({ discordId, children }) {
   if (authLoading) return <div className="text-white">로그인 확인 중...</div>;
 
   if (!user) {
-  return (
-    <div className="flex items-start justify-center h-screen ">
-      <div className="flex flex-col items-center gap-6 p-8 bg-gray-800 rounded-2xl shadow-lg">
-        <p className="text-lg font-semibold text-gray-100">
-          로그인이 필요합니다
-        </p>
-        <LoginButton serverId={serverId} />
+    return (
+      <div className="flex items-start justify-center h-screen ">
+        <div className="flex flex-col items-center gap-6 p-8 bg-gray-800 rounded-2xl shadow-lg">
+          <p className="text-lg font-semibold text-gray-100">
+            로그인이 필요합니다
+          </p>
+          <LoginButton serverId={serverId} />
+        </div>
       </div>
-    </div>
-  );
-}
-
+    );
+  }
 
   if (user.id !== discordId) {
     return (
