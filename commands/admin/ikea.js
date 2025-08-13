@@ -5,7 +5,7 @@ module.exports = {
     try {
       // 유보금 조회 로직 (지금은 고정 값, 추후 데이터베이스 연동 가능)
       await message.reply(
-        '환영합니다 이케아님.\n스위스 은행에 있는 유보금은 400억입니다.'
+        '환영합니다 이케아님.\n스위스 계좌에 있는 유보금은 400억입니다.'
       );
     } catch (error) {
       console.error('유보금 조회 에러:', error);

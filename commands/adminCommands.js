@@ -14,7 +14,7 @@ for (const file of files) {
 }
 
 module.exports.adminCommands = async function (message, client) {
-  const channelId = message.channel.id;
+  const serverId = message.serverId.id;
   const userId = message.author.id;
   const [command, ...args] = message.content.split(' ');
 
@@ -22,12 +22,12 @@ module.exports.adminCommands = async function (message, client) {
   if (!adminCommands.has(command)) return false;
 
   // 권한 확인
-  if (!isAdmin(channelId, userId)) {
+  if (!isAdmin(serverId, userId)) {
     await message.reply('❌ 권한이 없습니다.');
     return true;
   }
 
   // 해당 명령어 실행
-  await adminCommands.get(command)(message, args, channelId);
+  await adminCommands.get(command)(message, args, serverId);
   return true;
 };

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const commands = new Map();
+const adminCommands = new Map();
 
 function load(dir) {
   for (const file of fs.readdirSync(dir)) {
@@ -9,17 +9,16 @@ function load(dir) {
     const stat = fs.statSync(full);
 
     if (stat.isDirectory()) {
-      if (file === 'admin') continue;
       load(full);
       continue;
     }
     if (file.endsWith('.js')) {
       const cmd = require(full);
-      if (!cmd?.name) continue;
-      commands.set(cmd.name, cmd);
+      if (!cmd?.name || typeof cmd.execute !== 'function') continue;
+      adminCommands.set(cmd.name, cmd.execute);
     }
   }
 }
 
-load(__dirname);
-module.exports.commands = commands;
+load(__dirname); // admin 폴더 안만 스캔
+module.exports = { adminCommands };
