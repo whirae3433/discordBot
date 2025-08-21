@@ -33,6 +33,7 @@ client.login(process.env.DISCORD_TOKEN);
 const updateRoutes = require('./routes/update/index.js');
 const authRoutes = require('./routes/auth.js');
 const nicknameRoutes = require('./routes/nickname.js');
+const listCharacters = require('./routes/read/listCharacters');
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.use(
 app.use('/api/update', updateRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/nickname', nicknameRoutes);
+app.get('/api/:serverId/characters', listCharacters);
 
 // React 정적 파일 서빙
 app.use(express.static(path.join(__dirname, 'frontend', 'build')));

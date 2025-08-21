@@ -7,7 +7,7 @@ export default function Logo() {
       to={`/${serverId}/home`}
       className="text-white font-bold text-xl hover:text-gray-300"
     >
-      TIMELESS
+      Muyeong
     </Link>
   );
 }
