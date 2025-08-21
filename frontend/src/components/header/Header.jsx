@@ -1,4 +1,4 @@
-import Logo from './Logo';
+// import Logo from './Logo';
 import Navigation from './Navigation';
 import SearchBar from './SearchBar';
 import UserInfo from './UserInfo';
@@ -15,7 +15,7 @@ export default function Header() {
       <div className="flex items-center px-6 py-4">
         {/* 왼쪽: 로고 + 네비 */}
         <div className="flex items-center gap-12 flex-1">
-          <Logo />
+          {/* <Logo /> */}
           <Navigation />
         </div>
 

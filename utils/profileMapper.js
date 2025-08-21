@@ -13,7 +13,7 @@ function mapRow(row = []) {
     job: row[10] || '',
     atk: Number(row[11] || 0),
     bossDmg: Number(row[12] || 0),
-    mapleWarrior: Number(row[13] || 0),
+    mapleWarrior: row[13] || 0,
     regDate: row[14] || '',
   };
 }

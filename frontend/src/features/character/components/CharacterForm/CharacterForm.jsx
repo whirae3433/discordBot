@@ -16,7 +16,7 @@ export default function CharacterForm({
 
   const [form, setForm] = useState(() => ({
     ign: initialValues?.ign ?? '',
-    profileImg: initialValues?.profileImg ?? '',
+    // profileImg: initialValues?.profileImg ?? '',
     job: initialValues?.job ?? '',
     level:
       initialValues?.level === 0 || initialValues?.level
@@ -50,7 +50,7 @@ export default function CharacterForm({
     const payload = {
       nickname: displayName,
       ign: form.ign,
-      profileImg: form.profileImg,
+      // profileImg: form.profileImg,
       job: form.job,
       level: toNumOrNull(form.level),
       atk: toNumOrNull(form.atk),
@@ -69,8 +69,8 @@ export default function CharacterForm({
       <BasicInfoForm
         ign={form.ign}
         setIgn={set('ign')}
-        profileImg={form.profileImg}
-        setProfileImg={set('profileImg')}
+        // profileImg={form.profileImg}
+        // setProfileImg={set('profileImg')}
         level={form.level}
         setLevel={set('level')}
       />

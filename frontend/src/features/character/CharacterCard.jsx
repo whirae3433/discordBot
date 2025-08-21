@@ -64,9 +64,12 @@ export default function CharacterCard({
         <div className="flex justify-start font-semibold">
           {character.job || '-'}
         </div>
-        <div className="flex justify-center">
-          {character.atk || '-'} |{' '}
-          {character.bossDmg ? `${character.bossDmg}%` : '-'}
+        <div className="flex justify-center items-center gap-1 whitespace-nowrap shrink-0 leading-none tabular-nums">
+          <span>{character.atk ?? '-'}</span>
+          <span>|</span>
+          <span>
+            {character.bossDmg != null ? `${character.bossDmg}%` : '-'}
+          </span>
         </div>
         <div className="flex justify-end">{character.mapleWarrior || '-'}</div>
       </div>
