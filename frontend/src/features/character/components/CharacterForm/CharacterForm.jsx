@@ -44,13 +44,12 @@ export default function CharacterForm({
 
   const set = (k) => (v) => setForm((prev) => ({ ...prev, [k]: v }));
 
-  const handleSubmit = () => {
+  const buildPayload = () => {
     const toNumOrNull = (v) =>
       v === '' || v === null || v === undefined ? null : Number(v);
-    const payload = {
+    return {
       nickname: displayName,
       ign: form.ign,
-      // profileImg: form.profileImg,
       job: form.job,
       level: toNumOrNull(form.level),
       atk: toNumOrNull(form.atk),
@@ -61,16 +60,45 @@ export default function CharacterForm({
       acc: toNumOrNull(form.acc),
       mapleWarrior: form.mapleWarrior,
     };
-    onSubmit(payload);
+  };
+
+  // ✅ 커스텀 검증: 빈칸이면 alert, 범위 오류도 alert
+  const handleSubmit = (e) => {
+    e.preventDefault(); // 브라우저 기본 제출/검증 막기
+
+    const ign = String(form.ign ?? '').trim();
+    const levelStr = String(form.level ?? '').trim();
+    const job = String(form.job ?? '').trim();
+    const accountGroup = String(form.accountGroup ?? '').trim();
+
+    const missing = [];
+    if (!ign) missing.push('인게임 닉');
+    if (!levelStr) missing.push('레벨');
+    if (!job) missing.push('직업');
+    if (!accountGroup) missing.push('계정 구분');
+
+    if (missing.length) {
+      alert(`다음 필수 항목을 입력해 주세요:\n- ${missing.join('\n- ')}`);
+      return;
+    }
+
+    // 레벨 숫자/범위 체크 (0~200)
+    const levelNum = Number(levelStr);
+    if (!Number.isFinite(levelNum) || levelNum < 0 || levelNum > 200) {
+      alert('레벨은 0~200 사이의 숫자여야 합니다.');
+      return;
+    }
+
+    // 통과 → 저장
+    onSubmit(buildPayload());
   };
 
   return (
-    <>
+    // ⬇️ 폼으로 감싸고, noValidate로 브라우저 기본 검증 끔
+    <form onSubmit={handleSubmit} noValidate>
       <BasicInfoForm
         ign={form.ign}
         setIgn={set('ign')}
-        // profileImg={form.profileImg}
-        // setProfileImg={set('profileImg')}
         level={form.level}
         setLevel={set('level')}
       />
@@ -102,13 +130,14 @@ export default function CharacterForm({
       />
 
       <div className="flex justify-center mt-4">
+        {/* ⬇️ 버튼은 항상 활성화, type=submit로 제출 트리거 */}
         <button
-          onClick={handleSubmit}
+          type="submit"
           className="px-4 py-1 bg-black text-white rounded hover:bg-gray-800"
         >
           {submitLabel}
         </button>
       </div>
-    </>
+    </form>
   );
 }

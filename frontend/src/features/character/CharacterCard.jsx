@@ -42,7 +42,7 @@ export default function CharacterCard({
 
       {/* 프로필 이미지 */}
       <img
-        src={character.profileImg}
+        src="/images/mush.jpeg"
         alt={character.ign}
         className="w-16 h-16 rounded-full border border-gray-300 mb-2"
       />

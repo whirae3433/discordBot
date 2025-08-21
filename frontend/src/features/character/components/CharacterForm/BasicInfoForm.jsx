@@ -14,6 +14,10 @@ export default function BasicInfoForm({
         value={ign}
         onChange={(e) => setIgn(e.target.value)}
         className="w-full mb-2 p-2 border border-gray-300 rounded"
+        onInvalid={(e) =>
+          e.currentTarget.setCustomValidity('인게임 닉을 입력해 주세요')
+        }
+        onInput={(e) => e.currentTarget.setCustomValidity('')}
       />
 
       <input
@@ -33,6 +37,10 @@ export default function BasicInfoForm({
         min="0"
         max="200"
         className="w-full mb-2 p-2 border border-gray-300 rounded"
+        onInvalid={(e) =>
+          e.currentTarget.setCustomValidity('레벨은 1~200 사이로 입력해 주세요')
+        }
+        onInput={(e) => e.currentTarget.setCustomValidity('')}
       />
       {/* <input
         type="text"
