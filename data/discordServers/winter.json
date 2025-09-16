@@ -1,7 +1,11 @@
 {
   "1373812260065251459": {
     "admins": ["1211483619613220886"],
-    "allowedChannels": ["1394232296684388363"],
+    "allowedChannels": [
+      "1407713966523683048",
+      "1417110465238270002",
+      "1417110201982652437"
+    ],
     "spreadsheetId": "1MtBDgquM3iBOZkx1Kl5y9mBKUK91nOxYJ35ynhk_EBo"
   }
 }
