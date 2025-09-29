@@ -5,6 +5,7 @@ const path = require('path');
 const session = require('express-session');
 const { Client, GatewayIntentBits } = require('discord.js');
 const { messageHandlers } = require('./utils/messageHandlers.js');
+const handleInteraction = require('./interactions');
 
 // --- Discord Bot 초기화 ---
 const client = new Client({
@@ -26,6 +27,8 @@ client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   await messageHandlers(message, client);
 });
+
+client.on('interactionCreate', handleInteraction);
 
 client.login(process.env.DISCORD_TOKEN);
 

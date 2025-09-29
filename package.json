@@ -9,6 +9,7 @@
     "express-session": "^1.18.2",
     "googleapis": "^152.0.0",
     "node-schedule": "^2.1.1",
+    "pg": "^8.16.3",
     "sharp": "^0.34.3",
     "uuid": "^11.1.0"
   },

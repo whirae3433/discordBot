@@ -11,16 +11,26 @@ module.exports.messageHandlers = async (message, client) => {
   const serverId = message.guild.id;
   const channelId = message.channel.id;
 
-  // 허용 채널 가드
-  // const cfg = channelConfigMap[serverId];
-  // if (
-  //   cfg?.allowedChannels?.length &&
-  //   !cfg.allowedChannels.includes(channelId)
-  // ) {
-  //   return false;
-  // }
-
+  const cfg = channelConfigMap[serverId];
   const [commandName, ...args] = message.content.trim().split(/\s+/);
+
+  if (cfg?.restrictedChannel === channelId) {
+    const isAllowedCommand = commandName === '!무영봇설정';
+    if (!isAllowedCommand) {
+      try {
+        await message.delete();
+        const warning = await message.channel.send({
+          content: `🚫 이 채널에서는 버튼으로 소통해주세요.`,
+        });
+        setTimeout(() => {
+          warning.delete().catch(() => {});
+        }, 3000);
+      } catch (err) {
+        console.error('[제한 채널 삭제 오류]', err);
+      }
+      return true; // 이후 로직 중단
+    }
+  }
 
   // 1) 관리자 명령어 먼저 체크
   if (adminCommands?.has?.(commandName)) {
