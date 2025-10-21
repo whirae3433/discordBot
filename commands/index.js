@@ -9,14 +9,15 @@ function load(dir) {
     const stat = fs.statSync(full);
 
     if (stat.isDirectory()) {
-      if (file === 'admin') continue;
       load(full);
       continue;
     }
     if (file.endsWith('.js')) {
+      if (file === 'index.js') continue;
+
       const cmd = require(full);
       if (!cmd?.name) continue;
-      commands.set(cmd.name, cmd);
+     commands.set(cmd.name, cmd);
     }
   }
 }
