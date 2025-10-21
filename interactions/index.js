@@ -1,7 +1,9 @@
 const buttonHandlers = {
   member_list: require('./buttons/member_list'),
   easter_egg: require('./buttons/easter_egg'),
-  guest_status: require('./buttons/guest_status'),
+  guest_reserve: require('./buttons/guest_reserve'),
+  guest_list: require('./buttons/guest_list'),
+  set_amount: require('./buttons/set_amount'),
 };
 
 const selectHandlers = {
@@ -12,6 +14,7 @@ const modalHandlers = {
   guest_input_rank1: require('./modals/guest_input'),
   guest_input_rank2: require('./modals/guest_input'),
   guest_input_rank3: require('./modals/guest_input'),
+  modal_set_amount: require('./modals/modal_set_amount'),
 };
 
 module.exports = async (interaction) => {

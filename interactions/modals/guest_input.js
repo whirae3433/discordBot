@@ -1,4 +1,6 @@
 const { MessageFlags } = require('discord-api-types/v10');
+const { getReferencePrice } = require('../../pg/getReferencePrice');
+const { insertGuestReservation } = require('../../pg/insertGuestReservation');
 
 const labelMap = {
   rank1: '🥇 1순위',
@@ -7,8 +9,12 @@ const labelMap = {
 };
 
 module.exports = async (interaction) => {
+  const serverId = interaction.guildId;
+  const userId = interaction.user.id;
+
   const rankValue = interaction.customId.replace('guest_input_', '');
   const rankLabel = labelMap[rankValue] ?? '알 수 없음';
+  const rank = parseInt(rankValue.replace('rank', ''), 10); // 숫자만 추출
 
   const guestId = interaction.fields.getTextInputValue('guest_id');
   const date = interaction.fields.getTextInputValue('guest_date');
@@ -24,8 +30,40 @@ module.exports = async (interaction) => {
     });
   }
 
-  await interaction.reply({
-    content: `🗓️ 날짜: **${date}** \n${rankLabel} **[${guestId}]**님 예약완료.`,
-    flags: MessageFlags.Ephemeral,
-  });
+  // 💰 가격 계산 로직
+  const referencePrice = await getReferencePrice(rank, serverId);
+  const discount = false; // 현재는 항상 false
+  const totalPrice = referencePrice;
+  const deposit = 100000000;
+  const balance = totalPrice - deposit;
+
+  // 🆔 예약 식별자들
+  const id = `${date}_${rank}`;
+  const raidId = `${date}_${userId}`;
+
+  try {
+    const saved = await insertGuestReservation({
+      id,
+      raidId,
+      guestName: guestId,
+      rank,
+      referencePrice,
+      discount,
+      totalPrice,
+      deposit,
+      balance,
+      serverId,
+    });
+
+    await interaction.reply({
+      content: `✅ 손님 **${guestId}** (${rankLabel}) 예약 완료!\n🗓️ 날짜: **${date}**\n💰 총액: ${totalPrice.toLocaleString()} / 💵 예약금: ${deposit.toLocaleString()} / 잔금: ${balance.toLocaleString()}`,
+      flags: MessageFlags.Ephemeral,
+    });
+  } catch (err) {
+    console.error('[DB 저장 오류]', err);
+    await interaction.reply({
+      content: '❌ 예약 저장 중 오류가 발생했습니다.',
+      flags: MessageFlags.Ephemeral,
+    });
+  }
 };

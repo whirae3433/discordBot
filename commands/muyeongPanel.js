@@ -28,6 +28,10 @@ module.exports = {
         .setCustomId('member_list')
         .setLabel('📋 멤버 목록')
         .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId('set_amount')
+        .setLabel('💰 먹자 금액')
+        .setStyle(ButtonStyle.Success)
       // new ButtonBuilder()
       //   .setCustomId('member_add')
       //   .setLabel('➕ 멤버 추가')
@@ -44,10 +48,14 @@ module.exports = {
       //   .setLabel('🗓️ 레이드 관리')
       //   .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
-        .setCustomId('guest_status')
-        .setLabel('📝 손님 현황')
+        .setCustomId('guest_reserve')
+        .setLabel('➕ 손님 예약')
         .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
+      new ButtonBuilder()
+        .setCustomId('guest_list')
+        .setLabel('📋 손님 현황')
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
         .setCustomId('easter_egg')
         .setLabel('🚫 클릭 금지')
         .setStyle(ButtonStyle.Danger)

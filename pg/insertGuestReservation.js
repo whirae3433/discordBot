@@ -1,5 +1,3 @@
-// pg/insertGuestReservation.js
-
 const pool = require('./db');
 
 async function insertGuestReservation({
@@ -15,7 +13,7 @@ async function insertGuestReservation({
   serverId,
 }) {
   const query = `
-    INSERT INTO guest_reservations (
+    INSERT INTO guest_list (
       id, raid_id, guest_name, rank, reference_price, discount, total_price, deposit, balance, server_id
     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     RETURNING *;
