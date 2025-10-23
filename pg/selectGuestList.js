@@ -9,7 +9,13 @@ async function getGuestListByDate(serverId) {
       total_price
     FROM guest_list
     WHERE server_id = $1
-      AND TO_DATE(LEFT(id, 10), 'YYYY-MM-DD') >= CURRENT_DATE - 1
+      AND (
+        (EXTRACT(HOUR FROM CURRENT_TIMESTAMP) < 2
+          AND TO_DATE(LEFT(id, 10), 'YYYY-MM-DD') >= CURRENT_DATE - 1)
+        OR
+        (EXTRACT(HOUR FROM CURRENT_TIMESTAMP) >= 2
+          AND TO_DATE(LEFT(id, 10), 'YYYY-MM-DD') >= CURRENT_DATE)
+      )
     ORDER BY LEFT(id, 10) ASC, rank ASC;
   `;
   const values = [serverId];
