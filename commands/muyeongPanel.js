@@ -49,8 +49,8 @@ module.exports = {
       //   .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
         .setCustomId('guest_reserve')
-        .setLabel('➕ 손님 예약')
-        .setStyle(ButtonStyle.Primary),
+        .setLabel('✏️ 손님 예약')
+        .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
         .setCustomId('guest_list')
         .setLabel('📋 손님 현황')
