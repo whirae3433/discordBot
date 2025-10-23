@@ -1,3 +1,5 @@
+const { MessageFlags } = require('discord-api-types/v10');
+
 const buttonHandlers = {
   member_list: require('./buttons/member_list'),
   easter_egg: require('./buttons/easter_egg'),
@@ -38,8 +40,16 @@ module.exports = async (interaction) => {
     if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({
         content: '❌ 알 수 없는 오류가 발생했습니다.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
+      // 자동 삭제 (선택)
+      setTimeout(async () => {
+        try {
+          await interaction.deleteReply();
+        } catch (deleteErr) {
+          console.error('[오류 메시지 삭제 실패]', deleteErr);
+        }
+      }, 5000);
     }
   }
 };

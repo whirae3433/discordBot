@@ -24,7 +24,7 @@ module.exports = async (interaction) => {
   const modal = new ModalBuilder()
     .setCustomId('modal_set_amount')
     .setCustomId('modal_set_amount')
-    .setTitle('💰 먹자 금액 설정');
+    .setTitle('⚠️ 관리자 외 입력 금지!');
 
   const inputs = ['1순위', '2순위', '3순위'].map((label, idx) => {
     const rank = idx + 1;

@@ -21,13 +21,21 @@ module.exports = async (interaction) => {
 
   // ✅ 날짜 형식 검증 (YYYY-MM-DD)
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-
   if (!dateRegex.test(date)) {
-    // 날짜 형식이 올바르지 않음 → 경고 메시지
-    return interaction.reply({
+    const reply = await interaction.reply({
       content: '⚠️ 날짜 형식이 올바르지 않습니다. 예: 2025-09-30',
       flags: MessageFlags.Ephemeral,
     });
+
+    // 5초 뒤 삭제
+    setTimeout(async () => {
+      try {
+        await interaction.deleteReply();
+      } catch (err) {
+        console.error('삭제 실패:', err);
+      }
+    }, 5000);
+    return;
   }
 
   // 💰 가격 계산 로직
@@ -59,11 +67,29 @@ module.exports = async (interaction) => {
       content: `✅ 손님 **${guestId}** (${rankLabel}) 예약 완료!\n🗓️ 날짜: **${date}**\n💰 총액: ${totalPrice.toLocaleString()} / 💵 예약금: ${deposit.toLocaleString()} / 잔금: ${balance.toLocaleString()}`,
       flags: MessageFlags.Ephemeral,
     });
+
+    // 5초 뒤 삭제
+    setTimeout(async () => {
+      try {
+        await interaction.deleteReply();
+      } catch (err) {
+        console.error('삭제 실패:', err);
+      }
+    }, 5000);
   } catch (err) {
     console.error('[DB 저장 오류]', err);
     await interaction.reply({
-      content: '❌ 예약 저장 중 오류가 발생했습니다.',
+      content: '❌ 해당 날짜의 순위는 이미 마감되었습니다',
       flags: MessageFlags.Ephemeral,
     });
+
+    // 오류 메시지도 5초 뒤 삭제
+    setTimeout(async () => {
+      try {
+        await interaction.deleteReply();
+      } catch (err) {
+        console.error('삭제 실패:', err);
+      }
+    }, 5000);
   }
 };
