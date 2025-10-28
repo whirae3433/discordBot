@@ -16,7 +16,7 @@ module.exports = async (interaction) => {
   const rankLabel = labelMap[rankValue] ?? '알 수 없음';
 
   const modal = new ModalBuilder()
-    .setCustomId(`guest_input_${rankValue}`) // guest_input_rank1
+    .setCustomId(`modal_guest_input_${rankValue}`) // guest_input_rank1
     .setTitle(`손님 예약 - ${rankLabel}`); // 한글 label 사용
 
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD

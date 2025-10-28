@@ -1,4 +1,5 @@
 const { MessageFlags } = require('discord-api-types/v10');
+const button_cancel_guest = require('./buttons/button_cancel_guest');
 
 const buttonHandlers = {
   member_list: require('./buttons/member_list'),
@@ -6,17 +7,22 @@ const buttonHandlers = {
   guest_reserve: require('./buttons/guest_reserve'),
   guest_list: require('./buttons/guest_list'),
   set_amount: require('./buttons/set_amount'),
+  cancel_guest: require('./buttons/button_cancel_guest'),
 };
 
 const selectHandlers = {
-  guest_reserve: require('./selects/guest_reserve'),
+  select_guest_reserve: require('./selectMenus/select_guest_reserve'),
+  select_edit_guest: require('./selectMenus/select_edit_guest'),
+  select_delete_guest: require('./selectMenus/select_delete_guest')
 };
 
 const modalHandlers = {
-  guest_input_rank1: require('./modals/guest_input'),
-  guest_input_rank2: require('./modals/guest_input'),
-  guest_input_rank3: require('./modals/guest_input'),
+  guest_input_rank1: require('./modals/modal_guest_input'),
+  guest_input_rank2: require('./modals/modal_guest_input'),
+  guest_input_rank3: require('./modals/modal_guest_input'),
   modal_set_amount: require('./modals/modal_set_amount'),
+  modal_edit_guest: require('./modals/modal_edit_guest'),
+  modal_cancel_guest: require('./modals/modal_delete_guest'),
 };
 
 module.exports = async (interaction) => {
@@ -27,11 +33,24 @@ module.exports = async (interaction) => {
     }
 
     if (interaction.isStringSelectMenu()) {
+      // 파일 라우트 방식 (selectMenus 폴더)
+      try {
+        const handler = require(`./selectMenus/${interaction.customId}.js`);
+        return handler(interaction);
+      } catch {}
+      // 매핑 객체 방식 (selectHandlers)
       const handler = selectHandlers[interaction.customId];
       if (handler) return handler(interaction);
     }
 
     if (interaction.isModalSubmit()) {
+      // baseId 추출 후 파일 라우트
+      const baseId = interaction.customId.split('_').slice(0, 3).join('_');
+      try {
+        const handler = require(`./modals/${baseId}.js`);
+        return handler(interaction);
+      } catch {}
+      // 매핑 객체 방식 (fallback)
       const handler = modalHandlers[interaction.customId];
       if (handler) return handler(interaction);
     }

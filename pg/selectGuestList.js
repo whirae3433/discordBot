@@ -3,10 +3,13 @@ const pool = require('./db');
 async function getGuestListByDate(serverId) {
   const query = `
     SELECT
+      id,
       raid_id,
       guest_name,
       rank,
-      total_price
+      total_price,
+      deposit,
+      balance
     FROM guest_list
     WHERE server_id = $1
       AND (

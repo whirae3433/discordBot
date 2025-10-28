@@ -56,8 +56,8 @@ module.exports = {
         .setLabel('📋 손님 현황')
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
-        .setCustomId('easter_egg')
-        .setLabel('🚫 클릭 금지')
+        .setCustomId('cancel_guest')
+        .setLabel('🚫 예약 취소')
         .setStyle(ButtonStyle.Danger)
     );
 
