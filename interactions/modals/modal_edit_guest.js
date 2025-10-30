@@ -10,15 +10,15 @@ module.exports = async (interaction) => {
   const serverId = interaction.guildId;
   const discordId = interaction.user.id;
 
-  // ✅ 숫자 파싱 유틸
+  // 숫자 파싱 유틸
   const parseIntSafe = (v, def = 0) => {
     if (v === null || v === undefined) return def;
     const str = String(v).replace(/[,]/g, '').trim();
     const n = parseInt(str, 10);
-    return Number.isFinite(n) ? n : def;
+    return Number.isFinite(n) && n >= 0 ? n : def;
   };
 
-  // ✅ 1️⃣ 모달 입력값 읽기
+  // 모달 입력값 읽기
   const date = interaction.fields.getTextInputValue('date')?.trim();
   const rank = parseIntSafe(interaction.fields.getTextInputValue('rank'));
   const guestName = interaction.fields.getTextInputValue('guest_name')?.trim();
@@ -32,7 +32,7 @@ module.exports = async (interaction) => {
   const newRaidId = `${date}_${discordId}`;
 
   try {
-    // 2️⃣ 유효성 검사
+    // 유효성 검사
     if (!date || isNaN(rank) || rank < 1 || rank > 3) {
       return interaction.reply({
         content: '❌ 날짜 형식 또는 순위 입력이 잘못되었습니다.',
@@ -40,7 +40,7 @@ module.exports = async (interaction) => {
       });
     }
 
-    // 3️⃣ 기본가 가져오기
+    // 기본가 가져오기
     const baseRes = await pool.query(
       `SELECT amount FROM amount_by_rank WHERE server_id = $1 AND rank = $2`,
       [serverId, rank]
@@ -55,7 +55,7 @@ module.exports = async (interaction) => {
     const basePrice = parseIntSafe(baseRes.rows[0].amount);
     const totalPrice = Math.max(basePrice - discount, 0);
 
-    // 4️⃣ 예약금 처리
+    // 예약금 처리
     let deposit;
     if (depositRaw === '완납') {
       deposit = totalPrice;
@@ -69,11 +69,10 @@ module.exports = async (interaction) => {
         flags: MessageFlags.Ephemeral,
       });
     }
-    if (deposit > totalPrice) deposit = totalPrice;
-
+    deposit = Math.min(deposit, totalPrice);
     const balance = Math.max(totalPrice - deposit, 0);
 
-    // 5️⃣ 중복 확인 (id 기준)
+    // 중복 확인 (id 기준)
     const conflictCheck = await pool.query(
       `SELECT 1 FROM guest_list WHERE server_id = $1 AND id = $2 AND id != $3`,
       [serverId, newId, oldId]
@@ -85,7 +84,7 @@ module.exports = async (interaction) => {
       });
     }
 
-    // 6️⃣ DB 업데이트
+    // DB 업데이트
     const updateQuery = `
       UPDATE guest_list
       SET
@@ -121,14 +120,24 @@ module.exports = async (interaction) => {
       });
     }
 
-    // 7️⃣ 성공 응답
+    // 성공 응답
     const g = res.rows[0];
+    const dateStr = g.raid_id.split('_')[0];
+
+    const format = (n) => n.toLocaleString();
+
     return interaction.reply({
-      content: `✅ 예약 수정 완료!\n\n🗓️ **${g.raid_id.split('_')[0]}** (${
-        g.rank
-      }순위)\n👤 **${
-        g.guest_name
-      }**\n💰 총액: ${g.total_price.toLocaleString()} 메소\n💸 예약금: ${g.deposit.toLocaleString()} 메소\n💳 잔금: ${g.balance.toLocaleString()} 메소`,
+      content: [
+        `✅ **예약 수정 완료!**`,
+        '',
+        `🗓️ **${dateStr} (${g.rank}순위)**`,
+        `👤 **${g.guest_name}**`,
+        '',
+        `💰 총액: ${format(g.total_price)} 메소`,
+        `💸 예약금: ${format(g.deposit)} 메소`,
+        `💳 잔금: ${format(g.balance)} 메소`,
+        `📉 할인: ${format(g.discount)} 메소`,
+      ].join('\n'),
       flags: MessageFlags.Ephemeral,
     });
   } catch (err) {

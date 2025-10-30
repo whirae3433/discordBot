@@ -8,13 +8,13 @@ const pool = require('../../pg/db');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guildId;
-  const guestId = interaction.values[0]; // 선택한 손님 id (ex: 2025-10-24_1)
+  const guestId = interaction.values[0];
 
   try {
-    // 🔍 해당 손님 정보 불러오기
+    // 해당 손님 정보 불러오기
     const res = await pool.query(
       `
-      SELECT raid_id, guest_name, total_price, deposit, balance, rank
+      SELECT raid_id, guest_name, total_price, deposit, balance, rank, discount
       FROM guest_list
       WHERE server_id = $1 AND id = $2
       `,
@@ -31,10 +31,10 @@ module.exports = async (interaction) => {
     const g = res.rows[0];
     const currentDate = g.raid_id.split('_')[0]; // 예: 2025-10-28
 
-    // 🧱 모달 생성
+    // 모달 생성
     const modal = new ModalBuilder()
       .setCustomId(`modal_edit_guest_${guestId}`)
-      .setTitle('✏️ 손님 예약 수정');
+      .setTitle(`✏️ ${g.guest_name} 수정`);
 
     // 날짜
     const dateInput = new TextInputBuilder()
@@ -80,7 +80,7 @@ module.exports = async (interaction) => {
       .setLabel('할인 ex: 10000000 (기본값 0)')
       .setStyle(TextInputStyle.Short)
       .setRequired(true)
-      .setValue('0');
+      .setValue(String(g.discount ?? 0));
 
     modal.addComponents(
       new ActionRowBuilder().addComponents(dateInput),
