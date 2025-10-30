@@ -1,19 +1,16 @@
 const { MessageFlags } = require('discord-api-types/v10');
-const button_cancel_guest = require('./buttons/button_cancel_guest');
 
 const buttonHandlers = {
   member_list: require('./buttons/member_list'),
-  easter_egg: require('./buttons/easter_egg'),
-  guest_reserve: require('./buttons/guest_reserve'),
-  guest_list: require('./buttons/guest_list'),
+  button_guest_reserve: require('./buttons/button_guest_reserve'),
+  button_guest_status: require('./buttons/button_guest_status'),
   set_amount: require('./buttons/set_amount'),
-  cancel_guest: require('./buttons/button_cancel_guest'),
 };
 
 const selectHandlers = {
-  select_guest_reserve: require('./selectMenus/select_guest_reserve'),
-  select_edit_guest: require('./selectMenus/select_edit_guest'),
-  select_delete_guest: require('./selectMenus/select_delete_guest')
+  select_guest_reserve: require('./selects/select_guest_reserve'),
+  select_edit_guest: require('./selects/select_edit_guest'),
+  select_delete_guest: require('./selects/select_delete_guest')
 };
 
 const modalHandlers = {
@@ -22,7 +19,7 @@ const modalHandlers = {
   guest_input_rank3: require('./modals/modal_guest_input'),
   modal_set_amount: require('./modals/modal_set_amount'),
   modal_edit_guest: require('./modals/modal_edit_guest'),
-  modal_cancel_guest: require('./modals/modal_delete_guest'),
+  modal_delete_guest: require('./modals/modal_delete_guest'),
 };
 
 module.exports = async (interaction) => {
@@ -35,7 +32,7 @@ module.exports = async (interaction) => {
     if (interaction.isStringSelectMenu()) {
       // 파일 라우트 방식 (selectMenus 폴더)
       try {
-        const handler = require(`./selectMenus/${interaction.customId}.js`);
+        const handler = require(`./selects/${interaction.customId}.js`);
         return handler(interaction);
       } catch {}
       // 매핑 객체 방식 (selectHandlers)
