@@ -1,6 +1,13 @@
 const pool = require('./db');
+const { DateTime } = require('luxon');
 
 async function getGuestListByDate(serverId) {
+  const nowKST = DateTime.now().setZone('Asia/Seoul');
+  const targetDate =
+    nowKST.hour < 2
+      ? nowKST.minus({ days: 1 }).toISODate()
+      : nowKST.toISODate();
+
   const query = `
     SELECT
       id,
@@ -12,17 +19,10 @@ async function getGuestListByDate(serverId) {
       balance
     FROM guest_list
     WHERE server_id = $1
-      AND (
-        (EXTRACT(HOUR FROM CURRENT_TIMESTAMP) < 2
-          AND TO_DATE(LEFT(id, 10), 'YYYY-MM-DD') >= CURRENT_DATE - 1)
-        OR
-        (EXTRACT(HOUR FROM CURRENT_TIMESTAMP) >= 2
-          AND TO_DATE(LEFT(id, 10), 'YYYY-MM-DD') >= CURRENT_DATE)
-      )
+      AND TO_DATE(LEFT(id, 10), 'YYYY-MM-DD') >= $2
     ORDER BY LEFT(id, 10) ASC, rank ASC;
   `;
-  const values = [serverId];
-
+  const values = [serverId, targetDate];
   const res = await pool.query(query, values);
 
   // 그룹화: { '2025-10-21': [ ... ] }
