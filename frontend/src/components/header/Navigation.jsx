@@ -10,7 +10,7 @@ export default function Navigation() {
   return (
     <nav className="flex gap-6 font-bold text-sm text-white">
       <NavItem
-        to={`/${serverId}/home`}
+        to={`/home`}
         label="Home"
         activePath={location.pathname}
       />

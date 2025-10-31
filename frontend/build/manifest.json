@@ -5,7 +5,7 @@
     {
       "src": "images/muyeong.png",
       "sizes": "192x192",
-      "type": "image/webp"
+      "type": "image/png"
     }
   ],
   "start_url": ".",

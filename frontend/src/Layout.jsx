@@ -1,5 +1,4 @@
 import { Outlet } from 'react-router-dom';
-import Banner from './components/banner/Banner';
 import Header from './components/header/Header';
 
 export default function Layout() {
@@ -8,13 +7,6 @@ export default function Layout() {
       {/* 헤더는 항상 고정 */}
       <div className="fixed top-0 left-0 w-full z-30">
         <Header />
-      </div>
-
-      {/* 배너는 스크롤 위치에 따라 이동 */}
-      <div className="mt-[72px] z-0">
-        {' '}
-        {/* 헤더 높이만큼 margin-top */}
-        <Banner />
       </div>
 
       {/* 메인 콘텐츠 */}

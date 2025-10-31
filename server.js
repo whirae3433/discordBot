@@ -57,6 +57,7 @@ app.use('/api/update', updateRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/nickname', nicknameRoutes);
 app.get('/api/:serverId/characters', listCharacters);
+app.use('/api/invite', require('./routes/invite'));
 
 // React 정적 파일 서빙
 app.use(express.static(path.join(__dirname, 'frontend', 'build')));

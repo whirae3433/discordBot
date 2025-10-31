@@ -5,6 +5,8 @@ const {
   EmbedBuilder,
 } = require('discord.js');
 
+const INVITE_REDIRECT_URI = encodeURIComponent(process.env.DISCORD_INVITE_REDIRECT_URI);
+
 module.exports = {
   name: '!무영봇설정',
   description: '고정 안내 메시지 + 버튼 UI를 전송합니다.',
@@ -65,7 +67,13 @@ module.exports = {
       new ButtonBuilder()
         .setCustomId('set_amount')
         .setLabel('💰 먹자 금액 설정')
-        .setStyle(ButtonStyle.Success)
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setLabel('🤖 무영이 사용하기')
+        .setStyle(ButtonStyle.Link) // ✅ URL 버튼은 Link 스타일로만 가능
+        .setURL(
+          `https://discord.com/oauth2/authorize?client_id=1394227164144074862&permissions=274877921280&scope=bot&redirect_uri=${INVITE_REDIRECT_URI}&response_type=code`
+        )
     );
 
     const sent = await message.channel.send({
