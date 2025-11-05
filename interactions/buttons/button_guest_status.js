@@ -43,17 +43,32 @@ module.exports = async (interaction) => {
       new ActionRowBuilder().addComponents(cancelSelect),
     ];
 
-    // 전송
+    // 이 버튼을 누른 사람만 볼 수 있게 (Ephemeral)
     await interaction.reply({
       embeds,
       components,
-      flags: MessageFlags.None,
+      flags: MessageFlags.Ephemeral,
     });
+
+    // 5초 후 자동 삭제 (선택 안 했을 경우)
+    setTimeout(async () => {
+      try {
+        await interaction.deleteReply();
+      } catch (err) {
+        // 이미 선택해서 모달 열었으면 무시
+      }
+    }, 5000);
   } catch (err) {
     console.error('[손님 현황 에러]', err);
     await interaction.reply({
       content: '❌ 손님 정보를 불러오는 중 오류가 발생했습니다.',
       flags: MessageFlags.Ephemeral,
     });
+
+    setTimeout(async () => {
+      try {
+        await interaction.deleteReply();
+      } catch {}
+    }, 5000);
   }
 };

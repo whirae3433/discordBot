@@ -50,19 +50,32 @@ module.exports = async (interaction) => {
 
     const components = [new ActionRowBuilder().addComponents(selectMenu)];
 
-    // 최종 출력
-    await interaction.reply({
+    // 이 버튼 누른 사람만 보이게 ephemeral 응답
+    const reply = await interaction.reply({
       embeds,
       components,
-      flags: MessageFlags.None,
+      flags: MessageFlags.Ephemeral,
     });
+
+    // 5초 후 자동 삭제 (아무 선택도 안 하면)
+    setTimeout(async () => {
+      try {
+        await interaction.deleteReply();
+      } catch (err) {
+        // 이미 모달 열거나 선택한 경우엔 삭제 실패 무시
+      }
+    }, 5000);
   } catch (err) {
     console.error('[guest_reserve 버튼 오류]', err);
 
-    // 오류 시 간단한 reply만
     await interaction.reply({
       content: '❌ 예약 정보를 불러오는 중 오류가 발생했습니다.',
       flags: MessageFlags.Ephemeral,
     });
+    setTimeout(async () => {
+      try {
+        await interaction.deleteReply();
+      } catch {}
+    }, 5000);
   }
 };
