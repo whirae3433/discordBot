@@ -7,7 +7,7 @@ module.exports = async (interaction) => {
   const serverId = interaction.guildId;
 
   try {
-    // ✅ 손님 목록 가져오기
+    // 손님 목록 가져오기
     const grouped = await getGuestListByDate(serverId);
     if (!grouped || Object.keys(grouped).length === 0) {
       return interaction.reply({
@@ -16,10 +16,10 @@ module.exports = async (interaction) => {
       });
     }
 
-    // ✅ Embed 생성
-    const embed = await buildGuestStatusEmbed(interaction, serverId);
+    // Embed 생성
+    const embeds = await buildGuestStatusEmbed(interaction, serverId);
 
-    // ✅ SelectMenus 생성
+    // SelectMenus 생성
     const allGuests = Object.entries(grouped).flatMap(([date, guests]) =>
       guests.map((g) => ({
         label: `${date} | ${g.rank}순위 - ${g.guest_name}`,
@@ -43,9 +43,9 @@ module.exports = async (interaction) => {
       new ActionRowBuilder().addComponents(cancelSelect),
     ];
 
-    // ✅ 전송
+    // 전송
     await interaction.reply({
-      embeds: [embed],
+      embeds,
       components,
       flags: MessageFlags.None,
     });

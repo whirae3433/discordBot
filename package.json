@@ -3,6 +3,7 @@
     "axios": "^1.10.0",
     "body-parser": "^2.2.0",
     "cheerio": "^1.1.0",
+    "dayjs": "^1.11.19",
     "discord-api-types": "^0.38.26",
     "discord.js": "^14.21.0",
     "dotenv": "^17.2.0",

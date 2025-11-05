@@ -11,10 +11,13 @@ module.exports = async (interaction) => {
   const serverId = interaction.guildId;
 
   try {
+    // 이전 메시지(Embed + SelectMenu) 삭제
+    await interaction.message.delete().catch(() => {});
+
     // 손님 정보 조회
     const res = await pool.query(
       `
-      SELECT guest_name, rank, raid_id
+      SELECT guest_name, rank, date
       FROM guest_list
       WHERE id = $1 AND server_id = $2
       `,
@@ -22,7 +25,7 @@ module.exports = async (interaction) => {
     );
 
     const g = res.rows[0];
-    const date = g.raid_id?.split('_')[0] ?? '날짜 미상';
+    const date = g.date ?? '날짜 미상';
 
     // 모달 생성
     const modal = new ModalBuilder()
@@ -31,10 +34,8 @@ module.exports = async (interaction) => {
 
     const confirmInput = new TextInputBuilder()
       .setCustomId('confirm_delete')
-      .setLabel(
-        `${g.guest_name}의 예약을 취소하려면 '예약 취소'를 입력하세요.`
-      )
-      .setPlaceholder('예약 취소')
+      .setLabel(`${g.guest_name}의 예약을 취소하려면 '예약취소'를 입력하세요.`)
+      .setPlaceholder('예약취소')
       .setStyle(TextInputStyle.Short)
       .setRequired(true);
 

@@ -8,7 +8,7 @@ module.exports = async (interaction) => {
 
   try {
     // 손님 현황 Embed
-    const embed = await buildGuestStatusEmbed(interaction, serverId);
+    const embeds = await buildGuestStatusEmbed(interaction, serverId);
 
     // 순위별 금액 조회
     const res = await pool.query(
@@ -48,12 +48,12 @@ module.exports = async (interaction) => {
         },
       ]);
 
-    const row = new ActionRowBuilder().addComponents(selectMenu);
+    const components = [new ActionRowBuilder().addComponents(selectMenu)];
 
     // 최종 출력
     await interaction.reply({
-      embeds: embed ? [embed] : [],
-      components: [row],
+      embeds,
+      components,
       flags: MessageFlags.None,
     });
   } catch (err) {

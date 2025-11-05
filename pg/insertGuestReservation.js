@@ -2,7 +2,7 @@ const pool = require('./db');
 
 async function insertGuestReservation({
   id,
-  raidId,
+  memberId,
   guestName,
   rank,
   referencePrice,
@@ -11,17 +11,18 @@ async function insertGuestReservation({
   deposit,
   balance,
   serverId,
+  date,
 }) {
   const query = `
     INSERT INTO guest_list (
-      id, raid_id, guest_name, rank, reference_price, discount, total_price, deposit, balance, server_id
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      id, member_id, guest_name, rank, reference_price, discount, total_price, deposit, balance, server_id, date
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
     RETURNING *;
   `;
 
   const values = [
     id,
-    raidId,
+    memberId,
     guestName,
     rank,
     referencePrice,
@@ -30,6 +31,7 @@ async function insertGuestReservation({
     deposit,
     balance,
     serverId,
+    date,
   ];
 
   const result = await pool.query(query, values);

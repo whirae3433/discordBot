@@ -11,10 +11,13 @@ module.exports = async (interaction) => {
   const guestId = interaction.values[0];
 
   try {
+    // 이전 메시지(Embed + SelectMenu) 삭제
+    await interaction.message.delete().catch(() => {});
+    
     // 해당 손님 정보 불러오기
     const res = await pool.query(
       `
-      SELECT raid_id, guest_name, total_price, deposit, balance, rank, discount
+      SELECT member_id, guest_name, total_price, deposit, balance, rank, discount, date
       FROM guest_list
       WHERE server_id = $1 AND id = $2
       `,
@@ -29,7 +32,7 @@ module.exports = async (interaction) => {
     }
 
     const g = res.rows[0];
-    const currentDate = g.raid_id.split('_')[0]; // 예: 2025-10-28
+    const currentDate = g.date
 
     // 모달 생성
     const modal = new ModalBuilder()

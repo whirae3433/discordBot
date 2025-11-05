@@ -5,7 +5,9 @@ const {
   EmbedBuilder,
 } = require('discord.js');
 
-const INVITE_REDIRECT_URI = encodeURIComponent(process.env.DISCORD_INVITE_REDIRECT_URI);
+const INVITE_REDIRECT_URI = encodeURIComponent(
+  process.env.DISCORD_INVITE_REDIRECT_URI
+);
 
 module.exports = {
   name: '!무영봇설정',
@@ -17,32 +19,47 @@ module.exports = {
     }
 
     const embed = new EmbedBuilder()
-      .setTitle('⚔️ 로나 원정대 관리 패널')
+      .setTitle('로나 원정대 관리 패널')
+      .setColor(0x2ecc71)
+      .setThumbnail(message.client.user.displayAvatarURL())
       .setDescription(
         [
-          '안녕하세요, **무영봇 관리자**입니다.',
-          '아래의 기능 버튼을 통해 테스트를 진행할 수 있습니다.',
-          '',
-          '🟢 **정상 작동 시** : 성공 메시지 또는 로그가 표시됩니다.',
-          '🔴 **오류 발생 시** : 콘솔 로그와 함께 오류 알림이 전송됩니다.',
+          '네. 맞아요. 제가 바로 무영이에요. \n',
+          '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
         ].join('\n')
       )
-      .setColor(0x2ecc71) // 세련된 민트-그린
-      .setThumbnail(message.client.user.displayAvatarURL())
       .addFields(
         {
-          name: '📡 시스템 상태',
+          name: '👤 일반 사용자 기능',
+          value: [
+            '• 손님 예약/조회',
+            '• 예약 수정/삭제',
+            '• 무영이 사용하기',
+          ].join('\n'),
+          inline: true,
+        },
+        { name: '\u200B', value: '\u200B', inline: true },
+        {
+          name: '🛠️ 관리자 전용 기능',
+          value: ['• 현황 채널 생성', '• 먹자 금액 설정'].join('\n'),
+          inline: true,
+        }
+      )
+      .addFields({
+        name: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        value: '',
+        inline: false,
+      })
+      .addFields(
+        {
+          name: '시스템 상태',
           value: '정상 작동 중 ✅',
           inline: true,
         },
         {
-          name: '🕒 마지막 업데이트',
-          value: '2025-10-30 14:30 (KST)',
+          name: '마지막 업데이트',
+          value: '2025-11-04 14:30 (KST)',
           inline: true,
-        },
-        {
-          name: '💾 서버 연결',
-          value: 'PostgreSQL / AWS EC2 / Discord API 연동 완료',
         }
       )
       .setFooter({
@@ -51,36 +68,41 @@ module.exports = {
       })
       .setTimestamp();
 
-    const row1 = new ActionRowBuilder().addComponents(
-      // new ButtonBuilder()
-      //   .setCustomId('raid_manage')
-      //   .setLabel('🗓️ 레이드 관리')
-      //   .setStyle(ButtonStyle.Primary),
+    // 첫 번째 줄 (일반 사용자용)
+    const rowUser = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('button_guest_reserve')
         .setLabel('📋 손님 예약/조회')
         .setStyle(ButtonStyle.Primary),
+
       new ButtonBuilder()
         .setCustomId('button_guest_status')
         .setLabel('✏️ 예약 수정/삭제')
         .setStyle(ButtonStyle.Danger),
+
+      new ButtonBuilder()
+        .setLabel('🤖 무영이 사용하기')
+        .setStyle(ButtonStyle.Link)
+        .setURL(
+          `https://discord.com/oauth2/authorize?client_id=1394227164144074862&permissions=8&scope=bot&redirect_uri=${INVITE_REDIRECT_URI}&response_type=code`
+        )
+    );
+    // 두 번째 줄 (관리자용)
+    const rowAdmin = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('button_create_guest_status_channel')
+        .setLabel('🪪 현황 채널 생성')
+        .setStyle(ButtonStyle.Secondary),
+
       new ButtonBuilder()
         .setCustomId('set_amount')
         .setLabel('💰 먹자 금액 설정')
-        .setStyle(ButtonStyle.Success),
-      new ButtonBuilder()
-        .setLabel('🤖 무영이 사용하기')
-        .setStyle(ButtonStyle.Link) // ✅ URL 버튼은 Link 스타일로만 가능
-        .setURL(
-          `https://discord.com/oauth2/authorize?client_id=1394227164144074862&permissions=274877921280&scope=bot&redirect_uri=${INVITE_REDIRECT_URI}&response_type=code`
-        )
+        .setStyle(ButtonStyle.Secondary)
     );
 
-    const sent = await message.channel.send({
+    await message.channel.send({
       embeds: [embed],
-      components: [row1],
+      components: [rowUser, rowAdmin],
     });
-
-    // sent.id 를 저장해두면 나중에 이 메시지를 수정하거나 복구 가능
   },
 };

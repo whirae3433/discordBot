@@ -5,12 +5,13 @@ const buttonHandlers = {
   button_guest_reserve: require('./buttons/button_guest_reserve'),
   button_guest_status: require('./buttons/button_guest_status'),
   set_amount: require('./buttons/set_amount'),
+  button_create_guest_status_channel: require('./buttons/button_create_guest_status_channel'),
 };
 
 const selectHandlers = {
   select_guest_reserve: require('./selects/select_guest_reserve'),
   select_edit_guest: require('./selects/select_edit_guest'),
-  select_delete_guest: require('./selects/select_delete_guest')
+  select_delete_guest: require('./selects/select_delete_guest'),
 };
 
 const modalHandlers = {

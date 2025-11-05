@@ -1,4 +1,7 @@
 const { MessageFlags } = require('discord-api-types/v10');
+const {
+  updateGuestStatusChannel,
+} = require('../../pg/updateGuestStatusChannel');
 const pool = require('../../pg/db');
 
 module.exports = async (interaction) => {
@@ -27,17 +30,19 @@ module.exports = async (interaction) => {
     interaction.fields.getTextInputValue('discount')
   );
 
-  // 새 ID / RAID_ID 생성
-  const newId = `${date}_${rank}`;
-  const newRaidId = `${date}_${discordId}`;
-
   try {
     // 유효성 검사
     if (!date || isNaN(rank) || rank < 1 || rank > 3) {
-      return interaction.reply({
+      await interaction.reply({
         content: '❌ 날짜 형식 또는 순위 입력이 잘못되었습니다.',
         flags: MessageFlags.Ephemeral,
       });
+      setTimeout(async () => {
+        try {
+          await interaction.deleteReply();
+        } catch {}
+      }, 5000);
+      return;
     }
 
     // 기본가 가져오기
@@ -46,10 +51,16 @@ module.exports = async (interaction) => {
       [serverId, rank]
     );
     if (baseRes.rowCount === 0) {
-      return interaction.reply({
+      await interaction.reply({
         content: '❌ 해당 순위의 기본 금액이 설정되어 있지 않습니다.',
         flags: MessageFlags.Ephemeral,
       });
+      setTimeout(async () => {
+        try {
+          await interaction.deleteReply();
+        } catch {}
+      }, 5000);
+      return;
     }
 
     const basePrice = parseIntSafe(baseRes.rows[0].amount);
@@ -64,24 +75,43 @@ module.exports = async (interaction) => {
     } else if (depositRaw === '1억') {
       deposit = 100000000;
     } else {
-      return interaction.reply({
+      await interaction.reply({
         content: '❌ 예약금은 "완납", "없음", "1억" 중 하나만 입력 가능합니다.',
         flags: MessageFlags.Ephemeral,
       });
+      setTimeout(async () => {
+        try {
+          await interaction.deleteReply();
+        } catch {}
+      }, 5000);
+      return;
     }
+
     deposit = Math.min(deposit, totalPrice);
     const balance = Math.max(totalPrice - deposit, 0);
 
+    const newId = `${date}_${rank}`;
+
     // 중복 확인 (id 기준)
     const conflictCheck = await pool.query(
-      `SELECT 1 FROM guest_list WHERE server_id = $1 AND id = $2 AND id != $3`,
+      `SELECT 1 
+        FROM guest_list 
+        WHERE server_id = $1 
+        AND id = $2 
+        AND id != $3`,
       [serverId, newId, oldId]
     );
     if (conflictCheck.rowCount > 0) {
-      return interaction.reply({
+      await interaction.reply({
         content: `❌ ${date}의 ${rank}순위는 이미 예약되어 있습니다.`,
         flags: MessageFlags.Ephemeral,
       });
+      setTimeout(async () => {
+        try {
+          await interaction.deleteReply();
+        } catch {}
+      }, 5000);
+      return;
     }
 
     // DB 업데이트
@@ -89,44 +119,54 @@ module.exports = async (interaction) => {
       UPDATE guest_list
       SET
         id = $1,
-        raid_id = $2,
+        member_id = $2,
         guest_name = $3,
         rank = $4,
         discount = $5,   
         total_price = $6,
         deposit = $7,
-        balance = $8
-      WHERE server_id = $9 AND id = $10
-      RETURNING guest_name, total_price, deposit, balance, id, raid_id, rank, discount;
+        balance = $8,
+        date = $9
+      WHERE server_id = $10 AND id = $11
+      RETURNING guest_name, total_price, deposit, balance, id, member_id, rank, discount, date, id;
     `;
     const values = [
       newId,
-      newRaidId,
+      discordId,
       guestName,
       rank,
       discount,
       totalPrice,
       deposit,
       balance,
+      date,
       serverId,
       oldId,
     ];
 
     const res = await pool.query(updateQuery, values);
     if (res.rowCount === 0) {
-      return interaction.reply({
+      await interaction.reply({
         content: '❌ 수정 대상 손님을 찾을 수 없습니다.',
         flags: MessageFlags.Ephemeral,
       });
+      setTimeout(async () => {
+        try {
+          await interaction.deleteReply();
+        } catch {}
+      }, 5000);
+      return;
     }
 
     // 성공 응답
     const g = res.rows[0];
-    const dateStr = g.raid_id.split('_')[0];
+    const dateStr = g.date;
 
     const format = (n) => n.toLocaleString();
 
-    return interaction.reply({
+    updateGuestStatusChannel(interaction.client, interaction.guildId, date);
+
+    await interaction.reply({
       content: [
         `✅ **예약 수정 완료!**`,
         '',
@@ -140,6 +180,11 @@ module.exports = async (interaction) => {
       ].join('\n'),
       flags: MessageFlags.Ephemeral,
     });
+    setTimeout(async () => {
+      try {
+        await interaction.deleteReply();
+      } catch {}
+    }, 5000);
   } catch (err) {
     console.error('[예약 수정 오류]', err);
     if (!interaction.replied) {
@@ -147,6 +192,11 @@ module.exports = async (interaction) => {
         content: '❌ 수정 중 오류가 발생했습니다.',
         flags: MessageFlags.Ephemeral,
       });
+      setTimeout(async () => {
+        try {
+          await interaction.deleteReply();
+        } catch {}
+      }, 5000);
     }
   }
 };

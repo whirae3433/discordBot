@@ -1,8 +1,4 @@
-const {
-  EmbedBuilder,
-  ActionRowBuilder,
-  StringSelectMenuBuilder,
-} = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const { getGuestListByDate } = require('../pg/selectGuestList');
 
 /** 입금 상태 포맷 */
@@ -16,28 +12,33 @@ function formatDepositStatus(guest) {
 /** 손님 현황 Embed + SelectMenus 생성 */
 async function buildGuestStatusEmbed(interaction, serverId) {
   const grouped = await getGuestListByDate(serverId);
+  if (!grouped || Object.keys(grouped).length === 0) {
+    const emptyEmbed = new EmbedBuilder()
+      .setColor(0xff0000)
+      .setTitle('❌ 손님 데이터 없음')
+      .setDescription('등록된 손님이 없습니다.');
+    return [emptyEmbed];
+  }
 
-  if (!grouped || Object.keys(grouped).length === 0) return null;
-
-  const embed = new EmbedBuilder()
-    .setTitle('📋 손님 예약 현황')
-    .setColor(0x00ae86);
-
+  const embeds = [];
   const days = ['일', '월', '화', '수', '목', '금', '토'];
 
   for (const [date, guests] of Object.entries(grouped)) {
     const d = new Date(date);
     const dayName = days[d.getDay()] || '';
-    embed.addFields({ name: `🗓️ ${date} (${dayName})`, value: '' });
+
+    // 날짜별로 새로운 Embed 생성
+    const embed = new EmbedBuilder()
+      .setColor(0x00ae86)
+      .setTitle(`🗓️ ${date} (${dayName})`);
 
     for (const g of guests) {
       const emoji = g.rank === 1 ? '🥇' : g.rank === 2 ? '🥈' : '🥉';
       const status = formatDepositStatus(g);
 
-      // 예약 입력자 닉네임 조회
       let reserverName = '';
       try {
-        const discordId = g.raid_id.split('_')[1];
+        const discordId = g.member_id
         const member = await interaction.guild.members.fetch(discordId);
         reserverName = member?.nickname || member?.user?.username || 'Unknown';
       } catch {
@@ -55,8 +56,10 @@ async function buildGuestStatusEmbed(interaction, serverId) {
       );
     }
 
-    embed.addFields({ name: '\u200B', value: '' });
+    embeds.push(embed);
   }
-  return embed;
+
+  return embeds;
 }
+
 module.exports = { buildGuestStatusEmbed };
