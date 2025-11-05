@@ -20,10 +20,20 @@ module.exports = async (interaction) => {
     );
 
     if (adminCheck.rowCount === 0) {
-      return interaction.reply({
+      await interaction.reply({
         content: '⚠️ 관리자 전용 버튼입니다.',
         flags: MessageFlags.Ephemeral,
       });
+      // 5초 뒤 메시지 삭제
+      setTimeout(async () => {
+        try {
+          await interaction.deleteReply();
+        } catch (err) {
+          console.error('[메시지 삭제 실패]', err);
+        }
+      }, 5000);
+
+      return;
     }
 
     // 1. 현재 서버의 순위별 금액 가져오기
@@ -66,5 +76,13 @@ module.exports = async (interaction) => {
       content: '⚠️ 모달 표시 중 오류가 발생했습니다.',
       flags: MessageFlags.Ephemeral,
     });
+    // 5초 뒤 메시지 삭제
+    setTimeout(async () => {
+      try {
+        await interaction.deleteReply();
+      } catch (err) {
+        console.error('[메시지 삭제 실패]', err);
+      }
+    }, 5000);
   }
 };
