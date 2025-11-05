@@ -40,18 +40,33 @@ router.get('/callback', async (req, res) => {
       console.log('identify 스코프 없음 → 초대한 유저 ID 알 수 없음');
     }
 
-    // 봇이 들어간 서버 ID 조회 (guild_id는 code 교환으로는 안 오므로 guildCreate에서 별도 처리)
-    console.log('봇 초대 완료 콜백 실행됨');
-
-    // DB 기록 (identify 스코프가 있다면)
-    if (userId && guild_id) {
-      await pool.query(
-        `INSERT INTO bot_admins (server_id, discord_id, is_main_admin)
-         VALUES ($1, $2, TRUE)
-         ON CONFLICT DO NOTHING`,
-        [guild_id, userId]
-      );
+    if (!userId || !guild_id) {
+      console.log('userId 또는 guild_id 누락 → DB 등록 생략');
+      return res.redirect(`${BASE_URL}/invite-error`);
     }
+
+    // 이미 해당 서버에 main_admin이 존재하는지 확인
+    const existing = await pool.query(
+      `SELECT discord_id FROM bot_admins WHERE server_id = $1 AND is_main_admin = TRUE`,
+      [guild_id]
+    );
+
+    if (existing.rowCount > 0) {
+      console.log(`[무영봇 초대] ${guild_id} 서버는 이미 메인 관리자 등록됨`);
+      return res.redirect(`${BASE_URL}/invite-already-exists`);
+    }
+
+    // 첫 등록이면 main_admin = TRUE로 저장
+    await pool.query(
+      `INSERT INTO bot_admins (server_id, discord_id, is_main_admin)
+       VALUES ($1, $2, TRUE)
+       ON CONFLICT DO NOTHING`,
+      [guild_id, userId]
+    );
+
+    console.log(
+      `[무영봇 초대] ${guild_id} 서버의 첫 메인 관리자 등록 완료 (${userId})`
+    );
 
     // 완료 페이지로 이동
     res.redirect(`${BASE_URL}/invite-success`);
