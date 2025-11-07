@@ -60,7 +60,7 @@ module.exports = {
         { name: '\u200B', value: '\u200B', inline: true },
         {
           name: '🛠️ 관리자 전용 기능',
-          value: ['• 현황 채널 생성', '• 먹자 금액 설정'].join('\n'),
+          value: ['• 현황 채널 생성', '• 손님 금액 설정'].join('\n'),
           inline: true,
         }
       )
@@ -113,7 +113,12 @@ module.exports = {
 
       new ButtonBuilder()
         .setCustomId('set_amount')
-        .setLabel('💰 먹자 금액 설정')
+        .setLabel('💰 손님 금액 설정')
+        .setStyle(ButtonStyle.Secondary),
+
+      new ButtonBuilder()
+        .setCustomId('button_set_incentive')
+        .setLabel('💵 인센 금액 설정')
         .setStyle(ButtonStyle.Secondary)
     );
 

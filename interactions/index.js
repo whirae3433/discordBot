@@ -4,8 +4,9 @@ const buttonHandlers = {
   member_list: require('./buttons/member_list'),
   button_guest_reserve: require('./buttons/button_guest_reserve'),
   button_guest_status: require('./buttons/button_guest_status'),
-  set_amount: require('./buttons/set_amount'),
   button_create_guest_status_channel: require('./buttons/button_create_guest_status_channel'),
+  set_amount: require('./buttons/set_amount'),
+  button_set_incentive: require('./buttons/button_set_incentive'),
 };
 
 const selectHandlers = {
@@ -21,13 +22,27 @@ const modalHandlers = {
   modal_set_amount: require('./modals/modal_set_amount'),
   modal_edit_guest: require('./modals/modal_edit_guest'),
   modal_delete_guest: require('./modals/modal_delete_guest'),
+  modal_add_incentive: require('./modals/modal_add_incentive'),
 };
 
 module.exports = async (interaction) => {
   try {
     if (interaction.isButton()) {
-      const handler = buttonHandlers[interaction.customId];
+      const id = interaction.customId;
+      const handler = buttonHandlers[id];
       if (handler) return handler(interaction);
+
+      if (
+        id.startsWith('btn_delete_incentive_confirm_') ||
+        id === 'btn_delete_incentive_cancel'
+      )
+        return require('./buttons/btn_delete_incentive_confirm')(interaction);
+
+      if (id.startsWith('btn_edit_incentive_'))
+        return require('./buttons/btn_edit_incentive')(interaction);
+
+      if (id.startsWith('btn_delete_incentive_'))
+        return require('./buttons/btn_delete_incentive')(interaction);
     }
 
     if (interaction.isStringSelectMenu()) {
