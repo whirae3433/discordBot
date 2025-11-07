@@ -49,7 +49,7 @@ async function buildGuestStatusEmbed(interaction, serverId) {
         { name: '', value: `${emoji} ${g.guest_name}`, inline: true },
         {
           name: '',
-          value: `💰 ${g.total_price.toLocaleString()}`,
+          value: `💰 ${g.total_price.toLocaleString()} 메소`,
           inline: true,
         },
         { name: '', value: `${status} (${reserverName})`, inline: true }
