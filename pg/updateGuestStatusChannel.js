@@ -13,11 +13,14 @@ async function updateGuestStatusChannel(client, serverId, targetDate) {
     const today = nowKST.format('YYYY-MM-DD');
 
     // targetDate가 오늘이 아닐 경우 (서버-스케줄러 오차 방지)
-    if (targetDate && targetDate !== today) {
-      console.log(
-        `[손님 현황] ${targetDate}는 오늘(${today})이 아니므로 갱신 생략`
-      );
-      return;
+    if (targetDate) {
+      const target = dayjs(targetDate).tz('Asia/Seoul').format('YYYY-MM-DD');
+      if (target !== today) {
+        console.log(
+          `[손님 현황] ${targetDate}는 오늘(${today})이 아니므로 갱신 생략`
+        );
+        return;
+      }
     }
 
     const guild = await client.guilds.fetch(serverId);
@@ -49,7 +52,11 @@ async function updateGuestStatusChannel(client, serverId, targetDate) {
     const embeds = await buildGuestStatusEmbed({ guild }, serverId);
 
     // ✅ 오늘 날짜 embed만 추출
-    const todayEmbed = embeds.find((e) => e.data.title?.includes(today));
+    const todayEmbed = embeds.find((e) => {
+      const t = e.data.title || '';
+      const d = e.data.description || '';
+      return t.includes(today) || d.includes(today);
+    });
     if (!todayEmbed) {
       console.log(`[손님 현황] ${today} 날짜에 해당하는 데이터 없음`);
       return;
@@ -59,7 +66,11 @@ async function updateGuestStatusChannel(client, serverId, targetDate) {
     const msgs = await channel.messages.fetch({ limit: 50 }).catch(() => null);
     if (msgs && msgs.size > 0) {
       const todayMsgs = msgs.filter((m) =>
-        m.embeds.some((e) => e.title?.includes(today))
+        m.embeds.some((e) => {
+          const t = e.title || '';
+          const d = e.description || '';
+          return t.includes(today) || d.includes(today);
+        })
       );
       for (const m of todayMsgs.values()) {
         await m.delete().catch(() => {});

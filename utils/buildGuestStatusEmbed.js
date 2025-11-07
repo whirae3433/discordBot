@@ -4,8 +4,8 @@ const { getGuestListByDate } = require('../pg/selectGuestList');
 /** 입금 상태 포맷 */
 function formatDepositStatus(guest) {
   if (guest.deposit >= guest.total_price) return '❤️ 완납';
-  if (guest.deposit === 0) return '❌ 없음';
-  if (guest.deposit === 100000000) return '💸 1억';
+  if (guest.deposit === 0) return '❌ 출발전납';
+  if (guest.deposit === 100000000) return '✅ 1억';
   return `💸 ${guest.deposit.toLocaleString()}`;
 }
 
@@ -30,7 +30,7 @@ async function buildGuestStatusEmbed(interaction, serverId) {
     // 날짜별로 새로운 Embed 생성
     const embed = new EmbedBuilder()
       .setColor(0x00ae86)
-      .setTitle(`🗓️ ${date} (${dayName})`);
+      .setDescription(`🗓️ ${date} (${dayName})`);
 
     for (const g of guests) {
       const emoji = g.rank === 1 ? '🥇' : g.rank === 2 ? '🥈' : '🥉';
@@ -52,7 +52,7 @@ async function buildGuestStatusEmbed(interaction, serverId) {
           value: `💰 ${g.total_price.toLocaleString()}`,
           inline: true,
         },
-        { name: '', value: `${status} - (${reserverName})`, inline: true }
+        { name: '', value: `${status} (${reserverName})`, inline: true }
       );
     }
 
