@@ -38,9 +38,13 @@ async function buildGuestStatusEmbed(interaction, serverId) {
 
       let reserverName = '';
       try {
-        const discordId = g.member_id
+        const discordId = g.member_id;
         const member = await interaction.guild.members.fetch(discordId);
-        reserverName = member?.nickname || member?.user?.username || 'Unknown';
+        reserverName =
+          member?.nickname ||
+          member?.user?.globalName ||
+          member?.user?.username ||
+          'Unknown';
       } catch {
         reserverName = 'Unknown';
       }
