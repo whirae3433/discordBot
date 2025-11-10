@@ -7,6 +7,7 @@ const buttonHandlers = {
   button_create_guest_status_channel: require('./buttons/button_create_guest_status_channel'),
   set_amount: require('./buttons/set_amount'),
   button_set_incentive: require('./buttons/button_set_incentive'),
+  button_profile_register: require('./buttons/button_profile_register'),
 };
 
 const selectHandlers = {

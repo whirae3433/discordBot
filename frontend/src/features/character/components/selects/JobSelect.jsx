@@ -16,6 +16,7 @@ const MAIN_JOBS = [
   '캡틴',
   '에반',
   '아란',
+  '듀블',
 ];
 
 export default function JobSelect({ value, onChange }) {

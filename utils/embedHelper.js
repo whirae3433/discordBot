@@ -13,7 +13,7 @@ function createRegisterEmbed(serverId, discordId) {
   return new EmbedBuilder()
     .setTitle('무영봇 프로필 등록')
     .setDescription(
-      `프로필을 등록하고 싶어?\n[📝 프로필 등록하기](${getProfileUrl(
+      `프로필을 등록하고 싶어?\n[📝 프로필 등록/수정](${getProfileUrl(
         serverId,
         discordId
       )})\n\u200B`
@@ -37,12 +37,12 @@ async function createProfileEmbed(profile, serverId, extraProfiles = []) {
 
   const embed = new EmbedBuilder()
     .setTitle(`${profile.ign}님의 프로필`)
-    .setDescription(
-      `[📝 프로필 확인/수정하기](${getProfileUrl(
-        serverId,
-        profile.discordId
-      )})\n\u200B`
-    )
+    // .setDescription(
+    //   `[📝 프로필 확인/수정하기](${getProfileUrl(
+    //     serverId,
+    //     profile.discordId
+    //   )})\n\u200B`
+    // )
     // .setThumbnail('attachment://thumbnail.png')
     .setColor(color)
     .setFooter({ text: `업데이트 : ${daysAgoText}` });
@@ -74,7 +74,7 @@ async function createProfileEmbed(profile, serverId, extraProfiles = []) {
   }
 
   // return { embeds: [embed], files: [attachment] };
-  return { embeds: [embed]};
+  return { embeds: [embed] };
 }
 
 module.exports = { createRegisterEmbed, createProfileEmbed };

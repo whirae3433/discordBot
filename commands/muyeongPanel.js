@@ -53,7 +53,7 @@ module.exports = {
           value: [
             '• 손님 예약/조회',
             '• 예약 수정/삭제',
-            '• 무영이 사용하기',
+            '• 프로필 등록/조회',
           ].join('\n'),
           inline: true,
         },
@@ -77,15 +77,14 @@ module.exports = {
         },
         {
           name: '마지막 업데이트',
-          value: '2025-11-04 14:30 (KST)',
+          value: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
           inline: true,
         }
       )
       .setFooter({
         text: '무영봇 v1.0.0 | Powered by Discord.js',
         iconURL: message.client.user.displayAvatarURL(),
-      })
-      .setTimestamp();
+      });
 
     // 첫 번째 줄 (일반 사용자용)
     const rowUser = new ActionRowBuilder().addComponents(
@@ -99,10 +98,10 @@ module.exports = {
         .setLabel('✏️ 예약 수정/삭제')
         .setStyle(ButtonStyle.Danger),
 
-      new ButtonBuilder()
-        .setLabel('🤖 무영이 사용하기')
-        .setStyle(ButtonStyle.Link)
-        .setURL(inviteUrl)
+      new ButtonBuilder() //
+        .setCustomId('button_profile_register')
+        .setLabel('👤 프로필 등록/조회')
+        .setStyle(ButtonStyle.Success)
     );
     // 두 번째 줄 (관리자용)
     const rowAdmin = new ActionRowBuilder().addComponents(
@@ -121,10 +120,15 @@ module.exports = {
         .setLabel('💵 인센 금액 설정')
         .setStyle(ButtonStyle.Secondary)
     );
-
+    const rowPublic = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel('🤖 내 채널에 추가')
+        .setStyle(ButtonStyle.Link)
+        .setURL(inviteUrl)
+    );
     await message.channel.send({
       embeds: [embed],
-      components: [rowUser, rowAdmin],
+      components: [rowUser, rowAdmin, rowPublic],
     });
   },
 };

@@ -1,11 +1,7 @@
 require('dotenv').config();
 const { getProfilesByNickname } = require('../../utils/getProfile');
 const parseArgs = require('../../utils/parseArgs');
-const {
-  createRegisterEmbed,
-  createProfileEmbed,
-} = require('../../utils/embedHelper');
-const { clearCache } = require('../../utils/profileCache');
+const { createProfileEmbed } = require('../../utils/embedHelper');
 
 module.exports = {
   name: '!정보',
@@ -13,18 +9,13 @@ module.exports = {
   execute: async (message, args) => {
     const serverId = message.guild.id;
 
-    // 캐시 초기화 명령 처리
-    if (args[0] === '업데이트') {
-      clearCache(serverId);
-      return message.reply(
-        '정보를 업데이트 했어. 다음부터 최신 프로필을 불러올게!'
-      );
-    }
-
     // 닉네임 없는 경우
     if (!args.length) {
-      const embed = createRegisterEmbed(serverId, message.author.id);
-      return message.channel.send({ embeds: [embed] });
+      return message.reply({
+        content:
+          '❗ `!정보 <닉네임>` 형태로 입력해줘!\n' +
+          '프로필 등록이나 수정은 이제 버튼을 통해서만 가능해.',
+      });
     }
 
     // 닉네임 파싱
@@ -40,8 +31,9 @@ module.exports = {
     // 프로필 조회
     const profiles = await getProfilesByNickname(message, nickname);
     if (!profiles.length) {
-      const embed = createRegisterEmbed(serverId, message.author.id);
-      return message.channel.send({ embeds: [embed] });
+      return message.reply(
+        `❌ '${nickname}'(으)로 등록된 프로필을 찾지 못했어.`
+      );
     }
 
     // 본계정 / 부계정만 필터링
