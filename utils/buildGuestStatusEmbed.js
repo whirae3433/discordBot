@@ -15,8 +15,8 @@ async function buildGuestStatusEmbed(interaction, serverId) {
   if (!grouped || Object.keys(grouped).length === 0) {
     const emptyEmbed = new EmbedBuilder()
       .setColor(0xff0000)
-      .setTitle('❌ 손님 데이터 없음')
-      .setDescription('등록된 손님이 없습니다.');
+      .setTitle('❌ 손님 정보가 없습니다.')
+      .setDescription('새로운 예약을 진행해 주세요.');
     return [emptyEmbed];
   }
 

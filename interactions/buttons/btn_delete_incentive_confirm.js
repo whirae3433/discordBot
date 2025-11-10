@@ -1,5 +1,6 @@
 const { MessageFlags } = require('discord-api-types/v10');
 const pool = require('../../pg/db');
+const { deleteAfter } = require('../../utils/deleteAfter');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
@@ -15,13 +16,7 @@ module.exports = async (interaction) => {
       flags: MessageFlags.Ephemeral,
     });
 
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch {}
-    }, 5000);
-
-    return;
+    return deleteAfter(interaction, 3000);
   }
 
   const incentiveId = interaction.customId.slice(prefix.length);
@@ -46,11 +41,7 @@ module.exports = async (interaction) => {
         flags: MessageFlags.Ephemeral,
       });
 
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch {}
-    }, 5000);
+    deleteAfter(interaction, 3000)
   } catch (err) {
     console.error('[인센 삭제 오류]', err);
     await interaction.reply({
@@ -59,10 +50,6 @@ module.exports = async (interaction) => {
     });
 
     // 오류 메시지도 자동 삭제
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch {}
-    }, 5000);
+    deleteAfter(interaction, 3000);
   }
 };

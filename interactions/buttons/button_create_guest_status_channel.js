@@ -4,6 +4,7 @@ const {
   MessageFlags,
 } = require('discord.js');
 const pool = require('../../pg/db');
+const { deleteAfter } = require('../../utils/deleteAfter');
 
 module.exports = async (interaction) => {
   const guild = interaction.guild;
@@ -23,12 +24,7 @@ module.exports = async (interaction) => {
         content: '⚠️ 관리자 전용 버튼입니다.',
         flags: MessageFlags.Ephemeral,
       });
-      setTimeout(async () => {
-        try {
-          await interaction.deleteReply();
-        } catch {}
-      }, 5000);
-      return;
+      return deleteAfter(interaction, 7000);
     }
 
     // 이미 존재하는 채널 찾기
@@ -108,21 +104,13 @@ module.exports = async (interaction) => {
         flags: MessageFlags.Ephemeral,
       });
     }
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch {}
-    }, 5000);
+    deleteAfter(interaction, 3000);
   } catch (error) {
     console.error('[손님 현황 채널 생성 오류]', error);
     await interaction.reply({
       content: '⚠️ 채널 생성 중 오류가 발생했습니다.',
       flags: MessageFlags.Ephemeral,
     });
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch {}
-    }, 5000);
+    deleteAfter(interaction, 3000);
   }
 };

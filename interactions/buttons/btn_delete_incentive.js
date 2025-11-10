@@ -1,5 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { MessageFlags } = require('discord-api-types/v10');
+const { deleteAfter } = require('../../utils/deleteAfter');
 
 module.exports = async (interaction) => {
   // customId: btn_delete_incentive_<id>
@@ -38,22 +39,13 @@ module.exports = async (interaction) => {
   });
 
   collector.on('collect', async (i) => {
-    try {
-      // 버튼 클릭 시 즉시 메시지 삭제
-      await interaction.deleteReply().catch(() => {});
-      collector.stop('clicked');
-    } catch (err) {
-      console.error('[버튼 클릭 후 삭제 실패]', err);
-    }
+    deleteAfter(interaction, 0); // ✅ 즉시 삭제
+    collector.stop('clicked');
   });
 
   collector.on('end', async (collected, reason) => {
     if (reason !== 'clicked') {
-      try {
-        await interaction.deleteReply().catch(() => {});
-      } catch (err) {
-        console.error('[자동삭제 실패]', err.message);
-      }
+      deleteAfter(interaction, 0); // 시간 종료 시 즉시 삭제
     }
   });
 };

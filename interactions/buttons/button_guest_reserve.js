@@ -2,6 +2,7 @@ const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { MessageFlags } = require('discord-api-types/v10');
 const pool = require('../../pg/db');
 const { buildGuestStatusEmbed } = require('../../utils/buildGuestStatusEmbed');
+const { deleteAfter } = require('../../utils/deleteAfter');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guildId;
@@ -57,14 +58,8 @@ module.exports = async (interaction) => {
       flags: MessageFlags.Ephemeral,
     });
 
-    // 5초 후 자동 삭제 (아무 선택도 안 하면)
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch (err) {
-        // 이미 모달 열거나 선택한 경우엔 삭제 실패 무시
-      }
-    }, 5000);
+    // 7초 후 자동 삭제 (아무 선택도 안 하면)
+    deleteAfter(interaction, 7000);
   } catch (err) {
     console.error('[guest_reserve 버튼 오류]', err);
 
@@ -72,10 +67,6 @@ module.exports = async (interaction) => {
       content: '❌ 예약 정보를 불러오는 중 오류가 발생했습니다.',
       flags: MessageFlags.Ephemeral,
     });
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch {}
-    }, 5000);
+    deleteAfter(interaction, 3000);
   }
 };

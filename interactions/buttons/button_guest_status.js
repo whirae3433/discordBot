@@ -2,6 +2,7 @@ const { MessageFlags } = require('discord-api-types/v10');
 const { buildGuestStatusEmbed } = require('../../utils/buildGuestStatusEmbed');
 const { getGuestListByDate } = require('../../pg/selectGuestList');
 const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { deleteAfter } = require('../../utils/deleteAfter');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guildId;
@@ -9,11 +10,14 @@ module.exports = async (interaction) => {
   try {
     // 손님 목록 가져오기
     const grouped = await getGuestListByDate(serverId);
+
     if (!grouped || Object.keys(grouped).length === 0) {
-      return interaction.reply({
+      await interaction.reply({
         content: '❌ 등록된 손님이 없습니다.',
         flags: MessageFlags.Ephemeral,
       });
+      deleteAfter(interaction, 3000);
+      return;
     }
 
     // Embed 생성
@@ -50,25 +54,16 @@ module.exports = async (interaction) => {
       flags: MessageFlags.Ephemeral,
     });
 
-    // 5초 후 자동 삭제 (선택 안 했을 경우)
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch (err) {
-        // 이미 선택해서 모달 열었으면 무시
-      }
-    }, 5000);
+    // 선택 안 하면 7초 후 자동 삭제
+    deleteAfter(interaction, 7000);
   } catch (err) {
     console.error('[손님 현황 에러]', err);
+
     await interaction.reply({
       content: '❌ 손님 정보를 불러오는 중 오류가 발생했습니다.',
       flags: MessageFlags.Ephemeral,
     });
 
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch {}
-    }, 5000);
+    deleteAfter(interaction, 3000);
   }
 };

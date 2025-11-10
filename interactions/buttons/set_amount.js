@@ -6,6 +6,7 @@ const {
 } = require('discord.js');
 const { MessageFlags } = require('discord-api-types/v10');
 const pool = require('../../pg/db');
+const { deleteAfter } = require('../../utils/deleteAfter');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
@@ -25,15 +26,7 @@ module.exports = async (interaction) => {
         flags: MessageFlags.Ephemeral,
       });
       // 5초 뒤 메시지 삭제
-      setTimeout(async () => {
-        try {
-          await interaction.deleteReply();
-        } catch (err) {
-          console.error('[메시지 삭제 실패]', err);
-        }
-      }, 5000);
-
-      return;
+      return deleteAfter(interaction, 7000);
     }
 
     // 1. 현재 서버의 순위별 금액 가져오기
@@ -76,13 +69,7 @@ module.exports = async (interaction) => {
       content: '⚠️ 모달 표시 중 오류가 발생했습니다.',
       flags: MessageFlags.Ephemeral,
     });
-    // 5초 뒤 메시지 삭제
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch (err) {
-        console.error('[메시지 삭제 실패]', err);
-      }
-    }, 5000);
+
+    return deleteAfter(interaction, 7000);
   }
 };
