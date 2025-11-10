@@ -2,6 +2,7 @@ require('dotenv').config();
 const { getProfilesByNickname } = require('../../utils/getProfile');
 const parseArgs = require('../../utils/parseArgs');
 const { createProfileEmbed } = require('../../utils/embedHelper');
+const { deleteAfter } = require('../../utils/deleteAfter');
 
 module.exports = {
   name: '!정보',
@@ -11,11 +12,13 @@ module.exports = {
 
     // 닉네임 없는 경우
     if (!args.length) {
-      return message.reply({
+      const reply = await message.reply({
         content:
           '❗ `!정보 <닉네임>` 형태로 입력해줘!\n' +
           '프로필 등록이나 수정은 이제 버튼을 통해서만 가능해.',
       });
+      deleteAfter(reply, 3000);
+      return;
     }
 
     // 닉네임 파싱
@@ -25,15 +28,21 @@ module.exports = {
 
     // 2글자 미만이면 차단
     if (nickname.trim().length < 2) {
-      return message.reply('닉네임은 최소 2글자 이상 입력해주세요.');
+      const reply = await message.reply(
+        '닉네임은 최소 2글자 이상 입력해주세요.'
+      );
+      deleteAfter(reply, 3000);
+      return;
     }
 
     // 프로필 조회
     const profiles = await getProfilesByNickname(message, nickname);
     if (!profiles.length) {
-      return message.reply(
+      const reply = await message.reply(
         `❌ '${nickname}'(으)로 등록된 프로필을 찾지 못했어.`
       );
+      deleteAfter(reply, 3000);
+      return;
     }
 
     // 본계정 / 부계정만 필터링
