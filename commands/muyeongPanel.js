@@ -122,7 +122,7 @@ module.exports = {
     );
     const rowPublic = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setLabel('🤖 내 채널에 추가')
+        .setLabel('🤖 내 서버에서 사용하기')
         .setStyle(ButtonStyle.Link)
         .setURL(inviteUrl)
     );
