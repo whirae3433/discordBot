@@ -45,6 +45,32 @@ router.get('/callback', async (req, res) => {
       return res.redirect(`${BASE_URL}/invite-error`);
     }
 
+    let serverName = null;
+    try {
+      const guildRes = await axios.get(
+        'https://discord.com/api/users/@me/guilds',
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      const foundGuild = guildRes.data.find((g) => g.id === guild_id);
+      if (foundGuild) {
+        serverName = foundGuild.name;
+        console.log(`[무영봇 초대] 서버 이름: ${serverName}`);
+      }
+    } catch (err) {
+      console.log('guild 스코프 없음 → 서버 이름 가져오기 실패');
+    }
+
+    // servers 테이블에 등록 (이미 존재하면 이름만 갱신)
+    await pool.query(
+      `INSERT INTO servers (server_id, server_name)
+       VALUES ($1, $2)
+       ON CONFLICT (server_id)
+       DO UPDATE SET server_name = EXCLUDED.server_name`,
+      [guild_id, serverName || '(이름 불러오기 실패)']
+    );
+
     // 이미 해당 서버에 main_admin이 존재하는지 확인
     const existing = await pool.query(
       `SELECT discord_id FROM bot_admins WHERE server_id = $1 AND is_main_admin = TRUE`,
