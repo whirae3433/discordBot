@@ -1,4 +1,5 @@
 const { buildGuestStatusEmbed } = require('../utils/buildGuestStatusEmbed');
+const { getLogicalToday } = require('../utils/getLogicalToday');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
@@ -6,23 +7,18 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 const pool = require('../pg/db');
 
-async function updateGuestStatusChannel(client, serverId, targetDate) {
+/**
+ * 손님 현황 메시지를 갱신 (논리적 오늘 기준)
+ * @param {Client} client Discord 클라이언트
+ * @param {string} serverId 서버 ID
+ * @param {object} [options]
+ * @param {number} [options.cutoffMinutes=60] 자정 이후 몇 분까지 전날로 볼지 (기본 60분)
+ */
+
+async function updateGuestStatusChannel(client, serverId, options = {}) {
+  const { cutoffMinutes = 90 } = options;
+  const logicalToday = getLogicalToday(cutoffMinutes);
   try {
-    // 항상 한국 시간 기준
-    const nowKST = dayjs().tz('Asia/Seoul');
-    const today = nowKST.format('YYYY-MM-DD');
-
-    // targetDate가 오늘이 아닐 경우 (서버-스케줄러 오차 방지)
-    if (targetDate) {
-      const target = dayjs(targetDate).tz('Asia/Seoul').format('YYYY-MM-DD');
-      if (target !== today) {
-        console.log(
-          `[손님 현황] ${targetDate}는 오늘(${today})이 아니므로 갱신 생략`
-        );
-        return;
-      }
-    }
-
     const guild = await client.guilds.fetch(serverId);
 
     // 채널 ID 조회
@@ -48,42 +44,55 @@ async function updateGuestStatusChannel(client, serverId, targetDate) {
       return;
     }
 
-    // ✅ Embed 생성 (모든 날짜)
+    // Embed 생성 (모든 날짜)
     const embeds = await buildGuestStatusEmbed({ guild }, serverId);
 
-    // ✅ 오늘 날짜 embed만 추출
-    const todayEmbed = embeds.find((e) => {
+    // 오늘 날짜 embed만 추출
+    const targetEmbed  = embeds.find((e) => {
       const t = e.data.title || '';
       const d = e.data.description || '';
-      return t.includes(today) || d.includes(today);
+      return t.includes(logicalToday) || d.includes(logicalToday);
     });
-    if (!todayEmbed) {
-      console.log(`[손님 현황] ${today} 날짜에 해당하는 데이터 없음`);
+
+    if (!targetEmbed) {
+      console.log(`[손님 현황] ${logicalToday} 날짜에 해당하는 데이터 없음`);
       return;
     }
 
-    // 기존 오늘 날짜 메시지 삭제
+    // 기존 오늘 메시지 삭제
     const msgs = await channel.messages.fetch({ limit: 50 }).catch(() => null);
     if (msgs && msgs.size > 0) {
-      const todayMsgs = msgs.filter((m) =>
+      const targetMsgs  = msgs.filter((m) =>
         m.embeds.some((e) => {
           const t = e.title || '';
           const d = e.description || '';
-          return t.includes(today) || d.includes(today);
+          return t.includes(logicalToday) || d.includes(logicalToday);
         })
       );
-      for (const m of todayMsgs.values()) {
+      for (const m of targetMsgs.values()) {
         await m.delete().catch(() => {});
       }
     }
 
-    // 새 embed 전송
-    await channel.send({ embeds: [todayEmbed] });
+    // 새 embed 전송 (오늘만)
+    await channel.send({ embeds: [targetEmbed] });
 
-    console.log(`[손님 현황] ${guild.name} ${today} 현황 갱신 완료`);
+    console.log(`[손님 현황] ${guild.name} ${logicalToday} 현황 갱신 완료`);
   } catch (err) {
     console.error('[손님 현황 갱신 오류]', err);
   }
 }
 
-module.exports = { updateGuestStatusChannel };
+/**
+ * 안전 버전: 에러 발생해도 봇이 멈추지 않음
+ * (updateGuestStatusChannel 내부 에러를 자체적으로 처리)
+ */
+async function safeUpdateGuestStatusChannel(client, serverId, options = {}) {
+  try {
+    await updateGuestStatusChannel(client, serverId, options);
+  } catch (err) {
+    console.error('[safeUpdateGuestStatusChannel] 오류 무시됨:', err);
+  }
+}
+
+module.exports = { updateGuestStatusChannel, safeUpdateGuestStatusChannel };

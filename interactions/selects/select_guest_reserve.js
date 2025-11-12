@@ -4,6 +4,7 @@ const {
   TextInputStyle,
   ActionRowBuilder,
 } = require('discord.js');
+const { getLogicalToday } = require('../../utils/getLogicalToday');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
@@ -28,16 +29,18 @@ module.exports = async (interaction) => {
       .setCustomId(`guest_input_${rankValue}`) // 모달 식별자 (index.js와 매칭됨)
       .setTitle(`${rankLabel} 손님 예약`);
 
-    // 한국시간 기준 오늘 날짜
-    const todayKST = dayjs().tz('Asia/Seoul').format('YYYY-MM-DD');
+    // 실제 오늘 (시각 기준)
+    const today = dayjs().tz('Asia/Seoul').format('YYYY-MM-DD');
+    // 논리적 오늘 (컷오프 기준)
+    const logicalToday = getLogicalToday(90);
 
     // 1. 날짜
     const dateInput = new TextInputBuilder()
       .setCustomId('guest_date')
-      .setLabel('날짜 ex.(2025-01-01)')
+      .setLabel(`오늘은 (${today}) 입니다.`)
       .setStyle(TextInputStyle.Short)
-      .setRequired(true);
-    dateInput.setValue(todayKST);
+      .setRequired(true)
+      .setValue(logicalToday);
 
     // 2. 손님 이름
     const guestNameInput = new TextInputBuilder()

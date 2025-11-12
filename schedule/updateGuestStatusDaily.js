@@ -12,7 +12,7 @@ module.exports = function startGuestStatusScheduler(client) {
   // 한국시간 새벽 2시 기준으로 실행되게 설정
   const rule = new schedule.RecurrenceRule();
   rule.tz = 'Asia/Seoul'; 
-  rule.hour = 2; 
+  rule.hour = 3; 
   rule.minute = 0; 
 
   schedule.scheduleJob(rule, async () => {
