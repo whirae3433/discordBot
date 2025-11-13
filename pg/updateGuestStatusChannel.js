@@ -33,7 +33,7 @@ async function updateGuestStatusChannel(client, serverId, options = {}) {
     }
 
     // Embed 생성 (모든 날짜)
-    const embeds = await buildGuestStatusEmbed(grouped);
+    const embeds = await buildGuestStatusEmbed(grouped, guild);
 
     // 기존 오늘 메시지 삭제
     const msgs = await channel.messages.fetch({ limit: 50 }).catch(() => null);
