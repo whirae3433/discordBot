@@ -1,51 +1,43 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { MessageFlags } = require('discord-api-types/v10');
-const { deleteAfter } = require('../../utils/deleteAfter');
+const { safeReply } = require('../../utils/safeReply');
+const pool = require('../../pg/db');
 
 module.exports = async (interaction) => {
-  // customId: btn_delete_incentive_<id>
   const prefix = 'btn_delete_incentive_';
-  const incentiveId = interaction.customId.startsWith(prefix)
-    ? interaction.customId.slice(prefix.length)
-    : interaction.customId;
+  const incentiveId = interaction.customId.replace(prefix, '');
+  const serverId = interaction.guild.id;
 
-    
+  try {
+    // DB 삭제
+    const res = await pool.query(
+      `
+      DELETE FROM incentive_reference
+      WHERE server_id = $1 AND id = $2
+      `,
+      [serverId, incentiveId]
+    );
 
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId(`btn_delete_incentive_confirm_${incentiveId}`)
-      .setLabel('삭제하기')
-      .setStyle(ButtonStyle.Danger),
-    new ButtonBuilder()
-      .setCustomId(`btn_delete_incentive_cancel`)
-      .setLabel('취소하기')
-      .setStyle(ButtonStyle.Secondary)
-  );
-
-  // 1. 메시지 전송
-  await interaction.reply({
-    content: `정말 삭제하시겠습니까?`,
-    components: [row],
-    flags: MessageFlags.Ephemeral,
-  });
-
-  // 2. Collector 생성 (7초 제한)
-  const collector = interaction.channel.createMessageComponentCollector({
-    filter: (i) =>
-      i.user.id === interaction.user.id &&
-      (i.customId === `btn_delete_incentive_confirm_${incentiveId}` ||
-        i.customId === 'btn_delete_incentive_cancel'),
-    time: 7000,
-  });
-
-  collector.on('collect', async (i) => {
-    deleteAfter(interaction, 0); // ✅ 즉시 삭제
-    collector.stop('clicked');
-  });
-
-  collector.on('end', async (collected, reason) => {
-    if (reason !== 'clicked') {
-      deleteAfter(interaction, 0); // 시간 종료 시 즉시 삭제
+    if (res.rowCount === 0) {
+      return safeReply(
+        interaction,
+        '❌ 이미 삭제되었거나 존재하지 않는 인센입니다.',
+        {
+          ephemeral: true,
+          deleteAfter: 3000,
+        }
+      );
     }
-  });
+
+    // 성공 메시지
+    return safeReply(interaction, '🗑️ 삭제가 완료되었습니다!', {
+      ephemeral: true,
+      deleteAfter: 2000,
+    });
+  } catch (err) {
+    console.error('[인센 삭제 오류]', err);
+
+    return safeReply(interaction, '❌ 삭제 중 오류가 발생했습니다.', {
+      ephemeral: true,
+      deleteAfter: 3000,
+    });
+  }
 };

@@ -4,6 +4,11 @@ const {
   TextInputStyle,
   ActionRowBuilder,
 } = require('discord.js');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
 const pool = require('../../pg/db');
 
 module.exports = async (interaction) => {
@@ -13,7 +18,7 @@ module.exports = async (interaction) => {
   try {
     // 이전 메시지(Embed + SelectMenu) 삭제
     await interaction.message.delete().catch(() => {});
-    
+
     // 해당 손님 정보 불러오기
     const res = await pool.query(
       `
@@ -32,7 +37,7 @@ module.exports = async (interaction) => {
     }
 
     const g = res.rows[0];
-    const currentDate = g.date
+    const currentDate = g.date;
 
     // 모달 생성
     const modal = new ModalBuilder()
@@ -40,9 +45,10 @@ module.exports = async (interaction) => {
       .setTitle(`✏️ ${g.guest_name} 수정`);
 
     // 날짜
+    const today = dayjs().tz('Asia/Seoul').format('YYYY-MM-DD');
     const dateInput = new TextInputBuilder()
       .setCustomId('date')
-      .setLabel('날짜 예시(2025-01-01)')
+      .setLabel(`오늘은 (${today}) 입니다.`)
       .setStyle(TextInputStyle.Short)
       .setRequired(true)
       .setValue(currentDate);

@@ -32,7 +32,7 @@ module.exports = async (interaction) => {
     // 실제 오늘 (시각 기준)
     const today = dayjs().tz('Asia/Seoul').format('YYYY-MM-DD');
     // 논리적 오늘 (컷오프 기준)
-    const logicalToday = getLogicalToday(90);
+    const logicalToday = getLogicalToday(2*60);
 
     // 1. 날짜
     const dateInput = new TextInputBuilder()

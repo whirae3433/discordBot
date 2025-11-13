@@ -10,7 +10,7 @@ dayjs.extend(timezone);
  * @param {number} [cutoffMinutes=60]  자정 이후 몇 분까지 전날로 간주할지 (기본 2시간)
  * @returns {string} 'YYYY-MM-DD' 형식의 문자열
  */
-function getLogicalToday(cutoffMinutes = 90) {
+function getLogicalToday(cutoffMinutes = 2*60) {
   const now = dayjs().tz('Asia/Seoul');
   const minutes = now.hour() * 60 + now.minute();
   const logical = minutes < cutoffMinutes ? now.subtract(1, 'day') : now;

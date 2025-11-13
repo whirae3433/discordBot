@@ -50,4 +50,21 @@ async function safeReply(interaction, message, options = {}) {
   }
 }
 
-module.exports = { safeReply };
+/**
+ * 이미 reply된 interaction에 대해
+ * 일정 시간 후 deleteReply만 안전하게 실행하는 헬퍼
+ * @param {Interaction} interaction
+ * @param {number} [ms=DEFAULT_DELETE_MS]
+ * @returns {NodeJS.Timeout} setTimeout에서 반환되는 타이머 ID
+ */
+function safeDeleteReply(interaction, ms = DEFAULT_DELETE_MS) {
+  return setTimeout(async () => {
+    try {
+      await interaction.deleteReply();
+    } catch (err) {
+      console.log('[safeDeleteReply] deleteReply 실패 (무시됨):', err.message);
+    }
+  }, ms);
+}
+
+module.exports = { safeReply, safeDeleteReply };

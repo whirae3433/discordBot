@@ -1,6 +1,7 @@
 const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { MessageFlags } = require('discord-api-types/v10');
 const pool = require('../../pg/db');
+const { getGuestListByDate } = require('../../pg/selectGuestList');
 const { buildGuestStatusEmbed } = require('../../utils/buildGuestStatusEmbed');
 const { deleteAfter } = require('../../utils/deleteAfter');
 
@@ -8,8 +9,8 @@ module.exports = async (interaction) => {
   const serverId = interaction.guildId;
 
   try {
-    // 손님 현황 Embed
-    const embeds = await buildGuestStatusEmbed(interaction, serverId);
+    const grouped = await getGuestListByDate(serverId, 'from_today');
+    const embeds = await buildGuestStatusEmbed(grouped, interaction.guild);
 
     // 순위별 금액 조회
     const res = await pool.query(

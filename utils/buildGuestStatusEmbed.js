@@ -1,5 +1,4 @@
 const { EmbedBuilder } = require('discord.js');
-const { getGuestListByDate } = require('../pg/selectGuestList');
 
 /** 입금 상태 포맷 */
 function formatDepositStatus(guest) {
@@ -9,9 +8,12 @@ function formatDepositStatus(guest) {
   return `💸 ${guest.deposit.toLocaleString()}`;
 }
 
-/** 손님 현황 Embed + SelectMenus 생성 */
-async function buildGuestStatusEmbed(interaction, serverId) {
-  const grouped = await getGuestListByDate(serverId);
+/**
+ * Embed 생성 전용 함수 (날짜 필터링 X)
+ * @param {object} grouped - 날짜별 손님 그룹
+ * @param {Guild} guild - Discord guild 객체
+ */
+async function buildGuestStatusEmbed(grouped, guild) {
   if (!grouped || Object.keys(grouped).length === 0) {
     const emptyEmbed = new EmbedBuilder()
       .setColor(0xff0000)
@@ -38,16 +40,13 @@ async function buildGuestStatusEmbed(interaction, serverId) {
 
       let reserverName = '';
       try {
-        const discordId = g.member_id;
-        const member = await interaction.guild.members.fetch(discordId);
+        const member = await guild.members.fetch(g.member_id);
         reserverName =
           member?.nickname ||
           member?.user?.globalName ||
           member?.user?.username ||
           'Unknown';
-      } catch {
-        reserverName = 'Unknown';
-      }
+      } catch {}
 
       embed.addFields(
         { name: '', value: `${emoji} ${g.guest_name}`, inline: true },

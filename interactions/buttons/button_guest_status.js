@@ -9,7 +9,7 @@ module.exports = async (interaction) => {
 
   try {
     // 손님 목록 가져오기
-    const grouped = await getGuestListByDate(serverId);
+    const grouped = await getGuestListByDate(serverId, 'from_today');
 
     if (!grouped || Object.keys(grouped).length === 0) {
       await interaction.reply({
@@ -21,7 +21,7 @@ module.exports = async (interaction) => {
     }
 
     // Embed 생성
-    const embeds = await buildGuestStatusEmbed(interaction, serverId);
+    const embeds = await buildGuestStatusEmbed(grouped, interaction.guild);
 
     // SelectMenus 생성
     const allGuests = Object.entries(grouped).flatMap(([date, guests]) =>

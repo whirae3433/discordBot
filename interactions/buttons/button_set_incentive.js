@@ -1,7 +1,7 @@
 const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { MessageFlags } = require('discord-api-types/v10');
 const pool = require('../../pg/db');
-const { deleteAfter } = require('../../utils/deleteAfter');
+const { safeReply, safeDeleteReply } = require('../../utils/safeReply');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
@@ -34,14 +34,22 @@ module.exports = async (interaction) => {
 
     const row = new ActionRowBuilder().addComponents(select);
 
-    // 여기서 바로 reply
-    await interaction.reply({
-      content: '📋 관리할 인센을 선택하세요.',
-      components: [row],
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeReply(
+      interaction,
+      {
+        content: '📋 관리할 인센을 선택하세요.',
+        components: [row],
+      },
+      {
+        ephemeral: true,
+        deleteAfter: null, // 자동 삭제 없음 (우리가 직접 관리)
+      }
+    );
 
-    // Collector 생성
+    // 🔥 7초 뒤 자동 삭제 타이머
+    const deleteTimer = safeDeleteReply(interaction, 7000);
+
+    // 🔥 Collector: 선택하면 타이머 취소
     const collector = interaction.channel.createMessageComponentCollector({
       filter: (i) =>
         i.user.id === interaction.user.id &&
@@ -49,23 +57,17 @@ module.exports = async (interaction) => {
       time: 7000,
     });
 
-    collector.on('collect', async (i) => {
-      deleteAfter(interaction, 0);
+    collector.on('collect', () => {
+      clearTimeout(deleteTimer); // 선택하면 삭제 타이머 취소
       collector.stop('selected');
-    });
-
-    collector.on('end', async (_, reason) => {
-      if (reason !== 'selected') deleteAfter(interaction, 0);
+      // select 선택 시 update는 다음 파일(select_incentive_manage.js)에서 진행됨
     });
   } catch (err) {
     console.error('[인센 목록 조회 오류]', err.message);
 
-    try {
-      await interaction.reply({
-        content: '❌ 인센 목록을 불러오는 중 오류가 발생했습니다.',
-        flags: MessageFlags.Ephemeral,
-      });
-      deleteAfter(interaction, 3000);
-    } catch {}
+    safeReply(interaction, '❌ 인센 목록을 불러오는 중 오류가 발생했습니다.', {
+      ephemeral: true,
+      deleteAfter: 3000,
+    });
   }
 };

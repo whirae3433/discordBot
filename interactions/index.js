@@ -33,12 +33,6 @@ module.exports = async (interaction) => {
       const handler = buttonHandlers[id];
       if (handler) return handler(interaction);
 
-      if (
-        id.startsWith('btn_delete_incentive_confirm_') ||
-        id === 'btn_delete_incentive_cancel'
-      )
-        return require('./buttons/btn_delete_incentive_confirm')(interaction);
-
       if (id.startsWith('btn_edit_incentive_'))
         return require('./buttons/btn_edit_incentive')(interaction);
 
