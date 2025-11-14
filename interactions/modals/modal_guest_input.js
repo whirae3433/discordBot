@@ -7,6 +7,8 @@ const {
   updateGuestStatusChannel,
 } = require('../../pg/updateGuestStatusChannel');
 
+const { MessageFlags } = require('discord-api-types/v10'); 
+
 const labelMap = {
   rank1: '🥇 1순위',
   rank2: '🥈 2순위',
@@ -30,14 +32,6 @@ module.exports = async (interaction) => {
     ?.trim();
   const discountRaw =
     interaction.fields.getTextInputValue('discount')?.trim() ?? '0';
-
-  // 숫자 파싱 유틸
-  const parseIntSafe = (v, def = 0) => {
-    if (v === null || v === undefined) return def;
-    const str = String(v).replace(/[,]/g, '').trim();
-    const n = parseInt(str, 10);
-    return Number.isFinite(n) && n >= 0 ? n : def;
-  };
 
   const discount = parseIntSafe(discountRaw);
   if (isNaN(discount) || discount < 0) {
