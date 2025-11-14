@@ -22,7 +22,7 @@ module.exports = async (interaction) => {
       [serverId, incentiveId]
     );
 
-    if (rows.length === 0) {
+    if (rows.rowCount === 0) {
       return safeReply(interaction, '❌ 해당 인센을 찾을 수 없습니다.', {
         ephemeral: true,
         deleteAfter: 3000,

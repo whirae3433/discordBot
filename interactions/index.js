@@ -12,8 +12,8 @@ const buttonHandlers = {
 
 const selectHandlers = {
   select_guest_reserve: require('./selects/select_guest_reserve'),
-  select_edit_guest: require('./selects/select_edit_guest'),
-  select_delete_guest: require('./selects/select_delete_guest'),
+  select_guest_edit: require('./selects/select_guest_edit'),
+  select_guest_delete: require('./selects/select_guest_delete'),
 };
 
 const modalHandlers = {
@@ -21,8 +21,8 @@ const modalHandlers = {
   guest_input_rank2: require('./modals/modal_guest_input'),
   guest_input_rank3: require('./modals/modal_guest_input'),
   modal_set_amount: require('./modals/modal_set_amount'),
-  modal_edit_guest: require('./modals/modal_edit_guest'),
-  modal_delete_guest: require('./modals/modal_delete_guest'),
+  modal_edit_guest: require('./modals/modal_guest_edit'),
+  modal_guest_delete: require('./modals/modal_guest_delete'),
   modal_add_incentive: require('./modals/modal_add_incentive'),
 };
 

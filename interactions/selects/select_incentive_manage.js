@@ -16,10 +16,6 @@ module.exports = async (interaction) => {
 
   try {
     if (selected === 'add_new') {
-      try {
-        await interaction.message.delete().catch(() => {});
-      } catch {}
-
       // 모달 띄우기
       const modal = new ModalBuilder()
         .setCustomId('modal_add_incentive')

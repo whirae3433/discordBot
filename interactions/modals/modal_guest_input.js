@@ -1,4 +1,6 @@
-const { MessageFlags } = require('discord-api-types/v10');
+const { safeReply } = require('../../utils/safeReply');
+const { parseIntSafe } = require('../../utils/parseIntSafe');
+
 const { getReferencePrice } = require('../../pg/getReferencePrice');
 const { insertGuestReservation } = require('../../pg/insertGuestReservation');
 const {
@@ -122,7 +124,7 @@ module.exports = async (interaction) => {
       deposit,
       balance,
       serverId,
-      date
+      date,
     });
 
     // ✅ 성공 메시지

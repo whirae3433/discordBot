@@ -40,9 +40,7 @@ async function safeReply(interaction, message, options = {}) {
       setTimeout(async () => {
         try {
           await interaction.deleteReply();
-        } catch (err) {
-          console.log('[safeReply] deleteReply 실패 (무시됨):', err.message);
-        }
+        } catch (err) {}
       }, deleteAfter);
     }
   } catch (err) {

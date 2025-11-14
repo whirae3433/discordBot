@@ -1,23 +1,21 @@
-const { MessageFlags } = require('discord-api-types/v10');
 const { buildGuestStatusEmbed } = require('../../utils/buildGuestStatusEmbed');
 const { getGuestListByDate } = require('../../pg/selectGuestList');
 const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
-const { deleteAfter } = require('../../utils/deleteAfter');
+const { safeReply } = require('../../utils/safeReply');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guildId;
+  const guild = interaction.guild;
 
   try {
     // 손님 목록 가져오기
     const grouped = await getGuestListByDate(serverId, 'from_today');
 
     if (!grouped || Object.keys(grouped).length === 0) {
-      await interaction.reply({
-        content: '❌ 등록된 손님이 없습니다.',
-        flags: MessageFlags.Ephemeral,
+      return safeReply(interaction, '❌ 등록된 손님이 없습니다.', {
+        ephemeral: true,
+        deleteAfter: 3000,
       });
-      deleteAfter(interaction, 3000);
-      return;
     }
 
     // Embed 생성
@@ -33,12 +31,12 @@ module.exports = async (interaction) => {
     );
 
     const editSelect = new StringSelectMenuBuilder()
-      .setCustomId('select_edit_guest')
+      .setCustomId('select_guest_edit')
       .setPlaceholder('✏️ 수정할 손님을 선택하세요')
       .addOptions(allGuests.slice(0, 25));
 
     const cancelSelect = new StringSelectMenuBuilder()
-      .setCustomId('select_delete_guest')
+      .setCustomId('select_guest_delete')
       .setPlaceholder('❌ 취소할 손님을 선택하세요')
       .addOptions(allGuests.slice(0, 25));
 
@@ -47,23 +45,27 @@ module.exports = async (interaction) => {
       new ActionRowBuilder().addComponents(cancelSelect),
     ];
 
-    // 이 버튼을 누른 사람만 볼 수 있게 (Ephemeral)
-    await interaction.reply({
-      embeds,
-      components,
-      flags: MessageFlags.Ephemeral,
-    });
-
-    // 선택 안 하면 7초 후 자동 삭제
-    deleteAfter(interaction, 7000);
+    return safeReply(
+      interaction,
+      {
+        embeds,
+        components,
+      },
+      {
+        ephemeral: true,
+        deleteAfter: 7000,
+      }
+    );
   } catch (err) {
-    console.error('[손님 현황 에러]', err);
+    console.error('[손님 현황 버튼 오류]', err);
 
-    await interaction.reply({
-      content: '❌ 손님 정보를 불러오는 중 오류가 발생했습니다.',
-      flags: MessageFlags.Ephemeral,
-    });
-
-    deleteAfter(interaction, 3000);
+    return safeReply(
+      interaction,
+      '❌ 손님 정보를 불러오는 중 오류가 발생했습니다.',
+      {
+        ephemeral: true,
+        deleteAfter: 3000,
+      }
+    );
   }
 };

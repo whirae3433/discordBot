@@ -1,5 +1,6 @@
 const { MessageFlags } = require('discord-api-types/v10');
 const pool = require('../../pg/db');
+const { safeReply } = require('../../utils/safeReply');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
@@ -15,14 +16,16 @@ module.exports = async (interaction) => {
 
     // 유효성 검사
     if (!name || !rawAmount) {
-      return await interaction.editReply('⚠️ 모든 칸을 입력해주세요.');
+      return safeReply(interaction, '⚠️ 모든 칸을 입력해주세요.', {
+        deleteAfter: 3000,
+      });
     }
 
     const amount = parseInt(rawAmount.replace(/[,]/g, ''), 10);
     if (isNaN(amount) || amount < 0) {
-      return await interaction.editReply(
-        '❌ 금액은 숫자만 입력할 수 있습니다.'
-      );
+      return safeReply(interaction, '❌ 금액은 숫자만 입력할 수 있습니다.', {
+        deleteAfter: 3000,
+      });
     }
 
     // 중복 검사
@@ -34,8 +37,10 @@ module.exports = async (interaction) => {
     );
 
     if (check.rowCount > 0) {
-      return await interaction.editReply(
-        `⚠️ 이미 **${name}** 인센이 존재합니다. 다른 이름을 입력해주세요.`
+      return safeReply(
+        interaction,
+        `⚠️ 이미 **${name}** 인센이 존재합니다. 다른 이름을 입력해주세요.`,
+        { deleteAfter: 3000 }
       );
     }
 
@@ -49,11 +54,16 @@ module.exports = async (interaction) => {
     );
 
     // 성공 메시지
-    await interaction.editReply(
-      `✅ **${name}**이(가) ${amount.toLocaleString()} 메소로 저장되었습니다.`
+    return safeReply(
+      interaction,
+      `✅ **${name}**이(가) ${amount.toLocaleString()} 메소로 저장되었습니다.`,
+      { deleteAfter: 3000 }
     );
   } catch (err) {
     console.error('[인센 추가 저장 오류]', err);
-    await interaction.editReply('❌ 인센 저장 중 오류가 발생했습니다.');
+
+    return safeReply(interaction, '❌ 인센 저장 중 오류가 발생했습니다.', {
+      deleteAfter: 3000,
+    });
   }
 };

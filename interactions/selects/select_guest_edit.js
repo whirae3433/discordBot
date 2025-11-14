@@ -41,7 +41,7 @@ module.exports = async (interaction) => {
 
     // 모달 생성
     const modal = new ModalBuilder()
-      .setCustomId(`modal_edit_guest_${guestId}`)
+      .setCustomId(`modal_guest_edit_${guestId}`)
       .setTitle(`✏️ ${g.guest_name} 수정`);
 
     // 날짜
@@ -102,7 +102,7 @@ module.exports = async (interaction) => {
     // ✅ 모달 띄우기
     await interaction.showModal(modal);
   } catch (err) {
-    console.error('[select_edit_guest 모달 에러]', err);
+    console.error('[select_guest_edit 모달 에러]', err);
     if (!interaction.replied) {
       await interaction.reply({
         content: '❌ 수정 모달을 여는 중 오류가 발생했습니다.',

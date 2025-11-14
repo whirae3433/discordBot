@@ -30,7 +30,7 @@ module.exports = async (interaction) => {
     // 성공 메시지
     return safeReply(interaction, '🗑️ 삭제가 완료되었습니다!', {
       ephemeral: true,
-      deleteAfter: 2000,
+      deleteAfter: 3000,
     });
   } catch (err) {
     console.error('[인센 삭제 오류]', err);

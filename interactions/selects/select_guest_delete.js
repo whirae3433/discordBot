@@ -29,7 +29,7 @@ module.exports = async (interaction) => {
 
     // 모달 생성
     const modal = new ModalBuilder()
-      .setCustomId(`modal_delete_guest_${guestId}`)
+      .setCustomId(`modal_guest_delete_${guestId}`)
       .setTitle('⚠️ 예약 취소 확인');
 
     const confirmInput = new TextInputBuilder()
@@ -44,7 +44,7 @@ module.exports = async (interaction) => {
     // 모달 표시
     await interaction.showModal(modal);
   } catch (err) {
-    console.error('[select_delete_guest 에러]', err);
+    console.error('[select_guest_delete 에러]', err);
     if (!interaction.replied) {
       await interaction.reply({
         content: '❌ 예약 취소 모달을 여는 중 오류가 발생했습니다.',
