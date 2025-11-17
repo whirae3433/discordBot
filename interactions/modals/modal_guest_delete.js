@@ -1,4 +1,5 @@
 const { safeReply } = require('../../utils/safeReply');
+const { buildGuestMessage } = require('./guest.helpers');
 const {
   updateGuestStatusChannel,
 } = require('../../pg/updateGuestStatusChannel');
@@ -45,19 +46,8 @@ module.exports = async (interaction) => {
     }
 
     const g = res.rows[0];
-    const format = (n) => (Number.isFinite(n) ? n.toLocaleString() : '0');
 
-    const msg = [
-      `🗑️ **예약 취소 완료!**`,
-      ``,
-      `🗓️ **${g.date} (${g.rank}순위)**`,
-      `👤 **${g.guest_name}**`,
-      ``,
-      `💰 총액: ${format(g.total_price)} 메소`,
-      `💸 예약금: ${format(g.deposit)} 메소`,
-      `💳 잔금: ${format(g.balance)} 메소`,
-      `📉 할인: ${format(g.discount)} 메소`,
-    ].join('\n');
+    const msg = buildGuestMessage('🗑️ **예약 취소 완료!**', g);
 
     // 성공 메시지 출력 + 자동 삭제
     await safeReply(interaction, msg, {

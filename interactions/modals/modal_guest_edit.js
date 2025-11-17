@@ -8,11 +8,12 @@ const {
 const pool = require('../../pg/db');
 
 const {
-  readGuestEditFields,
+  readGuestFields,
   fetchBasePriceAndConflict,
   computeDeposit,
-  buildSuccessMessage,
-} = require('./guestEdit.helpers');
+  validateDiscount,
+  buildGuestMessage,
+} = require('./guest.helpers');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guildId;
@@ -24,14 +25,25 @@ module.exports = async (interaction) => {
 
   try {
     // 입력값 읽기
-    const { date, rank, guestName, depositRaw, discount } =
-      readGuestEditFields(interaction);
+    const { date, rank, guestName, depositRaw, discount } = readGuestFields(
+      interaction,
+      'edit'
+    );
 
     // 검증
     if (!date || !rank || rank < 1 || rank > 3) {
       return safeReply(interaction, '❌ 날짜/순위 입력 오류', {
         deleteAfter: 3000,
       });
+    }
+
+    // 할인 검증 추가
+    if (!validateDiscount(discount)) {
+      return safeReply(
+        interaction,
+        '⚠️ 할인 금액은 0 이상의 숫자로 입력해주세요.',
+        { deleteAfter: 3000 }
+      );
     }
 
     const newId = `${date}_${rank}`;
@@ -110,9 +122,11 @@ module.exports = async (interaction) => {
     const updated = updateRes.rows[0];
 
     // 성공 메시지
-    safeReply(interaction, buildSuccessMessage(updated), {
-      deleteAfter: 3000,
-    });
+    safeReply(
+      interaction,
+      buildGuestMessage('✅ **예약 수정 완료!**', updated),
+      { deleteAfter: 3000 }
+    );
 
     // 현황 갱신 → 비동기
     safeUpdateGuestStatusChannel(interaction.client, serverId, {

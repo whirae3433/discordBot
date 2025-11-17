@@ -5,8 +5,10 @@ const pool = require('../../pg/db');
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
 
-  const prefix = 'modal_edit_incentive_';
-  const incentiveId = interaction.customId.replace(prefix, '');
+  const prefix = 'modal_incentive_edit_';
+  const incentiveId = interaction.customId.startsWith(prefix)
+    ? interaction.customId.slice(prefix.length)
+    : interaction.customId;
 
   try {
     const raw = interaction.fields.getTextInputValue('new_amount')?.trim();

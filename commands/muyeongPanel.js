@@ -160,7 +160,7 @@ module.exports = {
         .setStyle(ButtonStyle.Secondary),
 
       new ButtonBuilder()
-        .setCustomId('button_set_incentive')
+        .setCustomId('button_incentive_set')
         .setLabel('💵 인센 금액 설정')
         .setStyle(ButtonStyle.Secondary)
     );

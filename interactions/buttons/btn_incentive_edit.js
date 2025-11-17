@@ -9,7 +9,7 @@ const { safeReply } = require('../../utils/safeReply');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
-  const prefix = 'btn_edit_incentive_';
+  const prefix = 'btn_incentive_edit_';
   const incentiveId = interaction.customId.replace(prefix, '');
 
   try {
@@ -32,7 +32,7 @@ module.exports = async (interaction) => {
     const { name, amount } = rows[0];
 
     const modal = new ModalBuilder()
-      .setCustomId(`modal_edit_incentive_${incentiveId}`)
+      .setCustomId(`modal_incentive_edit_${incentiveId}`)
       .setTitle(`✏️ ${name} 금액 수정`);
 
     const amountInput = new TextInputBuilder()

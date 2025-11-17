@@ -2,7 +2,7 @@ const { safeReply } = require('../../utils/safeReply');
 const pool = require('../../pg/db');
 
 module.exports = async (interaction) => {
-  const prefix = 'btn_delete_incentive_';
+  const prefix = 'btn_incentive_delete_';
   const incentiveId = interaction.customId.replace(prefix, '');
   const serverId = interaction.guild.id;
 

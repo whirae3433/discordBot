@@ -18,7 +18,7 @@ module.exports = async (interaction) => {
     if (selected === 'add_new') {
       // 모달 띄우기
       const modal = new ModalBuilder()
-        .setCustomId('modal_add_incentive')
+        .setCustomId('modal_incentive_add')
         .setTitle('➕ 새 인센 추가');
 
       const nameInput = new TextInputBuilder()
@@ -63,11 +63,11 @@ module.exports = async (interaction) => {
 
     const buttons = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`btn_edit_incentive_${incentive.id}`)
+        .setCustomId(`btn_incentive_edit_${incentive.id}`)
         .setLabel('✏️ 수정하기')
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
-        .setCustomId(`btn_delete_incentive_${incentive.id}`)
+        .setCustomId(`btn_incentive_delete_${incentive.id}`)
         .setLabel('🗑️ 삭제하기')
         .setStyle(ButtonStyle.Danger)
     );

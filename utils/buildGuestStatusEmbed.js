@@ -1,6 +1,12 @@
+/**
+ * Embed 생성 전용 함수 (날짜 필터링 X)
+ * @param {object} grouped - 날짜별 손님 그룹
+ * @param {Guild} guild - Discord guild 객체
+ */
+
 const { EmbedBuilder } = require('discord.js');
 
-/** 입금 상태 포맷 */
+// 입금 상태 포맷
 function formatDepositStatus(guest) {
   if (guest.deposit >= guest.total_price) return '❤️ 완납';
   if (guest.deposit === 0) return '❌ 출발전납';
@@ -8,24 +14,33 @@ function formatDepositStatus(guest) {
   return `💸 ${guest.deposit.toLocaleString()}`;
 }
 
-/**
- * Embed 생성 전용 함수 (날짜 필터링 X)
- * @param {object} grouped - 날짜별 손님 그룹
- * @param {Guild} guild - Discord guild 객체
- */
+// 빈 날짜 embed 생성
+
+function buildEmptyEmbed(date) {
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  const d = new Date(date);
+  const dayName = days[d.getDay()] || '';
+
+  return new EmbedBuilder()
+    .setColor(0xffcc00)
+    .setDescription(`🗓️ ${date} (${dayName})\n\n손님 예약 없음`);
+}
+
 async function buildGuestStatusEmbed(grouped, guild) {
   if (!grouped || Object.keys(grouped).length === 0) {
-    const emptyEmbed = new EmbedBuilder()
-      .setColor(0xff0000)
-      .setTitle('❌ 손님 정보가 없습니다.')
-      .setDescription('새로운 예약을 진행해 주세요.');
-    return [emptyEmbed];
+    return [buildEmptyEmbed('오늘')];
   }
 
   const embeds = [];
   const days = ['일', '월', '화', '수', '목', '금', '토'];
 
   for (const [date, guests] of Object.entries(grouped)) {
+    // 날짜 데이터가 비었으면 해당 날짜 빈 embed push
+    if (!guests || guests.length === 0) {
+      embeds.push(buildEmptyEmbed(date));
+      continue;
+    }
+
     const d = new Date(date);
     const dayName = days[d.getDay()] || '';
 

@@ -6,38 +6,40 @@ const buttonHandlers = {
   button_guest_status: require('./buttons/button_guest_status'),
   button_create_guest_status_channel: require('./buttons/button_create_guest_status_channel'),
   set_amount: require('./buttons/set_amount'),
-  button_set_incentive: require('./buttons/button_set_incentive'),
+  button_incentive_set: require('./buttons/button_incentive_set'),
   button_profile_register: require('./buttons/button_profile_register'),
 };
 
 const selectHandlers = {
-  select_guest_reserve: require('./selects/select_guest_reserve'),
+  select_guest_reserve: require('./selects/select_guest_reserve.js'),
   select_guest_edit: require('./selects/select_guest_edit'),
   select_guest_delete: require('./selects/select_guest_delete'),
 };
 
 const modalHandlers = {
-  guest_input_rank1: require('./modals/modal_guest_input'),
-  guest_input_rank2: require('./modals/modal_guest_input'),
-  guest_input_rank3: require('./modals/modal_guest_input'),
+  guest_add_rank1: require('./modals/modal_guest_add'),
+  guest_add_rank2: require('./modals/modal_guest_add'),
+  guest_add_rank3: require('./modals/modal_guest_add'),
   modal_set_amount: require('./modals/modal_set_amount'),
-  modal_edit_guest: require('./modals/modal_guest_edit'),
+  modal_guest_edit: require('./modals/modal_guest_edit'),
   modal_guest_delete: require('./modals/modal_guest_delete'),
-  modal_add_incentive: require('./modals/modal_add_incentive'),
+  modal_incentive_add: require('./modals/modal_incentive_add.js'),
 };
 
 module.exports = async (interaction) => {
   try {
     if (interaction.isButton()) {
+      console.log('BUTTON PRESS:', interaction.customId);
       const id = interaction.customId;
       const handler = buttonHandlers[id];
+      console.log('HANDLER FOUND:', handler ? 'YES' : 'NO');
       if (handler) return handler(interaction);
 
-      if (id.startsWith('btn_edit_incentive_'))
-        return require('./buttons/btn_edit_incentive')(interaction);
+      if (id.startsWith('btn_incentive_edit_'))
+        return require('./buttons/btn_incentive_edit')(interaction);
 
-      if (id.startsWith('btn_delete_incentive_'))
-        return require('./buttons/btn_delete_incentive')(interaction);
+      if (id.startsWith('btn_incentive_delete_'))
+        return require('./buttons/btn_incentive_delete')(interaction);
     }
 
     if (interaction.isStringSelectMenu()) {
