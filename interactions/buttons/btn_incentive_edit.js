@@ -4,16 +4,13 @@ const {
   TextInputStyle,
   ActionRowBuilder,
 } = require('discord.js');
-const { MessageFlags } = require('discord-api-types/v10');
 const pool = require('../../pg/db');
+const { safeReply } = require('../../utils/safeReply');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
-  // customId: btn_edit_incentive_<id>
-  const prefix = 'btn_edit_incentive_';
-  const incentiveId = interaction.customId.startsWith(prefix)
-    ? interaction.customId.slice(prefix.length)
-    : interaction.customId;
+  const prefix = 'btn_incentive_edit_';
+  const incentiveId = interaction.customId.replace(prefix, '');
 
   try {
     const { rows } = await pool.query(
@@ -25,17 +22,17 @@ module.exports = async (interaction) => {
       [serverId, incentiveId]
     );
 
-    if (rows.length === 0) {
-      return interaction.reply({
-        content: '❌ 해당 인센을 찾을 수 없습니다.',
-        flags: MessageFlags.Ephemeral,
+    if (rows.rowCount === 0) {
+      return safeReply(interaction, '❌ 해당 인센을 찾을 수 없습니다.', {
+        ephemeral: true,
+        deleteAfter: 3000,
       });
     }
 
     const { name, amount } = rows[0];
 
     const modal = new ModalBuilder()
-      .setCustomId(`modal_edit_incentive_${incentiveId}`)
+      .setCustomId(`modal_incentive_edit_${incentiveId}`)
       .setTitle(`✏️ ${name} 금액 수정`);
 
     const amountInput = new TextInputBuilder()
@@ -47,12 +44,14 @@ module.exports = async (interaction) => {
 
     const row = new ActionRowBuilder().addComponents(amountInput);
 
-    await interaction.showModal(modal.addComponents(row));
+    return interaction.showModal(modal.addComponents(row));
   } catch (err) {
     console.error('[인센 수정 모달 오류]', err);
-    await interaction.reply({
-      content: '❌ 수정 모달을 여는 중 오류가 발생했습니다.',
-      flags: MessageFlags.Ephemeral,
-    });
+
+    return safeReply(
+      interaction,
+      '❌ 수정 모달을 여는 중 오류가 발생했습니다.',
+      { ephemeral: true, deleteAfter: 3000 }
+    );
   }
 };

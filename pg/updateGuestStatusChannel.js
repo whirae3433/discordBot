@@ -1,89 +1,67 @@
+const { getGuestListByDate } = require('../pg/selectGuestList');
 const { buildGuestStatusEmbed } = require('../utils/buildGuestStatusEmbed');
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-const timezone = require('dayjs/plugin/timezone');
-dayjs.extend(utc);
-dayjs.extend(timezone);
+const { getLogicalToday } = require('../utils/getLogicalToday');
 const pool = require('../pg/db');
 
-async function updateGuestStatusChannel(client, serverId, targetDate) {
+async function updateGuestStatusChannel(client, serverId, options = {}) {
+  const logicalToday = getLogicalToday(3 * 60);
+
   try {
-    // 항상 한국 시간 기준
-    const nowKST = dayjs().tz('Asia/Seoul');
-    const today = nowKST.format('YYYY-MM-DD');
-
-    // targetDate가 오늘이 아닐 경우 (서버-스케줄러 오차 방지)
-    if (targetDate) {
-      const target = dayjs(targetDate).tz('Asia/Seoul').format('YYYY-MM-DD');
-      if (target !== today) {
-        console.log(
-          `[손님 현황] ${targetDate}는 오늘(${today})이 아니므로 갱신 생략`
-        );
-        return;
-      }
-    }
-
     const guild = await client.guilds.fetch(serverId);
 
     // 채널 ID 조회
     const res = await pool.query(
-      `SELECT channel_id FROM bot_channels WHERE server_id = $1 AND type = 'guest_status'`,
+      `
+      SELECT channel_id 
+      FROM bot_channels 
+      WHERE server_id = $1 AND type = 'guest_status'
+      `,
       [serverId]
     );
-
-    if (res.rowCount === 0) {
-      console.log(`[손님 현황] ${guild.name} 서버에 등록된 채널 ID 없음`);
-      return;
-    }
+    if (res.rowCount === 0) return;
 
     const channelId = res.rows[0].channel_id;
-    const channel =
-      guild.channels.cache.get(channelId) ||
-      (await guild.channels.fetch(channelId).catch(() => null));
+    const channel = await guild.channels.fetch(channelId).catch(() => null);
+    if (!channel) return;
 
-    if (!channel) {
-      console.log(
-        `[손님 현황] ${guild.name} 서버의 채널(${channelId})을 찾을 수 없음`
-      );
-      return;
-    }
+    // 오늘 기준 손님 조회
+    const grouped = await getGuestListByDate(serverId, 'today');
 
-    // ✅ Embed 생성 (모든 날짜)
-    const embeds = await buildGuestStatusEmbed({ guild }, serverId);
-
-    // ✅ 오늘 날짜 embed만 추출
-    const todayEmbed = embeds.find((e) => {
-      const t = e.data.title || '';
-      const d = e.data.description || '';
-      return t.includes(today) || d.includes(today);
-    });
-    if (!todayEmbed) {
-      console.log(`[손님 현황] ${today} 날짜에 해당하는 데이터 없음`);
-      return;
-    }
-
-    // 기존 오늘 날짜 메시지 삭제
+    // 기존 메시지 모두 삭제 (오늘만)
     const msgs = await channel.messages.fetch({ limit: 50 }).catch(() => null);
-    if (msgs && msgs.size > 0) {
-      const todayMsgs = msgs.filter((m) =>
-        m.embeds.some((e) => {
-          const t = e.title || '';
-          const d = e.description || '';
-          return t.includes(today) || d.includes(today);
-        })
+    if (msgs) {
+      const targetMsgs = msgs.filter((m) =>
+        m.embeds.some((e) => (e.description || '').includes(logicalToday))
       );
-      for (const m of todayMsgs.values()) {
+      for (const m of targetMsgs.values()) {
         await m.delete().catch(() => {});
       }
     }
 
-    // 새 embed 전송
-    await channel.send({ embeds: [todayEmbed] });
+    // 빈 데이터 처리 포함 내부 embed 생성
+    const embeds = await buildGuestStatusEmbed(
+      { [logicalToday]: grouped[logicalToday] },
+      guild
+    );
 
-    console.log(`[손님 현황] ${guild.name} ${today} 현황 갱신 완료`);
+    await channel.send({ embeds });
+
+    console.log(`[손님 현황] ${logicalToday} 업데이트 완료`);
   } catch (err) {
     console.error('[손님 현황 갱신 오류]', err);
   }
 }
 
-module.exports = { updateGuestStatusChannel };
+/**
+ * 안전 버전: 에러 발생해도 봇이 멈추지 않음
+ * (updateGuestStatusChannel 내부 에러를 자체적으로 처리)
+ */
+async function safeUpdateGuestStatusChannel(client, serverId, options = {}) {
+  try {
+    await updateGuestStatusChannel(client, serverId, options);
+  } catch (err) {
+    console.error('[safeUpdateGuestStatusChannel] 오류 무시됨:', err);
+  }
+}
+
+module.exports = { updateGuestStatusChannel, safeUpdateGuestStatusChannel };

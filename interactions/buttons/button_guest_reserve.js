@@ -1,72 +1,77 @@
 const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
-const { MessageFlags } = require('discord-api-types/v10');
 const pool = require('../../pg/db');
+const { getGuestListByDate } = require('../../pg/selectGuestList');
 const { buildGuestStatusEmbed } = require('../../utils/buildGuestStatusEmbed');
-const { deleteAfter } = require('../../utils/deleteAfter');
+const { safeReply } = require('../../utils/safeReply');
 
-module.exports = async (interaction) => {
-  const serverId = interaction.guildId;
+// ---------------- Helper functions ---------------- //
+function buildAmountMap(rows) {
+  const amountMap = { 1: 0, 2: 0, 3: 0 };
+  rows.forEach((r) => (amountMap[r.rank] = r.amount));
+  return amountMap;
+}
 
-  try {
-    // 손님 현황 Embed
-    const embeds = await buildGuestStatusEmbed(interaction, serverId);
+function buildSelectMenu(amountMap) {
+  const fmt = (n) => (Number.isFinite(n) ? n.toLocaleString() : '0');
 
-    // 순위별 금액 조회
-    const res = await pool.query(
-      `
-      SELECT rank, amount 
-      FROM amount_by_rank 
-      WHERE server_id = $1 
-      ORDER BY rank
-      `,
-      [serverId]
-    );
-
-    const amountMap = { 1: 0, 2: 0, 3: 0 };
-    res.rows.forEach((row) => {
-      amountMap[row.rank] = row.amount;
-    });
-
-    // 안전한 금액 포맷
-    const format = (n) => (Number.isFinite(n) ? n.toLocaleString() : '0');
-
-    // Select 메뉴
-    const selectMenu = new StringSelectMenuBuilder()
+  return new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder()
       .setCustomId('select_guest_reserve')
       .setPlaceholder('✏️ 예약할 순위를 선택하세요')
       .addOptions([
-        {
-          label: `🥇 1순위 - ${format(amountMap[1])} 메소`,
-          value: 'rank1',
-        },
-        {
-          label: `🥈 2순위 - ${format(amountMap[2])} 메소`,
-          value: 'rank2',
-        },
-        {
-          label: `🥉 3순위 - ${format(amountMap[3])} 메소`,
-          value: 'rank3',
-        },
-      ]);
+        { label: `🥇 1순위 - ${fmt(amountMap[1])} 메소`, value: 'rank1' },
+        { label: `🥈 2순위 - ${fmt(amountMap[2])} 메소`, value: 'rank2' },
+        { label: `🥉 3순위 - ${fmt(amountMap[3])} 메소`, value: 'rank3' },
+      ])
+  );
+}
 
-    const components = [new ActionRowBuilder().addComponents(selectMenu)];
+// ---------------- Main Handler ---------------- //
+module.exports = async (interaction) => {
+  const serverId = interaction.guildId;
+  const guild = interaction.guild;
 
-    // 이 버튼 누른 사람만 보이게 ephemeral 응답
-    const reply = await interaction.reply({
-      embeds,
-      components,
-      flags: MessageFlags.Ephemeral,
-    });
+  try {
+    // 1) "손님 데이터 + 순위별 금액" 동시에 조회
+    const [grouped, amountRes] = await Promise.all([
+      getGuestListByDate(serverId, 'from_today'),
+      pool.query(
+        `
+        SELECT rank, amount 
+        FROM amount_by_rank 
+        WHERE server_id = $1 
+        ORDER BY rank
+        `,
+        [serverId]
+      ),
+    ]);
 
-    // 7초 후 자동 삭제 (아무 선택도 안 하면)
-    deleteAfter(interaction, 7000);
+    // 2) Embed 및 메뉴 구성
+    const embeds = await buildGuestStatusEmbed(grouped, guild);
+    const amountMap = buildAmountMap(amountRes.rows);
+    const menu = buildSelectMenu(amountMap);
+
+    return safeReply(
+      interaction,
+      {
+        embeds,
+        components: [menu],
+      },
+      {
+        ephemeral: true,
+        deleteAfter: 7000,
+      }
+    );
   } catch (err) {
     console.error('[guest_reserve 버튼 오류]', err);
 
-    await interaction.reply({
-      content: '❌ 예약 정보를 불러오는 중 오류가 발생했습니다.',
-      flags: MessageFlags.Ephemeral,
-    });
-    deleteAfter(interaction, 3000);
+    return safeReply(
+      interaction,
+      '❌ 예약 정보를 불러오는 중 오류가 발생했습니다.',
+      {
+        ephemeral: true,
+        deleteAfter: 3000,
+      }
+    );
   }
 };

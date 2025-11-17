@@ -1,18 +1,28 @@
-const { MessageFlags } = require('discord-api-types/v10');
 const { createRegisterEmbed } = require('../../utils/embedHelper');
-const { deleteAfter } = require('../../utils/deleteAfter');
+const { safeReply } = require('../../utils/safeReply');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
   const userId = interaction.user.id;
 
-  // 등록 안내 임베드 생성
-  const embed = createRegisterEmbed(serverId, userId);
+  try {
+    const embed = createRegisterEmbed(serverId, userId);
 
-  await interaction.reply({
-    embeds: [embed],
-    flags: MessageFlags.Ephemeral,
-  });
+    return safeReply(
+      interaction,
+      { embeds: [embed] },
+      {
+        ephemeral: true,
+        deleteAfter: 7000,
+      }
+    );
+  } catch (err) {
+    console.error('[등록 안내 임베드 오류]', err);
 
-  deleteAfter(interaction, 7000);
-}
+    return safeReply(
+      interaction,
+      '❌ 등록 안내 메시지를 생성하는 중 문제가 발생했습니다.',
+      { ephemeral: true, deleteAfter: 3000 }
+    );
+  }
+};
