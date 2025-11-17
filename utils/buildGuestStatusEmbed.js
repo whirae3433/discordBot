@@ -17,18 +17,30 @@ function formatDepositStatus(guest) {
 // 빈 날짜 embed 생성
 
 function buildEmptyEmbed(date) {
-  const days = ['일', '월', '화', '수', '목', '금', '토'];
-  const d = new Date(date);
-  const dayName = days[d.getDay()] || '';
+  // 날짜 검사
+  const isRealDate = /^\d{4}-\d{2}-\d{2}$/.test(date);
+
+  let headerText = '';
+
+  if (isRealDate) {
+    // 정상 날짜 → 요일 계산
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    const d = new Date(date);
+    const dayName = days[d.getDay()] || '';
+    headerText = `🗓️ ${date} (${dayName})`;
+  } else {
+    // 날짜가 아님 → 그대로 출력 (괄호 없음)
+    headerText = `🗓️ ${date}`;
+  }
 
   return new EmbedBuilder()
     .setColor(0xffcc00)
-    .setDescription(`🗓️ ${date} (${dayName})\n\n손님 예약 없음`);
+    .setDescription(`${headerText}\n\n손님 예약 없음`);
 }
 
 async function buildGuestStatusEmbed(grouped, guild) {
   if (!grouped || Object.keys(grouped).length === 0) {
-    return [buildEmptyEmbed('오늘')];
+    return [buildEmptyEmbed('예약이 없습니다')];
   }
 
   const embeds = [];
