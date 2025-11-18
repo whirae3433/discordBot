@@ -1,5 +1,9 @@
-require('dotenv').config({ path: '../.env' });
-const { Pool } = require('pg');
+// pg/db.js
+require('dotenv').config();    // 경로 자동 처리
+const { Pool, types } = require('pg');
+
+// BIGINT → string
+types.setTypeParser(20, (val) => val);
 
 const pool = new Pool({
   host: process.env.PG_HOST,

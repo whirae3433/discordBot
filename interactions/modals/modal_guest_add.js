@@ -1,6 +1,8 @@
 const { safeReply } = require('../../utils/safeReply');
 const { getReferencePrice } = require('../../pg/getReferencePrice');
 const { insertGuestReservation } = require('../../pg/insertGuestReservation');
+const updateRecruitMessage = require('../../pg/updateRecruitMessage');
+
 const {
   updateGuestStatusChannel,
 } = require('../../pg/updateGuestStatusChannel');
@@ -116,6 +118,8 @@ module.exports = async (interaction) => {
 
     // 손님 현황 채널 갱신
     updateGuestStatusChannel(interaction.client, interaction.guildId, date);
+    // 구인글 재생성
+    updateRecruitMessage(interaction.client, serverId);
   } catch (err) {
     console.error('[DB 저장 오류]', err);
 

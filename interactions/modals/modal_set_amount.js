@@ -1,5 +1,6 @@
-const { MessageFlags } = require('discord-api-types/v10');
+const { safeReply } = require('../../utils/safeReply');
 const pool = require('../../pg/db');
+const updateRecruitMessage = require('../../pg/updateRecruitMessage');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guildId;
@@ -9,6 +10,7 @@ module.exports = async (interaction) => {
     const amounts = [1, 2, 3].map((rank) => {
       const raw = interaction.fields.getTextInputValue(`amount_rank${rank}`);
       const amount = parseInt(raw.replace(/,/g, ''), 10);
+
       if (isNaN(amount)) throw new Error(`${rank}순위 금액이 숫자가 아닙니다.`);
       return { rank, amount };
     });
@@ -24,7 +26,7 @@ module.exports = async (interaction) => {
       );
     }
 
-    // ✅ 순위별 금액 표시용 텍스트
+    // 순위별 금액 표시용 텍스트
     const summary = amounts
       .map(({ rank, amount }) => {
         const emoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉';
@@ -32,35 +34,20 @@ module.exports = async (interaction) => {
       })
       .join('\n');
 
-    // ✅ 성공 메시지 출력
-    await interaction.reply({
-      content: `✅ 금액이 성공적으로 저장되었습니다!\n\n${summary}`,
-      flags: MessageFlags.Ephemeral,
-    });
-
-    // 5초 뒤 자동 삭제
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch (err) {
-        console.error('[메시지 삭제 오류]', err);
-      }
-    }, 5000);
+    // 성공 메시지 출력
+    safeReply(
+      interaction,
+      `✅ 금액이 성공적으로 저장되었습니다!\n\n${summary}`,
+      { deleteAfter: 3000 }
+    );
+    
+    // 금액 변경 반영
+    updateRecruitMessage(interaction.client, serverId);
   } catch (err) {
     console.error('[금액 저장 오류]', err);
 
-    await interaction.reply({
-      content: '❌ 금액 저장 중 오류가 발생했습니다.',
-      flags: MessageFlags.Ephemeral,
+    safeReply(interaction, '❌ 금액 저장 중 오류가 발생했습니다.', {
+      deleteAfter: 3000,
     });
-
-    // 오류 메시지도 5초 뒤 삭제
-    setTimeout(async () => {
-      try {
-        await interaction.deleteReply();
-      } catch (err2) {
-        console.error('[에러 메시지 삭제 오류]', err2);
-      }
-    }, 5000);
   }
 };

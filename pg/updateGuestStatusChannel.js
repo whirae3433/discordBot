@@ -4,7 +4,7 @@ const { getLogicalToday } = require('../utils/getLogicalToday');
 const pool = require('../pg/db');
 
 async function updateGuestStatusChannel(client, serverId, options = {}) {
-  const logicalToday = getLogicalToday(3 * 60);
+  const logicalToday = getLogicalToday(2 * 60);
 
   try {
     const guild = await client.guilds.fetch(serverId);

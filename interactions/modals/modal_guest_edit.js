@@ -14,6 +14,7 @@ const {
   validateDiscount,
   buildGuestMessage,
 } = require('./guest.helpers');
+const updateRecruitMessage = require('../../pg/updateRecruitMessage');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guildId;
@@ -132,6 +133,8 @@ module.exports = async (interaction) => {
     safeUpdateGuestStatusChannel(interaction.client, serverId, {
       date: updated.date,
     });
+    // 구인글 재생성
+    updateRecruitMessage(interaction.client, serverId);
   } catch (err) {
     console.error('[예약 수정 오류]', err);
     safeReply(interaction, '❌ 수정 중 오류가 발생했습니다.', {

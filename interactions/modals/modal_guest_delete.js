@@ -4,6 +4,7 @@ const {
   updateGuestStatusChannel,
 } = require('../../pg/updateGuestStatusChannel');
 const pool = require('../../pg/db');
+const updateRecruitMessage = require('../../pg/updateRecruitMessage');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guildId;
@@ -58,6 +59,8 @@ module.exports = async (interaction) => {
     await updateGuestStatusChannel(interaction.client, serverId, {
       date: g.date,
     });
+    // 구인글 재생성
+    updateRecruitMessage(interaction.client, serverId);
   } catch (err) {
     console.error('[예약 삭제 오류]', err);
 
