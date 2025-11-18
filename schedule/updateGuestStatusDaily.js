@@ -7,7 +7,7 @@ module.exports = function startGuestStatusScheduler(client) {
   const rule = new schedule.RecurrenceRule();
   rule.tz = 'Asia/Seoul';
   rule.hour = 2;
-  rule.minute = 0;
+  rule.minute = 30;
 
   schedule.scheduleJob(rule, async () => {
     try {

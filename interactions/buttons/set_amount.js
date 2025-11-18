@@ -28,7 +28,7 @@ module.exports = async (interaction) => {
       });
     }
 
-    // 1. 현재 서버의 순위별 금액 가져오기
+    // 현재 서버의 순위별 금액 가져오기
     const amountRes = await pool.query(
       `
       SELECT rank, amount 
@@ -39,11 +39,18 @@ module.exports = async (interaction) => {
       [serverId]
     );
 
-    // 2. rank:amount 구조로 매핑
-    const amountMap = { 1: null, 2: null, 3: null };
+    // rank:amount 구조로 매핑
+    const amountMap = { 1: '', 2: '', 3: '' };
     amountRes.rows.forEach((row) => {
       amountMap[row.rank] = row.amount.toLocaleString();
     });
+
+    // 최초 기본값
+    const defaultValues = {
+      1: '260000000',
+      2: '240000000',
+      3: '220000000',
+    };
 
     const modal = new ModalBuilder()
       .setCustomId('modal_set_amount')
@@ -52,15 +59,15 @@ module.exports = async (interaction) => {
     const INPUT_LABELS = ['1순위 금액', '2순위 금액', '3순위 금액'];
 
     const rows = [1, 2, 3].map((rank) => {
-      const formatted = amountMap[rank]?.toLocaleString() ?? '260000000';
+      const value = amountMap[rank] || defaultValues[rank];
 
       return new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId(`amount_rank${rank}`)
           .setLabel(INPUT_LABELS[rank - 1])
           .setStyle(TextInputStyle.Short)
-          .setPlaceholder(`예: ${formatted}`)
           .setRequired(true)
+          .setValue(value)
       );
     });
 

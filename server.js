@@ -7,6 +7,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const { messageHandlers } = require('./utils/messageHandlers.js');
 const handleInteraction = require('./interactions');
 const startGuestStatusScheduler = require('./schedule/updateGuestStatusDaily');
+const startRecruitScheduler = require('./schedule/recruit_scheduler');
 
 // --- Discord Bot 초기화 ---
 const client = new Client({
@@ -24,6 +25,7 @@ global.botClient = client;
 client.once('ready', () => {
   console.log(`✅ 로그인됨: ${client.user.tag}`);
   startGuestStatusScheduler(client);
+  startRecruitScheduler(client);
 });
 
 client.on('messageCreate', async (message) => {
