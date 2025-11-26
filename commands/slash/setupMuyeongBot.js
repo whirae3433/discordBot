@@ -74,9 +74,7 @@ module.exports = {
     const userId = interaction.user.id;
 
     try {
-      await interaction.deferReply({
-        flags: MessageFlags.Ephemeral,
-      });
+      await interaction.deferReply();
 
       // 초대 링크
       const RAW_REDIRECT = process.env.DISCORD_INVITE_REDIRECT_URI;
@@ -119,7 +117,7 @@ module.exports = {
         return safeReply(
           interaction,
           `⚠️ 이미 <#${existingChannel.id}> 채널이 등록되어 있습니다.`,
-          { deleteAfter: 5000 }
+          { ephemeral: false, deleteAfter: 5000 }
         );
       }
 
