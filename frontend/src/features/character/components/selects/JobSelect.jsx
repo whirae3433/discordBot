@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
-const BUFF_JOBS = ['리프1', '리프30', '리저', '뻥', '연막', '샤프']; // '뻥캐' vs '뻥' 표기 통일
+const BUFF_JOBS = ['리프', '리저', '뻥', '연막']; 
 const MAIN_JOBS = [
   '히어로',
-  '닼나',
+  '다크나이트',
   '팔라딘',
   '보마',
   '신궁',

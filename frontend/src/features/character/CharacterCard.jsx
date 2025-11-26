@@ -1,6 +1,8 @@
 import { useDeleteCharacter } from '../../hooks/useDelete';
 import { RiDeleteBinLine } from 'react-icons/ri';
 import { GrUpdate } from 'react-icons/gr';
+import jobImg from '../../utils/jobImg';
+
 
 export default function CharacterCard({
   character,
@@ -42,7 +44,7 @@ export default function CharacterCard({
 
       {/* 프로필 이미지 */}
       <img
-        src="/images/mush.jpeg"
+        src={jobImg[character.job] || jobImg.default}
         alt={character.ign}
         className="w-16 h-16 rounded-full border border-gray-300 mb-2"
       />
@@ -52,14 +54,7 @@ export default function CharacterCard({
         {character.ign}
       </h3>
 
-      {/* 1행: Lv / HP / Acc */}
-      <div className="w-full grid grid-cols-3 text-sm mb-1 text-gray-700">
-        <div className="flex justify-start">Lv. {character.level || '-'}</div>
-        <div className="flex justify-center">HP: {character.hp || '-'}</div>
-        <div className="flex justify-end">Acc: {character.acc || '-'}</div>
-      </div>
-
-      {/* 2행: Job / Atk|Boss / MapleWarrior */}
+      {/* 1행: Job / Atk|Boss / MapleWarrior */}
       <div className="w-full grid grid-cols-3 text-sm text-gray-700">
         <div className="flex justify-start font-semibold">
           {character.job || '-'}
@@ -72,6 +67,13 @@ export default function CharacterCard({
           </span>
         </div>
         <div className="flex justify-end">{character.mapleWarrior || '-'}</div>
+      </div>
+
+      {/* 2행: Lv / HP / Acc */}
+      <div className="w-full grid grid-cols-3 text-sm mb-1 text-gray-700">
+        <div className="flex justify-start">Lv. {character.level || '-'}</div>
+        <div className="flex justify-center">HP: {character.hp || '-'}</div>
+        <div className="flex justify-end">Acc: {character.acc || '-'}</div>
       </div>
     </div>
   );

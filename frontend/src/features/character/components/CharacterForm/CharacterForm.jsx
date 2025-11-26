@@ -3,7 +3,6 @@ import BasicInfoForm from './BasicInfoForm';
 import SpecInfoForm from './SpecInfoForm';
 import { useAuth } from '../../../../hooks/useAuth.jsx';
 import JobSelect from '../selects/JobSelect.jsx';
-import AccountGroupSelect from '../selects/AccountGroupSelect.jsx';
 import MapleWarriorSelect from '../selects/MapleWarriorSelect.jsx';
 
 export default function CharacterForm({
@@ -30,7 +29,6 @@ export default function CharacterForm({
       initialValues?.bossDmg === 0 || initialValues?.bossDmg
         ? String(initialValues.bossDmg)
         : '',
-    accountGroup: initialValues?.accountGroup ?? '',
     hp:
       initialValues?.hp === 0 || initialValues?.hp
         ? String(initialValues.hp)
@@ -54,7 +52,6 @@ export default function CharacterForm({
       level: toNumOrNull(form.level),
       atk: toNumOrNull(form.atk),
       bossDmg: toNumOrNull(form.bossDmg),
-      accountGroup: form.accountGroup,
       order: '',
       hp: toNumOrNull(form.hp),
       acc: toNumOrNull(form.acc),
@@ -69,13 +66,10 @@ export default function CharacterForm({
     const ign = String(form.ign ?? '').trim();
     const levelStr = String(form.level ?? '').trim();
     const job = String(form.job ?? '').trim();
-    const accountGroup = String(form.accountGroup ?? '').trim();
-
     const missing = [];
     if (!ign) missing.push('인게임 닉');
     if (!levelStr) missing.push('레벨');
     if (!job) missing.push('직업');
-    if (!accountGroup) missing.push('계정 구분');
 
     if (missing.length) {
       alert(`다음 필수 항목을 입력해 주세요:\n- ${missing.join('\n- ')}`);
@@ -104,11 +98,6 @@ export default function CharacterForm({
       />
 
       <JobSelect value={form.job} onChange={set('job')} />
-      <AccountGroupSelect
-        value={form.accountGroup}
-        onChange={set('accountGroup')}
-      />
-
       <div className="border-t my-4" />
 
       <SpecInfoForm

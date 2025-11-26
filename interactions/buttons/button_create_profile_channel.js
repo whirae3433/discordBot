@@ -1,6 +1,7 @@
-const { ChannelType, PermissionsBitField } = require('discord.js');
+const { ChannelType, PermissionsBitField, MessageFlags } = require('discord.js');
 const pool = require('../../pg/db');
 const { safeReply } = require('../../utils/safeReply');
+const { updateProfileChannel } = require('../../pg/updateProfileChannel');
 
 // ---------------- Helper functions ---------------- //
 
@@ -16,13 +17,13 @@ async function ensureAdmin(serverId, userId) {
   return check.rowCount > 0;
 }
 
-// 등록된 채널 조회
+// 등록된 프로필 채널 조회
 async function getRegisteredChannel(serverId, guild) {
   const res = await pool.query(
     `
     SELECT channel_id 
     FROM bot_channels 
-    WHERE server_id = $1 AND type = 'guest_status'
+    WHERE server_id = $1 AND type = 'profile'
     `,
     [serverId]
   );
@@ -31,28 +32,24 @@ async function getRegisteredChannel(serverId, guild) {
 
   const id = res.rows[0].channel_id;
 
-  // 캐시 → fetch 순서로 최적화된 조회
+  // 캐시 → fetch 순서로 안전하게 확인
   return (
     guild.channels.cache.get(id) ||
     (await guild.channels.fetch(id).catch(() => null))
   );
 }
 
-// 채널 생성
-async function createGuestStatusChannel(guild, userId) {
+// 프로필 채널 생성
+async function createProfileChannel(guild, userId) {
   return await guild.channels.create({
-    name: '🪪손님현황',
+    name: '📘길드원-프로필',
     type: ChannelType.GuildText,
-    topic: '무영봇이 관리하는 손님 예약 현황 채널입니다.',
+    topic: '무영봇이 관리하는 길드원 프로필 전용 채널입니다.',
     permissionOverwrites: [
       {
         id: guild.roles.everyone,
         allow: [PermissionsBitField.Flags.ViewChannel],
         deny: [PermissionsBitField.Flags.SendMessages],
-      },
-      {
-        id: userId,
-        allow: [PermissionsBitField.Flags.SendMessages],
       },
     ],
   });
@@ -66,6 +63,7 @@ module.exports = async (interaction) => {
   const userId = interaction.user.id;
 
   try {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     // 1. 관리자 권한 확인
     const isAdmin = await ensureAdmin(serverId, userId);
     if (!isAdmin) {
@@ -74,7 +72,7 @@ module.exports = async (interaction) => {
       });
     }
 
-    // 2. DB에서 등록된 채널 조회
+    // 2. DB에서 등록된 프로필 채널 조회
     const existingChannel = await getRegisteredChannel(serverId, guild);
 
     if (existingChannel) {
@@ -86,29 +84,32 @@ module.exports = async (interaction) => {
     }
 
     // 3. 채널 새로 생성
-    const newChannel = await createGuestStatusChannel(guild, userId);
+    const newChannel = await createProfileChannel(guild, userId);
 
     // 4. DB 저장 or 갱신
     await pool.query(
       `
       INSERT INTO bot_channels (server_id, channel_id, type)
-      VALUES ($1, $2, 'guest_status')
+      VALUES ($1, $2, 'profile')
       ON CONFLICT (server_id, type)
       DO UPDATE SET channel_id = $2
        `,
       [serverId, newChannel.id]
     );
 
+    // 채널 생성 후 전체 프로필 출력 추가
+    await updateProfileChannel(guild.client, serverId);
+
+    // 최종 응답
     return safeReply(
       interaction,
-      `✅ 새 채널 <#${newChannel.id}> 이(가) 생성되었습니다.`,
+      `✅ 새 프로필 채널 <#${newChannel.id}> 이(가) 생성되었습니다.`,
       { deleteAfter: 3000 }
     );
   } catch (err) {
-    console.error('[손님 현황 채널 생성 오류]', err);
-
-    return safeReply(interaction, '⚠️ 채널 생성 중 오류가 발생했습니다.', {
-      deleteAfter: 3000,
+    console.error('[프로필 채널 생성 오류]', err);
+    return interaction.editReply({
+      content: '⚠️ 채널 생성 중 오류가 발생했습니다.',
     });
   }
 };

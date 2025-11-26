@@ -1,4 +1,5 @@
-const { fetchPriceData } = require('../utils/fetchPrice');
+const { fetchPriceData } = require('../../utils/fetchPrice');
+const { SlashCommandBuilder } = require('discord.js');
 
 function padRight(str, length) {
   str = String(str);
@@ -6,14 +7,18 @@ function padRight(str, length) {
 }
 
 module.exports = {
-  name: '!복대',
-  description: '최근 복대 시세 내역을 조회합니다.',
-  execute: async (message) => {
+  data: new SlashCommandBuilder()
+    .setName('복대')
+    .setDescription('최근 복대 시세 내역을 조회합니다.'),
+
+  async execute(interaction) {
     try {
+      await interaction.deferReply({ ephemeral: false });
+
       const data = await fetchPriceData();
 
       if (!data || data.length === 0) {
-        return message.reply('❌ 시세 데이터를 찾을 수 없어!');
+        return interaction.editReply('❌ 시세 데이터를 찾을 수 없어!');
       }
 
       const msg = data
@@ -25,10 +30,12 @@ module.exports = {
         })
         .join('\n');
 
-      return message.reply(`\`\`\`\n🔎 최근 시세 내역:\n${msg}\n\`\`\``);
+      return interaction.editReply(
+        `\`\`\`\n🔎 최근 시세 내역:\n${msg}\n\`\`\``
+      );
     } catch (error) {
       console.error('시세 조회 에러:', error);
-      return message.reply('😥 시세 데이터를 가져오는 데 실패했어...');
+      return interaction.editReply('😥 시세 데이터를 가져오는 데 실패했어...');
     }
   },
 };
