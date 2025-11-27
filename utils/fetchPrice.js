@@ -22,6 +22,7 @@ async function fetchPriceData(category = 'bok') {
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
     ],
+    executablePath: '/usr/bin/google-chrome-stable', // ← 추가
   });
 
   const page = await browser.newPage();
