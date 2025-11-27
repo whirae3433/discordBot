@@ -3,11 +3,11 @@ const puppeteer = require('puppeteer');
 
 // 품목별 itemId 매핑
 const ITEM_IDS = {
-  bok: '1132018',      // 복대
-  hon: '2049100',      // 혼줌
-  sijo: '666666797',   // 시조
-  kkum: '5240153',     // 꿈조
-  point: '666666661',  // 포인트
+  bok: '1132018', // 복대
+  hon: '2049100', // 혼줌
+  sijo: '666666797', // 시조
+  kkum: '5240153', // 꿈조
+  point: '666666661', // 포인트
 };
 
 async function fetchPriceData(category = 'bok') {
@@ -40,21 +40,20 @@ async function fetchPriceData(category = 'bok') {
   // ✔ 더보기 버튼 1회 클릭 (있으면)
   // ---------------------------------------
   await page.evaluate(() => {
-    const btn = [...document.querySelectorAll('button')]
-      .find((b) => b.textContent.trim() === '더보기');
+    const btn = [...document.querySelectorAll('button')].find(
+      (b) => b.textContent.trim() === '더보기'
+    );
     if (btn) btn.click();
   });
 
   // 더보기 클릭 후 DOM 로딩까지 대기
-  await page.waitForTimeout(700);
+  await new Promise((resolve) => setTimeout(resolve, 700));
 
   // ---------------------------------------
   // ✔ 데이터 파싱
   // ---------------------------------------
   const result = await page.evaluate(() => {
-    const rows = document.querySelectorAll(
-      'div.flex.items-center.gap-3.p-2'
-    );
+    const rows = document.querySelectorAll('div.flex.items-center.gap-3.p-2');
 
     return [...rows].map((row) => {
       const p = row.querySelectorAll('p');
@@ -69,9 +68,7 @@ async function fetchPriceData(category = 'bok') {
   await browser.close();
 
   // 유효 항목만 필터링
-  const filtered = result.filter(
-    (d) => d.date && d.volume && d.price
-  );
+  const filtered = result.filter((d) => d.date && d.volume && d.price);
 
   return filtered;
 }
