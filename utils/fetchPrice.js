@@ -14,7 +14,7 @@ async function fetchPriceData(category = 'bok') {
   const itemId = ITEM_IDS[category];
   const url = `https://www.ronaoff.com/item/${itemId}`;
 
-  // Puppeteer 실행 (리소스 최소화)
+  // ✅ executablePath 제거, 나머지 옵션은 그대로
   const browser = await puppeteer.launch({
     headless: 'new',
     args: [
@@ -22,17 +22,18 @@ async function fetchPriceData(category = 'bok') {
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
     ],
-    executablePath: '/usr/bin/google-chrome-stable', // ← 추가
   });
 
   const page = await browser.newPage();
 
-  // 이미지, 폰트, CSS, 광고 차단
+  // 이미지, 폰트, CSS, 미디어 차단
   await page.setRequestInterception(true);
   page.on('request', (req) => {
     if (['image', 'stylesheet', 'font', 'media'].includes(req.resourceType())) {
       req.abort();
-    } else req.continue();
+    } else {
+      req.continue();
+    }
   });
 
   await page.goto(url, { waitUntil: 'networkidle2' });
@@ -44,14 +45,14 @@ async function fetchPriceData(category = 'bok') {
       const btn = [...document.querySelectorAll('button')].find((b) =>
         b.textContent.includes('더보기')
       );
-
       if (!btn) return false;
       btn.click();
       return true;
     });
 
     if (clicked) {
-      await page.waitForFunction(() => true, { timeout: 300 });
+      // 살짝 대기
+      return new Promise((resolve) => setTimeout(resolve, 300));
     }
   }
 
