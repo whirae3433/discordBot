@@ -1,19 +1,25 @@
+// utils/priceChart.js
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
 const width = 1200;
 const height = 600;
-const chartNode = new ChartJSNodeCanvas({ width, height, backgroundColour: 'transparent' });
+
+const chartNode = new ChartJSNodeCanvas({
+  width,
+  height,
+  backgroundColour: 'transparent',
+});
 
 async function createPriceChart(data, label) {
   // 날짜 오름차순 (가장 오래된 → 최신)
-  const sorted = [...data].reverse(); 
+  const sorted = [...data].reverse();
 
   const labels = sorted.map((d) => d.date);
 
-  // 🔥 가격 → 만 단위 변환
+  // 가격 → 만 단위 변환
   const prices = sorted.map((d) => {
     const raw = Number(String(d.price).replace(/,/g, ''));
-    return Math.round(raw / 10000);   // 만단위
+    return Math.round(raw / 10000); // 만 단위
   });
 
   const volumes = sorted.map((d) =>
@@ -25,7 +31,7 @@ async function createPriceChart(data, label) {
     data: {
       labels,
       datasets: [
-        // 🟣 거래량 → 왼쪽 y1
+        // 거래량 (왼쪽)
         {
           type: 'bar',
           label: `${label} 거래량`,
@@ -36,7 +42,7 @@ async function createPriceChart(data, label) {
           yAxisID: 'y1',
         },
 
-        // 🔵 가격 → 오른쪽 y2
+        // 가격 (오른쪽)
         {
           type: 'line',
           label: `${label} 가격(만)`,
@@ -61,9 +67,7 @@ async function createPriceChart(data, label) {
           },
         },
       },
-
       scales: {
-        // 🟣 거래량 (왼쪽)
         y1: {
           type: 'linear',
           position: 'left',
@@ -73,8 +77,6 @@ async function createPriceChart(data, label) {
             font: { size: 14 },
           },
         },
-
-        // 🔵 가격 (오른쪽, 만 단위)
         y2: {
           type: 'linear',
           position: 'right',
@@ -85,8 +87,6 @@ async function createPriceChart(data, label) {
             font: { size: 14 },
           },
         },
-
-        // X축 날짜
         x: {
           ticks: { font: { size: 14 } },
         },

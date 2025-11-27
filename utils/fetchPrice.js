@@ -3,17 +3,18 @@ const puppeteer = require('puppeteer');
 
 // 품목별 itemId 매핑
 const ITEM_IDS = {
-  bok: '1132018', // 복대
-  hon: '2049100', // 혼줌
-  sijo: '666666797', // 시조
-  kkum: '5240153', // 꿈조
-  point: '666666661', // 포인트
+  bok: '1132018',      // 복대
+  hon: '2049100',      // 혼줌
+  sijo: '666666797',   // 시조
+  kkum: '5240153',     // 꿈조
+  point: '666666661',  // 포인트
 };
 
 async function fetchPriceData(category = 'bok') {
   const itemId = ITEM_IDS[category];
   const url = `https://www.ronaoff.com/item/${itemId}`;
 
+  // Puppeteer 실행 (리소스 최소화)
   const browser = await puppeteer.launch({
     headless: 'new',
     args: [
@@ -25,52 +26,54 @@ async function fetchPriceData(category = 'bok') {
 
   const page = await browser.newPage();
 
-  // 이미지/폰트/CSS 차단
+  // 이미지, 폰트, CSS, 미디어 차단
   await page.setRequestInterception(true);
   page.on('request', (req) => {
-    const block = ['image', 'font', 'stylesheet', 'media'];
-    if (block.includes(req.resourceType())) {
+    if (['image', 'stylesheet', 'font', 'media'].includes(req.resourceType())) {
       req.abort();
-    } else req.continue();
+    } else {
+      req.continue();
+    }
   });
 
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  // 페이지 로드
+  await page.goto(url, { waitUntil: 'networkidle2' });
 
-  // ---------------------------------------
-  // ✔ 더보기 버튼 1회 클릭 (있으면)
-  // ---------------------------------------
-  await page.evaluate(() => {
-    const btn = [...document.querySelectorAll('button')].find(
-      (b) => b.textContent.trim() === '더보기'
-    );
-    if (btn) btn.click();
-  });
+  // "더보기" 버튼 반복 클릭 (더보기 없어질 때까지)
+  let clicked = true;
+  while (clicked) {
+    clicked = await page.evaluate(() => {
+      const btn = [...document.querySelectorAll('button')].find((b) =>
+        b.textContent.includes('더보기')
+      );
+      if (!btn) return false;
+      btn.click();
+      return true;
+    });
 
-  // 더보기 클릭 후 DOM 로딩까지 대기
-  await new Promise((resolve) => setTimeout(resolve, 700));
+    if (clicked) {
+      // 그냥 300ms 기다리기용
+      await page.waitForFunction(() => true, { timeout: 300 });
+    }
+  }
 
-  // ---------------------------------------
-  // ✔ 데이터 파싱
-  // ---------------------------------------
+  // 데이터 파싱
   const result = await page.evaluate(() => {
-    const rows = document.querySelectorAll('div.flex.items-center.gap-3.p-2');
-
-    return [...rows].map((row) => {
+    const rows = [...document.querySelectorAll('.flex.items-center.p-2')];
+    return rows.map((row) => {
       const p = row.querySelectorAll('p');
       return {
-        date: p[0]?.textContent.trim() || null,
-        volume: p[1]?.textContent.trim() || null,
-        price: p[2]?.textContent.trim() || null,
+        date: p[0]?.textContent.trim(),
+        volume: p[1]?.textContent.trim(),
+        price: p[2]?.textContent.trim(),
       };
     });
   });
 
   await browser.close();
 
-  // 유효 항목만 필터링
-  const filtered = result.filter((d) => d.date && d.volume && d.price);
-
-  return filtered;
+  // 유효 데이터만 필터링
+  return result.filter((d) => d.date && d.volume && d.price);
 }
 
 module.exports = { fetchPriceData };
