@@ -1,5 +1,7 @@
 const { MessageFlags } = require('discord-api-types/v10');
 
+const autocompleteRona = require('./autocomplete/rona_autocomplete');
+
 const slashCommands = new Map();
 slashCommands.set('무영봇', require('../commands/slash/setupMuyeongBot.js'));
 slashCommands.set('로나오프', require('../commands/slash/priceCommand.js'));
@@ -39,6 +41,15 @@ const modalHandlers = {
 
 module.exports = async (interaction) => {
   try {
+    // 자동완성 처리
+    if (interaction.isAutocomplete()) {
+      if (interaction.commandName === '로나오프') {
+        return autocompleteRona(interaction);
+      }
+      return;
+    }
+
+    //  슬래시 명령어 처리
     if (interaction.isChatInputCommand()) {
       const cmd = slashCommands.get(interaction.commandName);
       if (cmd) return cmd.execute(interaction);

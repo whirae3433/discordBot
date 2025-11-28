@@ -8,16 +8,18 @@ import NotFound from './pages/NotFound';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import Info from './pages/Info';
+import ReportItem from './pages/ReportItem';
 
 const router = createBrowserRouter([
   {
-    path: '/',                  // ✅ 루트 라우트
-    element: <Layout />,        // Layout이 모든 페이지의 공통 틀
+    path: '/', // ✅ 루트 라우트
+    element: <Layout />, // Layout이 모든 페이지의 공통 틀
     errorElement: <NotFound />, // 404 페이지
     children: [
       { path: 'home', element: <HomePage /> }, // ✅ /home
+      { path: 'report-item', element: <ReportItem /> },
       {
-        path: ':serverId',      // ✅ /:serverId 이하
+        path: ':serverId', // ✅ /:serverId 이하
         children: [
           { path: 'profile/:discordId', element: <ProfilePage /> },
           { path: 'info', element: <Info /> },

@@ -1,20 +1,8 @@
-// utils/fetchPrice.js
 const puppeteer = require('puppeteer');
 
-// 품목별 itemId 매핑
-const ITEM_IDS = {
-  bok: '1132018',      // 복대
-  hon: '2049100',      // 혼줌
-  sijo: '666666797',   // 시조
-  kkum: '5240153',     // 꿈조
-  point: '666666661',  // 포인트
-};
-
-async function fetchPriceData(category = 'bok') {
-  const itemId = ITEM_IDS[category];
+async function fetchPriceData(itemId) {
   const url = `https://www.ronaoff.com/item/${itemId}`;
 
-  // Puppeteer 실행 (리소스 최소화)
   const browser = await puppeteer.launch({
     headless: 'new',
     args: [

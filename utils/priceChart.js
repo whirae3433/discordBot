@@ -34,7 +34,7 @@ async function createPriceChart(data, label) {
         // 거래량 (왼쪽)
         {
           type: 'bar',
-          label: `${label} 거래량`,
+          label: `거래량`,
           data: volumes,
           backgroundColor: 'rgba(180, 0, 255, 0.35)',
           borderColor: 'rgba(180, 0, 255, 0.8)',
@@ -45,7 +45,7 @@ async function createPriceChart(data, label) {
         // 가격 (오른쪽)
         {
           type: 'line',
-          label: `${label} 가격(만)`,
+          label: `가격(만)`,
           data: prices,
           borderColor: '#0090ff',
           backgroundColor: 'rgba(0,144,255,0.25)',
