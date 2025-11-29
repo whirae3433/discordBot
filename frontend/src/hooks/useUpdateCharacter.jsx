@@ -33,7 +33,6 @@ export function useUpdateCharacter() {
           level:        toNumOrUndef(data.level),
           atk:          toNumOrUndef(data.atk),
           bossDmg:      toNumOrUndef(data.bossDmg),
-          accountGroup: toStrOrUndef(data.accountGroup),
           order:        toStrOrUndef(data.order),
           hp:           toNumOrUndef(data.hp),          
           acc:          toNumOrUndef(data.acc),     

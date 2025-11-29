@@ -1,8 +1,4 @@
-const {
-  ChannelType,
-  PermissionsBitField,
-  MessageFlags,
-} = require('discord.js');
+const { ChannelType, PermissionsBitField } = require('discord.js');
 const pool = require('../../pg/db');
 const { safeReply } = require('../../utils/safeReply');
 

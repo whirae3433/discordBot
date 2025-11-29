@@ -1,8 +1,6 @@
 export default function BasicInfoForm({
   ign,
   setIgn,
-  // profileImg,
-  // setProfileImg,
   level,
   setLevel,
 }) {
@@ -42,13 +40,6 @@ export default function BasicInfoForm({
         }
         onInput={(e) => e.currentTarget.setCustomValidity('')}
       />
-      {/* <input
-        type="text"
-        placeholder="프로필 이미지 URL"
-        value={profileImg}
-        onChange={(e) => setProfileImg(e.target.value)}
-        className="w-full mb-2 p-2 border border-gray-300 rounded"
-      /> */}
     </div>
   );
 }

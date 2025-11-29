@@ -1,70 +1,61 @@
-const { sheets } = require('../../utils/googleSheets');
-const channelConfigMap = require('../../config');
+const pool = require('../../pg/db');
+const { updateProfileChannel } = require('../../pg/updateProfileChannel');
 
 module.exports = async function deleteCharacter(req, res) {
   const { serverId, discordId, characterId } = req.params;
 
-  const spreadsheetId = channelConfigMap[serverId]?.spreadsheetId;
-  if (!spreadsheetId) {
-    return res.status(400).json({ error: '유효하지 않은 serverId' });
-  }
-
+  const client = await pool.connect();
   try {
-    // 1. 시트 ID 얻기 (길드원 시트의 내부 ID 조회)
-    const meta = await sheets.spreadsheets.get({ spreadsheetId });
-    const targetSheet = meta.data.sheets.find(
-      (sheet) => sheet.properties.title === '길드원'
-    );
-    if (!targetSheet) {
-      return res.status(404).json({ error: '길드원 시트를 찾을 수 없음' });
-    }
+    await client.query('BEGIN');
 
-    const sheetId = targetSheet.properties.sheetId;
-
-    // 2. 전체 데이터 가져오기
-    const range = `길드원!A:O`;
-    const result = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range,
-    });
-    const rows = result.data.values || [];
-
-    // 3. 해당 캐릭터 위치 찾기
-    const targetIndex = rows.findIndex(
-      (row) =>
-        row[0]?.toString().trim() === discordId.toString().trim() &&
-        row[1]?.toString().trim() === characterId.toString().trim()
+    // 1) 삭제 대상 캐릭터 IGN 조회
+    const find = await client.query(
+      `
+      SELECT ingame_name, discord_id
+      FROM characters
+      WHERE character_uuid = $1
+      `,
+      [characterId]
     );
 
-    if (targetIndex === -1) {
-      return res.status(404).json({ error: '캐릭터를 찾을 수 없음' });
+    const row = find.rows[0];
+
+    // ⛔ 본인만 삭제 가능
+    if (String(row.discord_id) !== String(discordId)) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({
+        error: '본인이 등록한 캐릭터만 삭제할 수 있습니다.',
+      });
     }
 
-    // 4. 실제 데이터 행 번호 (헤더 포함이므로 +1 필요)
-    const rowNumber = targetIndex;
+    const targetIGN = find.rows[0].ingame_name;
 
-    // 5. 행 삭제 (헤더 제외 → 데이터는 1행부터 시작하므로 startIndex = rowNumber)
-    await sheets.spreadsheets.batchUpdate({
-      spreadsheetId,
-      requestBody: {
-        requests: [
-          {
-            deleteDimension: {
-              range: {
-                sheetId,
-                dimension: 'ROWS',
-                startIndex: rowNumber,     // inclusive
-                endIndex: rowNumber + 1,   // exclusive
-              },
-            },
-          },
-        ],
-      },
-    });
+    // 2) 캐릭터 삭제
+    await client.query(
+      `
+      DELETE FROM characters
+      WHERE character_uuid = $1
+      `,
+      [characterId]
+    );
 
-    res.json({ success: true, message: '캐릭터 삭제 완료' });
+    await client.query('COMMIT');
+
+    // 3) 프로필 채널 부분 갱신 (해당 IGN만 삭제/갱신)
+    updateProfileChannel(global.botClient, serverId, targetIGN).catch((err) =>
+      console.error('[프로필 채널 자동 갱신 실패]', err)
+    );
+
+    return res.json({ success: true, message: '캐릭터 삭제 완료' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: '캐릭터 삭제 실패' });
+    await client.query('ROLLBACK');
+    console.error('[ERROR deleteCharacter]', err);
+
+    return res.status(500).json({
+      error: '캐릭터 삭제 실패',
+      detail: err.message,
+    });
+  } finally {
+    client.release();
   }
 };

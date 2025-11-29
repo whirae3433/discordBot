@@ -1,19 +1,31 @@
 const { MessageFlags } = require('discord-api-types/v10');
 
+const autocompleteRona = require('./autocomplete/rona_autocomplete');
+
+const slashCommands = new Map();
+slashCommands.set('무영봇', require('../commands/slash/setupMuyeongBot.js'));
+slashCommands.set('로나오프', require('../commands/slash/priceCommand.js'));
+slashCommands.set('정보', require('../commands/slash/info.js'));
+slashCommands.set('분배금', require('../commands/slash/rewardCommand.js'));
+
 const buttonHandlers = {
   member_list: require('./buttons/member_list'),
   button_guest_reserve: require('./buttons/button_guest_reserve'),
   button_guest_status: require('./buttons/button_guest_status'),
+  button_channel_menu: require('./buttons/button_channel_menu'),
   button_create_guest_status_channel: require('./buttons/button_create_guest_status_channel'),
+  button_create_profile_channel: require('./buttons/button_create_profile_channel'),
   set_amount: require('./buttons/set_amount'),
   button_incentive_set: require('./buttons/button_incentive_set'),
-  button_profile_register: require('./buttons/button_profile_register'),
+  button_profile_menu: require('./buttons/button_profile_menu'),
+  btn_profile_search: require('./buttons/btn_profile_search'),
 };
 
 const selectHandlers = {
   select_guest_reserve: require('./selects/select_guest_reserve.js'),
   select_guest_edit: require('./selects/select_guest_edit'),
   select_guest_delete: require('./selects/select_guest_delete'),
+  profile_select_job: require('./selects/profile_select_job'),
 };
 
 const modalHandlers = {
@@ -24,10 +36,26 @@ const modalHandlers = {
   modal_guest_edit: require('./modals/modal_guest_edit'),
   modal_guest_delete: require('./modals/modal_guest_delete'),
   modal_incentive_add: require('./modals/modal_incentive_add.js'),
+  modal_profile_search: require('./modals/modal_profile_search'),
 };
 
 module.exports = async (interaction) => {
   try {
+    // 자동완성 처리
+    if (interaction.isAutocomplete()) {
+      if (interaction.commandName === '로나오프') {
+        return autocompleteRona(interaction);
+      }
+      return;
+    }
+
+    //  슬래시 명령어 처리
+    if (interaction.isChatInputCommand()) {
+      const cmd = slashCommands.get(interaction.commandName);
+      if (cmd) return cmd.execute(interaction);
+      return;
+    }
+
     if (interaction.isButton()) {
       console.log('BUTTON PRESS:', interaction.customId);
       const id = interaction.customId;

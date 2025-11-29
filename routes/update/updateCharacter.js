@@ -1,19 +1,10 @@
-const { sheets } = require('../../utils/googleSheets');
-const channelConfigMap = require('../../config');
-
-const todayKST = () => {
-  const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  return kst.toISOString().slice(0, 10);
-};
+const pool = require('../../pg/db');
+const { updateProfileChannel } = require('../../pg/updateProfileChannel');
 
 module.exports = async function updateCharacter(req, res) {
   const { serverId, discordId, characterId } = req.params;
   const {
-    profileImg,
-    nickname,
     ign,
-    accountGroup,
-    order,
     level,
     hp,
     acc,
@@ -21,71 +12,115 @@ module.exports = async function updateCharacter(req, res) {
     atk,
     bossDmg,
     mapleWarrior,
-    // clientLastModified, // 필요시 사용
   } = req.body;
 
-  console.log('[PATCH] params=', { serverId, discordId, characterId }); // ✅
-  console.log('[PATCH] body_keys=', Object.keys(req.body)); // ✅
-
-  const spreadsheetId = channelConfigMap[serverId]?.spreadsheetId;
-  if (!spreadsheetId) {
-    return res.status(400).json({ error: '유효하지 않은 serverId' });
-  }
+  const client = await pool.connect();
 
   try {
-    const range = `길드원!A:O`;
-    const result = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range,
-    });
-    const rows = result.data.values || [];
+    await client.query('BEGIN');
 
-    const targetIndex = rows.findIndex((row, idx) => {
-      if (idx === 0) return false; // header
-      const rowDiscordId = String(row[0] ?? '');
-      const rowUuid = String(row[1] ?? '');
-      return (
-        rowDiscordId === String(discordId) && rowUuid === String(characterId)
-      );
-    });
+    // 1) 기존 캐릭터 정보 가져오기
+    const prevRes = await client.query(
+      `
+      SELECT 
+        c.character_uuid,
+        c.discord_id,
+        c.ingame_name AS ign,
+        c.job_id,
+        c.level,
+        c.hp,
+        c.acc,
+        c.atk,
+        c.boss_dmg,
+        c.maple_warrior,
+        j.job_name
+      FROM characters c
+      LEFT JOIN jobs j ON c.job_id = j.job_id
+      WHERE c.character_uuid = $1
+      `,
+      [characterId]
+    );
 
-    if (targetIndex === -1) {
-      return res.status(404).json({ error: '대상 캐릭터를 찾을 수 없음' });
+    if (prevRes.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: '수정할 캐릭터를 찾을 수 없습니다.' });
     }
 
-    const old = rows[targetIndex];
-    const safe = (arr, i, def = '') => (arr[i] !== undefined ? arr[i] : def);
+    const prev = prevRes.rows[0];
 
-    const nextRow = [];
-    nextRow[0] = safe(old, 0); // 디코ID
-    nextRow[1] = safe(old, 1); // UUID
-    nextRow[2] = profileImg ?? safe(old, 2);
-    nextRow[3] = nickname ?? safe(old, 3);
-    nextRow[4] = ign ?? safe(old, 4);
-    nextRow[5] = accountGroup ?? safe(old, 5);
-    nextRow[6] = order ?? safe(old, 6);
-    nextRow[7] = level ?? safe(old, 7);
-    nextRow[8] = hp ?? safe(old, 8);
-    nextRow[9] = acc ?? safe(old, 9);
-    nextRow[10] = job ?? safe(old, 10);
-    nextRow[11] = atk ?? safe(old, 11);
-    nextRow[12] = bossDmg ?? safe(old, 12);
-    nextRow[13] = mapleWarrior ?? safe(old, 13);
-    nextRow[14] = todayKST(); // 수정일
+    // ⛔ 본인만 수정 가능
+    if (String(prev.discord_id) !== String(discordId)) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ error: '본인이 등록한 캐릭터만 수정할 수 있습니다.' });
+    }
 
-    const rowNumber = targetIndex + 1; // 1-based
-    const writeRange = `길드원!A${rowNumber}:O${rowNumber}`;
+    const oldIGN = prev.ign;
 
-    await sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range: writeRange,
-      valueInputOption: 'USER_ENTERED',
-      requestBody: { values: [nextRow] },
-    });
+    // 2) job_name → job_id 변환
+    let jobId = prev.job_id;
+    if (job) {
+      const jobRes = await client.query(
+        `SELECT job_id FROM jobs WHERE job_name = $1`,
+        [job]
+      );
+      if (jobRes.rowCount === 0) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: `알 수 없는 직업명: ${job}` });
+      }
+      jobId = jobRes.rows[0].job_id;
+    }
 
-    return res.json({ ok: true });
+    const today = new Date().toISOString().split('T')[0];
+
+    // 3) DB 업데이트
+    await client.query(
+      `
+      UPDATE characters
+      SET
+        ingame_name = COALESCE($1, ingame_name),
+        job_id      = $2,
+        level       = COALESCE($3, level),
+        hp          = COALESCE($4, hp),
+        acc         = COALESCE($5, acc),
+        atk         = COALESCE($6, atk),
+        boss_dmg    = COALESCE($7, boss_dmg),
+        maple_warrior = COALESCE($8, maple_warrior),
+        updated_at  = $9
+      WHERE character_uuid = $10
+      `,
+      [
+        ign ?? null,
+        jobId,
+        level ?? null,
+        hp ?? null,
+        acc ?? null,
+        atk ?? null,
+        bossDmg ?? null,
+        mapleWarrior ?? null,
+        today,
+        characterId,
+      ]
+    );
+
+    await client.query('COMMIT');
+
+    // 4) IGN 변경 여부 체크
+    const newIGN = ign ?? oldIGN;
+
+    // 5) 프로필 채널 갱신
+    updateProfileChannel(global.botClient, serverId, newIGN)
+      .catch(err => console.error('[프로필 채널 자동 갱신 실패]', err));
+
+    return res.json({ success: true, message: '캐릭터 수정 완료' });
+
   } catch (err) {
-    console.error('updateCharacter error:', err?.response?.data || err);
-    return res.status(500).json({ error: '서버 오류', detail: String(err) });
+    await client.query('ROLLBACK');
+    console.error('[ERROR updateCharacter]', err);
+    return res.status(500).json({
+      error: '캐릭터 수정 실패',
+      detail: err.message,
+    });
+  } finally {
+    client.release();
   }
 };

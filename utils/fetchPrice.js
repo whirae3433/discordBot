@@ -1,24 +1,67 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
 
-async function fetchPriceData(itemId = '1132018') {
+async function fetchPriceData(itemId) {
   const url = `https://www.ronaoff.com/item/${itemId}`;
-  const { data } = await axios.get(url);
-  const $ = cheerio.load(data);
 
-  const result = [];
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+    ],
+  });
 
-  $('.flex.items-center.p-2').each((_, el) => {
-    const date = $(el).find('p').eq(0).text().trim();
-    const volume = $(el).find('p').eq(1).text().trim();
-    const price = $(el).find('p').eq(2).text().trim();
+  const page = await browser.newPage();
 
-    if (date && volume && price) {
-      result.push({ date, volume, price });
+  // 이미지, 폰트, CSS, 미디어 차단
+  await page.setRequestInterception(true);
+  page.on('request', (req) => {
+    if (['image', 'stylesheet', 'font', 'media'].includes(req.resourceType())) {
+      req.abort();
+    } else {
+      req.continue();
     }
   });
 
-  return result;
+  // 페이지 로드
+  await page.goto(url, { waitUntil: 'networkidle2' });
+
+  // "더보기" 버튼 반복 클릭 (더보기 없어질 때까지)
+  let clicked = true;
+  while (clicked) {
+    clicked = await page.evaluate(() => {
+      const btn = [...document.querySelectorAll('button')].find((b) =>
+        b.textContent.includes('더보기')
+      );
+      if (!btn) return false;
+      btn.click();
+      return true;
+    });
+
+    if (clicked) {
+      // 그냥 300ms 기다리기용
+      await page.waitForFunction(() => true, { timeout: 300 });
+    }
+  }
+
+  // 데이터 파싱
+  const result = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('.flex.items-center.p-2')];
+    return rows.map((row) => {
+      const p = row.querySelectorAll('p');
+      return {
+        date: p[0]?.textContent.trim(),
+        volume: p[1]?.textContent.trim(),
+        price: p[2]?.textContent.trim(),
+      };
+    });
+  });
+
+  await browser.close();
+
+  // 유효 데이터만 필터링
+  return result.filter((d) => d.date && d.volume && d.price);
 }
 
 module.exports = { fetchPriceData };

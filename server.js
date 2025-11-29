@@ -42,6 +42,7 @@ const updateRoutes = require('./routes/update/index.js');
 const authRoutes = require('./routes/auth.js');
 const nicknameRoutes = require('./routes/nickname.js');
 const listCharacters = require('./routes/read/listCharacters');
+const reportItemRoute = require('./routes/reportItem');
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/nickname', nicknameRoutes);
 app.get('/api/:serverId/characters', listCharacters);
 app.use('/api/invite', require('./routes/invite'));
+app.use('/api/report-item', reportItemRoute);
 
 // React 정적 파일 서빙
 app.use(express.static(path.join(__dirname, 'frontend', 'build')));

@@ -1,7 +1,6 @@
-const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
-const { cropCenterSquare } = require('./imageHelper');
+const { EmbedBuilder } = require('discord.js');
 const { getDaysAgo } = require('./dateHelper');
-const path = require('path'); 
+const path = require('path');
 
 const BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3001';
 const DEFAULT_IMAGE_PATH = path.resolve(__dirname, '../public/기본.jpeg');
@@ -21,60 +20,65 @@ function createRegisterEmbed(serverId, discordId) {
     .setColor(0x00ae86);
 }
 
-async function createProfileEmbed(profile, serverId, extraProfiles = []) {
-  const { text: daysAgoText, color } = getDaysAgo(profile.regDate);
+// 디스코드 아바타 URL 생성
+function getDiscordAvatarUrl(client, discordId) {
+  try {
+    const user = client.users.cache.get(discordId);
+    if (!user) return DEFAULT_IMAGE_PATH;
 
-  // URL 검증 → 잘못된 값이면 기본 이미지 사용
-  const imageUrl =
-    profile.profileImg && profile.profileImg.startsWith('http')
-      ? profile.profileImg
-      : DEFAULT_IMAGE_PATH;
+    return (
+      user.displayAvatarURL({ extension: 'png', size: 256 }) ||
+      DEFAULT_IMAGE_PATH
+    );
+  } catch (e) {
+    return DEFAULT_IMAGE_PATH;
+  }
+}
+async function createProfileEmbed(profile, extraProfiles = []) {
+  const client = global.botClient;
+  const { text: daysAgoText, color } = getDaysAgo(profile.updatedAt);
 
-  const imagePath = await cropCenterSquare(imageUrl);
-  const attachment = new AttachmentBuilder(imagePath, {
-    name: 'thumbnail.png',
-  });
-
-  const embed = new EmbedBuilder()
-    .setTitle(`${profile.ign}님의 프로필`)
-    // .setDescription(
-    //   `[📝 프로필 확인/수정하기](${getProfileUrl(
-    //     serverId,
-    //     profile.discordId
-    //   )})\n\u200B`
-    // )
-    // .setThumbnail('attachment://thumbnail.png')
-    .setColor(color)
-    .setFooter({ text: `업데이트 : ${daysAgoText}` });
+  const avatarUrl = getDiscordAvatarUrl(client, profile.discordId);
 
   const allProfiles = [profile, ...extraProfiles];
 
+  const embeds = [];
+  let currentEmbed = new EmbedBuilder()
+    .setTitle(`${profile.ign}님의 프로필`)
+    .setThumbnail(avatarUrl)
+    .setColor(color)
+    .setFooter({ text: `업데이트 : ${daysAgoText}` });
+
+  let fieldCount = 0;
+  
   for (const p of allProfiles) {
-    embed.addFields(
-      { name: `Lv: ${p.level || '1'}`, value: '', inline: true },
-      { name: `Hp: ${p.hp || '???'}`, value: '', inline: true },
-      { name: `Acc: ${p.acc || '???'}`, value: '', inline: true },
-      { name: `${p.job || '백수'}`, value: '', inline: true },
+    const fields = [
+      { name: `${p.jobName || '백수'}`, value: '', inline: true },
       {
         name: `${p.atk || '없음'} | ${p.bossDmg ? p.bossDmg + '%' : '0%'}`,
         value: '',
         inline: true,
       },
-      {
-        name: `${p.mapleWarrior || '없음'}`, //
-        value: '',
-        inline: true,
-      },
-      {
-        name: '',
-        value: '━━━━━━━━━━━━━━━━━━━━━━━━━━',
-        inline: false,
-      }
-    );
+      { name: `${p.mapleWarrior || '없음'}`, value: '', inline: true },
+      { name: `Lv: ${p.level || '1'}`, value: '', inline: true },
+      { name: `Hp: ${p.hp || '???'}`, value: '', inline: true },
+      { name: `Acc: ${p.acc || '???'}`, value: '', inline: true },
+      { name: '', value: '━━━━━━━━━━━━━━━━━━━━━━━━━━', inline: false },
+    ];
+
+    if (fieldCount + fields.length > 25) {
+      embeds.push(currentEmbed);
+      currentEmbed = new EmbedBuilder().setColor(color);
+      fieldCount = 0;
+    }
+
+    currentEmbed.addFields(...fields);
+    fieldCount += fields.length;
   }
 
-  // return { embeds: [embed], files: [attachment] };
-  return { embeds: [embed] };
-}
+  // 마지막 embed push
+  embeds.push(currentEmbed);
 
+  return { embeds };
+}
 module.exports = { createRegisterEmbed, createProfileEmbed };

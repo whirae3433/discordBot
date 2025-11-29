@@ -1,47 +1,24 @@
 const channelConfigMap = require('../config');
 
+// prefix 명령어는 더 이상 지원하지 않음
 module.exports.messageHandlers = async (message, client) => {
   if (message.author.bot) return false;
-  if (!message.guild) return false; // DM은 무시 (원하면 제거)
+  if (!message.guild) return false;
 
-  const serverId = message.guild.id;
-  const channelId = message.channel.id;
+  const content = message.content.trim(); 
 
-  const cfg = channelConfigMap[serverId];
-  const [commandName, ...args] = message.content.trim().split(/\s+/);
+  // 예전 "!정보" 처리 방지
+  if (content.startsWith('!')) {
+    const warning = await message.reply({
+      content: `🚫 이제 **슬래시('/무영') 명령어와 버튼**만 사용할 수 있어요!`,
+    });
+    setTimeout(() => warning.delete().catch(() => {}), 5000);
 
-  // 제한 채널 처리
-  if (cfg?.restrictedChannel === channelId) {
-    const isAllowedCommand = commandName === '!무영봇설정';
-    if (!isAllowedCommand) {
-      try {
-        await message.delete();
-        const warning = await message.channel.send({
-          content: `🚫 이 채널에서는 버튼으로 소통해주세요.`,
-        });
-        setTimeout(() => {
-          warning.delete().catch(() => {});
-        }, 3000);
-      } catch (err) {
-        console.error('[제한 채널 삭제 오류]', err);
-      }
-      return true; // 이후 로직 중단
-    }
+    // 유저 메시지도 삭제 (선택)
+    if (message.deletable) message.delete().catch(() => {});
+    return true;
   }
 
-  const { commands } = require('../commands'); // ⬅️ 이제 admin 제거했으니 순환 위험 없음
-  const command = commands.get(commandName);
-
-  if (command) {
-    try {
-      await command.execute(message, args, client);
-      return true;
-    } catch (err) {
-      console.error(`명령어 실행 오류 (${commandName}):`, err);
-      message.reply('❌ 명령어 실행 중 오류가 발생했습니다.');
-      return true;
-    }
-  }
-
-  return false; // 해당 명령어 없음
+  // prefix 명령어는 완전히 비활성화했으므로 더 이상 처리할 것 없음
+  return false;
 };

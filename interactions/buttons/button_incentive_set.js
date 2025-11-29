@@ -2,10 +2,34 @@ const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const pool = require('../../pg/db');
 const { safeReply } = require('../../utils/safeReply');
 
+// 관리자 권한 체크
+async function ensureAdmin(serverId, userId) {
+  const check = await pool.query(
+    `
+    SELECT 1 
+    FROM bot_admins 
+    WHERE server_id = $1 AND discord_id = $2
+    `,
+    [serverId, userId]
+  );
+  return check.rowCount > 0;
+}
+
 module.exports = async (interaction) => {
-  const serverId = interaction.guild.id;
+  const guild = interaction.guild;
+  const serverId = guild.id;
+  const userId = interaction.user.id;
 
   try {
+    // 관리자 체크
+    const isAdmin = await ensureAdmin(serverId, userId);
+    if (!isAdmin) {
+      return safeReply(interaction, '⚠️ 관리자 전용 메뉴입니다.', {
+        ephemeral: true,
+        deleteAfter: 3000,
+      });
+    }
+
     const { rows } = await pool.query(
       `SELECT name, amount 
        FROM incentive_reference 

@@ -33,7 +33,6 @@ export default function EditCharacterModal({
     level: character?.level === 0 || character?.level ? String(character.level) : '',
     atk: character?.atk === 0 || character?.atk ? String(character.atk) : '',
     bossDmg: character?.bossDmg === 0 || character?.bossDmg ? String(character.bossDmg) : '',
-    accountGroup: character?.accountGroup ?? '본계정',
     hp: character?.hp === 0 || character?.hp ? String(character.hp) : '',
     acc: character?.acc === 0 || character?.acc ? String(character.acc) : '',
     mapleWarrior: character?.mapleWarrior ?? '없음',
