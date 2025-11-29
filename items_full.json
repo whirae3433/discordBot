@@ -1,5 +1,15 @@
 [
-{
+  {
+    "name": "엘릭서",
+    "id": "2023235",
+    "icon": "https://maplestory.io/api/kms/latest/item/2023235/icon"
+  },
+  {
+    "name": "파워 엘릭서",
+    "id": "2023236",
+    "icon": "https://maplestory.io/api/kms/latest/item/2023236/icon"
+  },
+  {
     "name": "푸른 복대",
     "id": "1132018",
     "icon": "https://maplestory.io/api/kms/latest/item/1132018/icon"
