@@ -6,7 +6,6 @@ const slashCommands = new Map();
 slashCommands.set('무영봇', require('../commands/slash/setupMuyeongBot.js'));
 slashCommands.set('로나오프', require('../commands/slash/priceCommand.js'));
 slashCommands.set('정보', require('../commands/slash/info.js'));
-slashCommands.set('분배금', require('../commands/slash/rewardCommand.js'));
 
 const buttonHandlers = {
   member_list: require('./buttons/member_list'),

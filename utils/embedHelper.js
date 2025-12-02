@@ -1,23 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
 const { getDaysAgo } = require('./dateHelper');
-const path = require('path');
-
-const BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3001';
-
-const getProfileUrl = (serverId, discordId) =>
-  `${BASE_URL}/${serverId}/profile/${discordId}`;
-
-function createRegisterEmbed(serverId, discordId) {
-  return new EmbedBuilder()
-    .setTitle('무영봇 프로필 등록')
-    .setDescription(
-      `프로필을 등록하고 싶어?\n[📝 프로필 등록/수정](${getProfileUrl(
-        serverId,
-        discordId
-      )})\n\u200B`
-    )
-    .setColor(0x00ae86);
-}
 
 // 디스코드 아바타 URL 생성
 async function getDiscordAvatarUrl(client, discordId) {
@@ -84,4 +66,4 @@ async function createProfileEmbed(profile, extraProfiles = []) {
 
   return { embeds };
 }
-module.exports = { createRegisterEmbed, createProfileEmbed };
+module.exports = { createProfileEmbed };

@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const session = require('express-session');
 const { Client, GatewayIntentBits } = require('discord.js');
-const { messageHandlers } = require('./utils/messageHandlers.js');
 const handleInteraction = require('./interactions');
 const startGuestStatusScheduler = require('./schedule/updateGuestStatusDaily');
 const startRecruitScheduler = require('./schedule/recruit_scheduler');
@@ -26,11 +25,6 @@ client.once('ready', () => {
   console.log(`✅ 로그인됨: ${client.user.tag}`);
   startGuestStatusScheduler(client);
   startRecruitScheduler(client);
-});
-
-client.on('messageCreate', async (message) => {
-  if (message.author.bot) return;
-  await messageHandlers(message, client);
 });
 
 client.on('interactionCreate', handleInteraction);

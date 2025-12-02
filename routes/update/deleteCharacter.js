@@ -20,7 +20,7 @@ module.exports = async function deleteCharacter(req, res) {
 
     const row = find.rows[0];
 
-    // ⛔ 본인만 삭제 가능
+    // 본인만 삭제 가능
     if (String(row.discord_id) !== String(discordId)) {
       await client.query('ROLLBACK');
       return res.status(403).json({
@@ -30,7 +30,7 @@ module.exports = async function deleteCharacter(req, res) {
 
     const targetIGN = find.rows[0].ingame_name;
 
-    // 2) 캐릭터 삭제
+    // 캐릭터 삭제
     await client.query(
       `
       DELETE FROM characters
@@ -41,7 +41,7 @@ module.exports = async function deleteCharacter(req, res) {
 
     await client.query('COMMIT');
 
-    // 3) 프로필 채널 부분 갱신 (해당 IGN만 삭제/갱신)
+    // 프로필 채널 부분 갱신 (해당 IGN만 삭제/갱신)
     updateProfileChannel(global.botClient, serverId, targetIGN).catch((err) =>
       console.error('[프로필 채널 자동 갱신 실패]', err)
     );

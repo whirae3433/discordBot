@@ -1,4 +1,3 @@
-// utils/priceChart.js
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
 const width = 1200;
