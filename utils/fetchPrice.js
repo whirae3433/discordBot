@@ -27,23 +27,16 @@ async function fetchPriceData(itemId) {
   // 페이지 로드
   await page.goto(url, { waitUntil: 'networkidle2' });
 
-  // "더보기" 버튼 반복 클릭 (더보기 없어질 때까지)
-  let clicked = true;
-  while (clicked) {
-    clicked = await page.evaluate(() => {
-      const btn = [...document.querySelectorAll('button')].find((b) =>
-        b.textContent.includes('더보기')
-      );
-      if (!btn) return false;
-      btn.click();
-      return true;
-    });
+  // "더보기" 버튼 클릭
+  await page.evaluate(() => {
+    const btn = [...document.querySelectorAll('button')].find((b) =>
+      b.textContent.includes('더보기')
+    );
+    if (btn) btn.click();
+  });
 
-    if (clicked) {
-      // 그냥 300ms 기다리기용
-      await page.waitForFunction(() => true, { timeout: 300 });
-    }
-  }
+  // 300ms 로딩 대기
+  await page.waitForFunction(() => true, { timeout: 300 });
 
   // 데이터 파싱
   const result = await page.evaluate(() => {

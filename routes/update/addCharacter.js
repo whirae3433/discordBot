@@ -6,13 +6,13 @@ module.exports = async function addCharacter(req, res) {
   const { discordId, serverId } = req.params;
   const { ign, level, hp, acc, job, atk, bossDmg, mapleWarrior } = req.body;
 
-  // 🔥 숫자 변환 (함수 내부에서 해야 함)
+  // 숫자 변환 (함수 내부에서 해야 함)
   const levelNum = Number(level);
   const hpNum = Number(hp);
   const accNum = Number(acc);
   const atkNum = Number(atk);
 
-  // 🔥 숫자 판별
+  // 숫자 판별
   if ([levelNum, hpNum, accNum, atkNum].some((n) => Number.isNaN(n))) {
     return res.status(400).json({
       error: '숫자형 필드에 유효하지 않은 값이 들어왔습니다.',
@@ -32,7 +32,7 @@ module.exports = async function addCharacter(req, res) {
     const discordName =
       member.nickname || member.user.globalName || member.user.username;
 
-    // 1) 서버에 멤버 등록
+    // 서버에 멤버 등록
     await client.query(
       `
       INSERT INTO members (server_id, discord_id, discord_name)
@@ -43,7 +43,7 @@ module.exports = async function addCharacter(req, res) {
       [serverId, discordId, discordName]
     );
 
-    // 2) 직업명 → job_id 조회
+    // 직업명 → job_id 조회
     const jobRes = await client.query(
       `SELECT job_id FROM jobs WHERE job_name = $1`,
       [job]
@@ -55,7 +55,7 @@ module.exports = async function addCharacter(req, res) {
 
     const jobId = jobRes.rows[0].job_id;
 
-    // 3) 캐릭터 INSERT
+    // 캐릭터 INSERT
     await client.query(
       `
       INSERT INTO characters (
@@ -96,7 +96,6 @@ module.exports = async function addCharacter(req, res) {
     );
 
     res.json({ success: true, message: '캐릭터 추가 완료', id: characterUuid });
-
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('[ERROR addCharacter]', err);

@@ -5,7 +5,6 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  MessageFlags,
 } = require('discord.js');
 const pool = require('../../pg/db');
 const { createPanelMessage } = require('../../utils/createPannel');

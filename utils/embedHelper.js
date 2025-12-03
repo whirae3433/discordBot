@@ -1,44 +1,29 @@
 const { EmbedBuilder } = require('discord.js');
 const { getDaysAgo } = require('./dateHelper');
-const path = require('path');
-
-const BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3001';
-const DEFAULT_IMAGE_PATH = path.resolve(__dirname, '../public/기본.jpeg');
-
-const getProfileUrl = (serverId, discordId) =>
-  `${BASE_URL}/${serverId}/profile/${discordId}`;
-
-function createRegisterEmbed(serverId, discordId) {
-  return new EmbedBuilder()
-    .setTitle('무영봇 프로필 등록')
-    .setDescription(
-      `프로필을 등록하고 싶어?\n[📝 프로필 등록/수정](${getProfileUrl(
-        serverId,
-        discordId
-      )})\n\u200B`
-    )
-    .setColor(0x00ae86);
-}
 
 // 디스코드 아바타 URL 생성
-function getDiscordAvatarUrl(client, discordId) {
+async function getDiscordAvatarUrl(client, discordId) {
   try {
-    const user = client.users.cache.get(discordId);
-    if (!user) return DEFAULT_IMAGE_PATH;
+    const user =
+      client.users.cache.get(discordId) ||
+      (await client.users.fetch(discordId).catch(() => null));
 
-    return (
-      user.displayAvatarURL({ extension: 'png', size: 256 }) ||
-      DEFAULT_IMAGE_PATH
-    );
-  } catch (e) {
-    return DEFAULT_IMAGE_PATH;
+    if (!user) {
+      return 'https://cdn.discordapp.com/embed/avatars/0.png'; // 기본 디스코드 아바타
+    }
+
+    const url = user.displayAvatarURL({ extension: 'png', size: 256 });
+    return url || 'https://cdn.discordapp.com/embed/avatars/0.png';
+  } catch {
+    return 'https://cdn.discordapp.com/embed/avatars/0.png';
   }
 }
+
 async function createProfileEmbed(profile, extraProfiles = []) {
   const client = global.botClient;
   const { text: daysAgoText, color } = getDaysAgo(profile.updatedAt);
 
-  const avatarUrl = getDiscordAvatarUrl(client, profile.discordId);
+  const avatarUrl = await getDiscordAvatarUrl(client, profile.discordId);
 
   const allProfiles = [profile, ...extraProfiles];
 
@@ -50,7 +35,7 @@ async function createProfileEmbed(profile, extraProfiles = []) {
     .setFooter({ text: `업데이트 : ${daysAgoText}` });
 
   let fieldCount = 0;
-  
+
   for (const p of allProfiles) {
     const fields = [
       { name: `${p.jobName || '백수'}`, value: '', inline: true },
@@ -81,4 +66,4 @@ async function createProfileEmbed(profile, extraProfiles = []) {
 
   return { embeds };
 }
-module.exports = { createRegisterEmbed, createProfileEmbed };
+module.exports = { createProfileEmbed };

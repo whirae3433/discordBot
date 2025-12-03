@@ -50,7 +50,7 @@ async function updateProfileChannel(client, serverId, targetIGN = null) {
       return;
     }
 
-    // ▶ 특정 IGN만 갱신 모드
+    // 특정 IGN만 갱신 모드
     console.log(`[updateProfileChannel] 부분 갱신: ${targetIGN}`);
 
     const messages = await channel.messages.fetch().catch(() => null);

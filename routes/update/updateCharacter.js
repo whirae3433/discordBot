@@ -19,7 +19,7 @@ module.exports = async function updateCharacter(req, res) {
   try {
     await client.query('BEGIN');
 
-    // 1) 기존 캐릭터 정보 가져오기
+    // 기존 캐릭터 정보 가져오기
     const prevRes = await client.query(
       `
       SELECT 
@@ -48,7 +48,7 @@ module.exports = async function updateCharacter(req, res) {
 
     const prev = prevRes.rows[0];
 
-    // ⛔ 본인만 수정 가능
+    // 본인만 수정 가능
     if (String(prev.discord_id) !== String(discordId)) {
       await client.query('ROLLBACK');
       return res.status(403).json({ error: '본인이 등록한 캐릭터만 수정할 수 있습니다.' });
@@ -56,7 +56,7 @@ module.exports = async function updateCharacter(req, res) {
 
     const oldIGN = prev.ign;
 
-    // 2) job_name → job_id 변환
+    // job_name → job_id 변환
     let jobId = prev.job_id;
     if (job) {
       const jobRes = await client.query(
@@ -72,7 +72,7 @@ module.exports = async function updateCharacter(req, res) {
 
     const today = new Date().toISOString().split('T')[0];
 
-    // 3) DB 업데이트
+    // DB 업데이트
     await client.query(
       `
       UPDATE characters
@@ -104,10 +104,10 @@ module.exports = async function updateCharacter(req, res) {
 
     await client.query('COMMIT');
 
-    // 4) IGN 변경 여부 체크
+    // IGN 변경 여부 체크
     const newIGN = ign ?? oldIGN;
 
-    // 5) 프로필 채널 갱신
+    // 프로필 채널 갱신
     updateProfileChannel(global.botClient, serverId, newIGN)
       .catch(err => console.error('[프로필 채널 자동 갱신 실패]', err));
 

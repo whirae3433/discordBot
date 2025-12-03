@@ -1,4 +1,3 @@
-// pg/db.js
 require('dotenv').config();    // 경로 자동 처리
 const { Pool, types } = require('pg');
 
