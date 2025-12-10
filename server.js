@@ -60,16 +60,16 @@ app.get('/api/:serverId/characters', listCharacters);
 app.use('/api/invite', require('./routes/invite'));
 app.use('/api/report-item', reportItemRoute);
 
-// React 정적 파일 서빙
-app.use(express.static(path.join(__dirname, 'frontend', 'build')));
-
-// SPA 라우팅 (API 제외)
-app.get(/^\/(?!api).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
-});
+// prod에서만 build 서빙
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'frontend', 'build')));
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
+  });
+}
 
 // 서버 실행
-const PORT = 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server + Bot running on port ${PORT}`);
 });
