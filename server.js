@@ -1,12 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
 const session = require('express-session');
 const { Client, GatewayIntentBits } = require('discord.js');
 const handleInteraction = require('./interactions');
 const startGuestStatusScheduler = require('./schedule/updateGuestStatusDaily');
-const startRecruitScheduler = require('./schedule/recruit_scheduler');
+
+const app = express();
 
 // --- Discord Bot 초기화 ---
 const client = new Client({
@@ -24,21 +24,11 @@ global.botClient = client;
 client.once('ready', () => {
   console.log(`✅ 로그인됨: ${client.user.tag}`);
   startGuestStatusScheduler(client);
-  startRecruitScheduler(client);
 });
 
 client.on('interactionCreate', handleInteraction);
 
 client.login(process.env.DISCORD_TOKEN);
-
-// --- Express 초기화 ---
-const updateRoutes = require('./routes/update/index.js');
-const authRoutes = require('./routes/auth.js');
-const nicknameRoutes = require('./routes/nickname.js');
-const listCharacters = require('./routes/read/listCharacters');
-const reportItemRoute = require('./routes/reportItem');
-
-const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -53,20 +43,13 @@ app.use(
 );
 
 // API 라우트
-app.use('/api/update', updateRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/nickname', nicknameRoutes);
-app.get('/api/:serverId/characters', listCharacters);
+app.use('/api/update', require('./routes/update'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/nickname', require('./routes/nickname'));
+app.get('/api/:serverId/characters', require('./routes/read/listCharacters'));
 app.use('/api/invite', require('./routes/invite'));
-app.use('/api/report-item', reportItemRoute);
+app.use('/api/report-item', require('./routes/reportItem'));
 
-// prod에서만 build 서빙
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'frontend', 'build')));
-  app.get(/^\/(?!api).*/, (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
-  });
-}
 
 // 서버 실행
 const PORT = process.env.PORT || 3001;
