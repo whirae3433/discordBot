@@ -48,12 +48,14 @@ module.exports = async function getCharacters(req, res) {
         level: row.level,
         hp: row.hp,
         acc: row.acc,
-        job: row.job_name,
+
+        jobName: row.job_name,
         jobGroup: row.job_group,
+
         atk: row.atk,
         bossDmg: row.boss_dmg,
         mapleWarrior: row.maple_warrior,
-        order: row.order,
+
         updatedAt: row.updated_at,
       }));
 
