@@ -5,6 +5,7 @@ const session = require('express-session');
 const { Client, GatewayIntentBits } = require('discord.js');
 const handleInteraction = require('./interactions');
 const startGuestStatusScheduler = require('./schedule/updateGuestStatusDaily');
+const startRecruitScheduler = require('./schedule/recruit_scheduler');
 
 const app = express();
 
@@ -24,6 +25,7 @@ global.botClient = client;
 client.once('ready', () => {
   console.log(`✅ 로그인됨: ${client.user.tag}`);
   startGuestStatusScheduler(client);
+  startRecruitScheduler(client);
 });
 
 client.on('interactionCreate', handleInteraction);
@@ -49,7 +51,6 @@ app.use('/api/nickname', require('./routes/nickname'));
 app.get('/api/:serverId/characters', require('./routes/read/listCharacters'));
 app.use('/api/invite', require('./routes/invite'));
 app.use('/api/report-item', require('./routes/reportItem'));
-
 
 // 서버 실행
 const PORT = process.env.PORT || 3001;
