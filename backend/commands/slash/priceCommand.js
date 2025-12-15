@@ -78,12 +78,34 @@ module.exports = {
     const itemName = item.name;
     const iconUrl = fixIconUrl(item.icon, itemId);
 
-    // DB 시세 데이터 가져오기
-    const priceData = await fetchPriceDataCached(itemId);
-    if (!priceData || priceData.length === 0) {
-      return interaction.editReply(
-        `❌ **${itemName}** 의 시세 데이터가 없습니다.`
+    // 캐시 기반 시세 데이터 조회
+    let { data: priceData } = fetchPriceDataCached(itemId);
+
+    // 캐시 MISS → 자동 대기 UX
+    if (!priceData) {
+      await interaction.editReply(
+        `⏳ **${itemName}** 시세를 불러오는 중입니다...\n잠시만 기다려주세요.`
       );
+
+      const start = Date.now();
+      const TIMEOUT = 20_000; // 20초
+      const INTERVAL = 1_000; // 1초
+
+      while (Date.now() - start < TIMEOUT) {
+        await new Promise((r) => setTimeout(r, INTERVAL));
+
+        const res = fetchPriceDataCached(itemId);
+        if (res.data) {
+          priceData = res.data;
+          break;
+        }
+      }
+
+      if (!priceData) {
+        return interaction.editReply(
+          `❌ **${itemName}** 시세를 불러오지 못했습니다.\n잠시 후 다시 시도해주세요.`
+        );
+      }
     }
 
     // 차트 이미지 생성
@@ -93,7 +115,7 @@ module.exports = {
       itemId
     );
     const chartFileName = 'chart.png';
-    
+
     const chartAttachment = new AttachmentBuilder(chartBuffer, {
       name: chartFileName,
     });
@@ -101,6 +123,7 @@ module.exports = {
     const embed = buildPriceEmbed(itemName, iconUrl, chartFileName, priceData);
 
     return interaction.editReply({
+      content: '',
       embeds: [embed],
       files: [chartAttachment],
     });
