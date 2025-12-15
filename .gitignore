@@ -11,6 +11,3 @@ npm-debug.log*
 # build artifacts
 frontend/build/
 libvips/
-
-# frontend
-frontend/
