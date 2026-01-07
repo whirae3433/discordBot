@@ -1,7 +1,10 @@
 const { safeReply } = require('../../utils/safeReply');
 const { createProfileEmbed } = require('../../utils/embedHelper');
 const { getProfileObjects } = require('../../utils/getProfileObjects');
+const { updateProfileChannel } = require('../../pg/updateProfileChannel');
 const jobGroups = require('../../utils/jobGroups');
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
@@ -20,6 +23,7 @@ module.exports = async (interaction) => {
     const allProfiles = await getProfileObjects(serverId);
 
     const embeds = [];
+    const ignToUpdate = new Set();
 
     // 직업 순서대로 반복
     for (const jobName of jobOrder) {
@@ -35,10 +39,14 @@ module.exports = async (interaction) => {
       }, {});
 
       // IGN 순서대로 embed 생성
-      for (const chars of Object.values(groupedByIgn)) {
+      for (const [ign, chars] of Object.entries(groupedByIgn)) {
+        if (!Array.isArray(chars) || chars.length === 0) continue;
+        
         const [main, ...rest] = chars;
         const embedObj = await createProfileEmbed(main, rest);
         embeds.push(...embedObj.embeds);
+
+        ignToUpdate.add(ign);
       }
     }
 
@@ -54,6 +62,18 @@ module.exports = async (interaction) => {
       embeds,
       flags: 64, // ephemeral
     });
+
+    // 프로필 채널 부분 갱신(백그라운드처럼 돌리되 과부하 방지)
+    (async () => {
+      for (const ign of ignToUpdate) {
+        try {
+          await updateProfileChannel(global.botClient, serverId, ign);
+          await sleep(150); // 0.15초 텀(필요하면 300~500으로 늘려)
+        } catch (err) {
+          console.error('[직업 조회 기반 프로필 갱신 오류]', err);
+        }
+      }
+    })();
 
     // 자동 삭제 20초
     setTimeout(async () => {

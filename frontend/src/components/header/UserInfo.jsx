@@ -1,13 +1,13 @@
 import { useAuth } from '../../hooks/useAuth';
 
-export default function UserInfo({ serverId }) {
+export default function UserInfo() {
   const { user } = useAuth();
 
   if (!user) {
     return <div className="felx items-center">누구세용</div>;
   }
 
-  const displayName = user.nickname || user.username;
+  const displayName = user.nickname || user.globalName || user.username;
 
   return (
     <div className="flex font-bold text-white text-xl items-center gap-3">

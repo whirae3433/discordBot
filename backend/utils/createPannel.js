@@ -74,7 +74,11 @@ async function createPanelMessage(client, guild, serverId) {
       { name: '\u200B', value: '\u200B', inline: true },
       {
         name: '🛠️ 관리자 전용 기능',
-        value: ['• 채널 생성 메뉴', '• 손님 금액 설정','• 인센 금액 설정'].join('\n'),
+        value: [
+          '• 채널 생성 메뉴',
+          '• 손님 금액 설정',
+          '• 인센 금액 설정',
+        ].join('\n'),
         inline: true,
       }
     )
@@ -114,12 +118,29 @@ async function createPanelMessage(client, guild, serverId) {
       .setStyle(ButtonStyle.Danger),
 
     new ButtonBuilder()
-      .setCustomId('button_profile_menu')
-      .setLabel('👤 길드원 프로필')
-      .setStyle(ButtonStyle.Success)
+      .setLabel('🤖 무영봇 링크')
+      .setStyle(ButtonStyle.Link)
+      .setURL(inviteUrl)
   );
 
-  // 두 번째 줄 (관리자용)
+  // 두 번째 줄 (길드 프로필)
+  const rowProfile = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('btn_profile_search')
+      .setLabel('🔎 길드원 ID로 검색')
+      .setStyle(ButtonStyle.Success),
+
+    new ButtonBuilder()
+      .setCustomId('btn_job_search')
+      .setLabel('🗂️ 직업별 조회하기')
+      .setStyle(ButtonStyle.Success),
+    new ButtonBuilder()
+      .setLabel('👤 프로필 등록/수정')
+      .setStyle(ButtonStyle.Link)
+      .setURL(`${process.env.FRONTEND_BASE_URL}/entry?serverId=${serverId}`)
+  );
+
+  // 세 번째 줄 (관리자용)
   const rowAdmin = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('button_channel_menu')
@@ -137,17 +158,9 @@ async function createPanelMessage(client, guild, serverId) {
       .setStyle(ButtonStyle.Secondary)
   );
 
-  // 세 번째 줄 (공개 초대 링크)
-  const rowPublic = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setLabel('🤖 내 서버에서 사용하기')
-      .setStyle(ButtonStyle.Link)
-      .setURL(inviteUrl)
-  );
-
   return {
     embeds: [embed],
-    components: [rowUser, rowAdmin, rowPublic],
+    components: [rowUser, rowProfile, rowAdmin],
   };
 }
 

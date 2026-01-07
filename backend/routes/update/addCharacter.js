@@ -1,9 +1,9 @@
 const { v4: uuidv4 } = require('uuid');
 const pool = require('../../pg/db');
-const { updateProfileChannel } = require('../../pg/updateProfileChannel');
+// const { updateProfileChannel } = require('../../pg/updateProfileChannel');
 
 module.exports = async function addCharacter(req, res) {
-  const { discordId, serverId } = req.params;
+  const { discordId } = req.params;
   const { ign, level, hp, acc, job, atk, bossDmg, mapleWarrior } = req.body;
 
   // 숫자 변환 (함수 내부에서 해야 함)
@@ -26,23 +26,6 @@ module.exports = async function addCharacter(req, res) {
   try {
     await client.query('BEGIN');
 
-    const guild = await global.botClient.guilds.fetch(serverId);
-    const member = await guild.members.fetch(discordId);
-
-    const discordName =
-      member.nickname || member.user.globalName || member.user.username;
-
-    // 서버에 멤버 등록
-    await client.query(
-      `
-      INSERT INTO members (server_id, discord_id, discord_name)
-      VALUES ($1, $2, $3)
-      ON CONFLICT (server_id, discord_id)
-      DO UPDATE SET discord_name = EXCLUDED.discord_name;
-      `,
-      [serverId, discordId, discordName]
-    );
-
     // 직업명 → job_id 조회
     const jobRes = await client.query(
       `SELECT job_id FROM jobs WHERE job_name = $1`,
@@ -50,7 +33,7 @@ module.exports = async function addCharacter(req, res) {
     );
 
     if (jobRes.rowCount === 0) {
-      throw new Error(`알 수 없는 직업명: ${job}`);
+      return res.status(400).json({ error: `알 수 없는 직업명: ${job}` });
     }
 
     const jobId = jobRes.rows[0].job_id;
@@ -90,10 +73,10 @@ module.exports = async function addCharacter(req, res) {
 
     await client.query('COMMIT');
 
-    // 프로필 채널 자동 업데이트
-    updateProfileChannel(global.botClient, serverId, ign).catch((err) =>
-      console.error('[프로필 채널 자동 갱신 실패]', err)
-    );
+    // // 프로필 채널 자동 업데이트
+    // updateProfileChannel(global.botClient, serverId, ign).catch((err) =>
+    //   console.error('[프로필 채널 자동 갱신 실패]', err)
+    // );
 
     res.json({ success: true, message: '캐릭터 추가 완료', id: characterUuid });
   } catch (err) {

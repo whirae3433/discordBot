@@ -4,12 +4,12 @@ export function useDeleteCharacter() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const deleteCharacter = async (serverId, discordId, characterId) => {
+  const deleteCharacter = async (discordId, characterId) => {
     try {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(`/api/update/characters/${serverId}/${discordId}/${characterId}`, {
+      const res = await fetch(`/api/update/characters/${discordId}/${characterId}`, {
         method: 'DELETE',
       });
 

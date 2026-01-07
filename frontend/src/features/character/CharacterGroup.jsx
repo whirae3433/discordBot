@@ -7,7 +7,6 @@ import EditCharacterModal from '../../features/character/components/modals/EditC
 export default function CharacterGroup({
   ign,
   characters,
-  serverId,
   discordId,
   onRefresh,
 }) {
@@ -35,7 +34,6 @@ export default function CharacterGroup({
           <CharacterCard
             key={char.id}
             character={char}
-            serverId={serverId}
             discordId={discordId}
             onDeleted={onRefresh}
             onEdit={openEdit}
@@ -49,19 +47,15 @@ export default function CharacterGroup({
       {/* 모달 */}
       {showModal && (
         <AddCharacterModal
-          serverId={serverId}
           discordId={discordId}
           onClose={handleClose}
-          onSuccess={onRefresh}
         />
       )}
       {editing && (
         <EditCharacterModal
-          serverId={serverId}
           discordId={discordId}
           character={editing}
           onClose={closeEdit}
-          onSuccess={onRefresh}
         />
       )}
     </div>

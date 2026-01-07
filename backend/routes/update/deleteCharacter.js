@@ -1,8 +1,14 @@
 const pool = require('../../pg/db');
-const { updateProfileChannel } = require('../../pg/updateProfileChannel');
+// const { updateProfileChannel } = require('../../pg/updateProfileChannel');
 
 module.exports = async function deleteCharacter(req, res) {
-  const { serverId, discordId, characterId } = req.params;
+  const { discordId, characterId } = req.params;
+
+  if (!discordId || !characterId) {
+    return res
+      .status(400)
+      .json({ error: 'discordId/characterId가 필요합니다.' });
+  }
 
   const client = await pool.connect();
   try {
@@ -18,6 +24,13 @@ module.exports = async function deleteCharacter(req, res) {
       [characterId]
     );
 
+    if (find.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return res
+        .status(404)
+        .json({ error: '삭제할 캐릭터를 찾을 수 없습니다.' });
+    }
+
     const row = find.rows[0];
 
     // 본인만 삭제 가능
@@ -28,23 +41,21 @@ module.exports = async function deleteCharacter(req, res) {
       });
     }
 
-    const targetIGN = find.rows[0].ingame_name;
-
     // 캐릭터 삭제
     await client.query(
       `
       DELETE FROM characters
-      WHERE character_uuid = $1
+      WHERE character_uuid = $1 AND discord_id = $2
       `,
-      [characterId]
+      [characterId, discordId]
     );
 
     await client.query('COMMIT');
 
-    // 프로필 채널 부분 갱신 (해당 IGN만 삭제/갱신)
-    updateProfileChannel(global.botClient, serverId, targetIGN).catch((err) =>
-      console.error('[프로필 채널 자동 갱신 실패]', err)
-    );
+    // // 프로필 채널 부분 갱신 (해당 IGN만 삭제/갱신)
+    // updateProfileChannel(global.botClient, serverId, targetIGN).catch((err) =>
+    //   console.error('[프로필 채널 자동 갱신 실패]', err)
+    // );
 
     return res.json({ success: true, message: '캐릭터 삭제 완료' });
   } catch (err) {

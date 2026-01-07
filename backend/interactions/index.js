@@ -1,6 +1,8 @@
 const { MessageFlags } = require('discord-api-types/v10');
 
 const autocompleteRona = require('./autocomplete/rona_autocomplete');
+const btn_profile_register = require('./buttons/btn_profile_register.js');
+const modal_confirm_profile_redirect = require('./modals/modal_confirm_profile_redirect.js');
 
 const slashCommands = new Map();
 slashCommands.set('무영봇', require('../commands/slash/setupMuyeongBot.js'));
@@ -18,6 +20,8 @@ const buttonHandlers = {
   button_incentive_set: require('./buttons/button_incentive_set'),
   button_profile_menu: require('./buttons/button_profile_menu'),
   btn_profile_search: require('./buttons/btn_profile_search'),
+  btn_job_search: require('./buttons/btn_job_search'),
+  btn_profile_register: require('./buttons/btn_profile_register.js'),
 };
 
 const selectHandlers = {
@@ -36,6 +40,7 @@ const modalHandlers = {
   modal_guest_delete: require('./modals/modal_guest_delete'),
   modal_incentive_add: require('./modals/modal_incentive_add.js'),
   modal_profile_search: require('./modals/modal_profile_search'),
+  modal_confirm_profile_redirect: require('./modals/modal_confirm_profile_redirect'),
 };
 
 module.exports = async (interaction) => {
