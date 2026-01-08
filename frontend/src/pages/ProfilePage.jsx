@@ -9,18 +9,15 @@ import CharacterGroup from '../features/character/CharacterGroup';
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const { serverId, discordId } = useParams();
-  const { characters, loading, fetchCharacters } = useCharacters(
-    serverId,
-    discordId
-  );
+  const { discordId } = useParams();
+  const { characters, loading, fetchCharacters } = useCharacters(discordId);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    if (discordId && serverId) {
+    if (discordId) {
       fetchCharacters();
     }
-  }, [fetchCharacters, discordId, serverId]);
+  }, [fetchCharacters, discordId]);
 
   if (!discordId)
     return <div className="text-white">Discord ID가 없습니다.</div>;
@@ -34,14 +31,14 @@ export default function ProfilePage() {
   }, {});
   const hasCharacters = Object.keys(grouped).length > 0;
 
-  const nickname = user?.nickname;
+  const displayName = user?.username ?? '유저';
 
   return (
     <ProtectedRoute discordId={discordId}>
       <div className="text-white">
         {/* 상단 닉네임 헤더 */}
         <h1 className="text-2xl font-bold mb-6 text-center">
-          {nickname}님의 프로필
+          {displayName}님의 프로필
         </h1>
 
         {hasCharacters ? (
@@ -50,7 +47,6 @@ export default function ProfilePage() {
               key={ign}
               ign={ign}
               characters={chars}
-              serverId={serverId}
               discordId={discordId}
               onRefresh={fetchCharacters}
             />
@@ -65,13 +61,11 @@ export default function ProfilePage() {
 
         {showModal && (
           <AddCharacterModal
-            serverId={serverId}
             discordId={discordId}
             onClose={() => {
               setShowModal(false);
               fetchCharacters();
             }}
-            onSuccess={fetchCharacters}
           />
         )}
       </div>

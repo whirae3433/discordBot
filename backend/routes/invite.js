@@ -7,6 +7,8 @@ const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const DISCORD_INVITE_REDIRECT_URI = process.env.DISCORD_INVITE_REDIRECT_URI;
 const BASE_URL = process.env.BASE_URL;
+const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL;
+
 
 router.get('/callback', async (req, res) => {
   const { code, guild_id } = req.query;
@@ -42,7 +44,7 @@ router.get('/callback', async (req, res) => {
 
     if (!userId || !guild_id) {
       console.log('userId 또는 guild_id 누락 → DB 등록 생략');
-      return res.redirect(`${BASE_URL}/invite-error`);
+      return res.redirect(`${FRONTEND_BASE_URL}/invite-error`);
     }
 
     let serverName = null;
@@ -79,7 +81,7 @@ router.get('/callback', async (req, res) => {
 
     if (existing.rowCount > 0) {
       console.log(`[무영봇 초대] ${guild_id} 서버는 이미 메인 관리자 등록됨`);
-      return res.redirect(`${BASE_URL}/invite-already-exists`);
+      return res.redirect(`${FRONTEND_BASE_URL}/invite-already-exists`);
     }
 
     // 첫 등록이면 main_admin = TRUE로 저장
@@ -95,10 +97,10 @@ router.get('/callback', async (req, res) => {
     );
 
     // 완료 페이지로 이동
-    res.redirect(`${BASE_URL}/invite-success`);
+    res.redirect(`${FRONTEND_BASE_URL}/invite-success`);
   } catch (err) {
     console.error('Invite Callback Error:', err.response?.data || err.message);
-    res.status(500).send('Invite Callback Error');
+    return res.redirect(`${FRONTEND_BASE_URL}/invite-error`);
   }
 });
 

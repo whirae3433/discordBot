@@ -8,6 +8,10 @@ npm-debug.log*
 .pnpm-debug.log*
 .pids
 .dump
+
 # build artifacts
 frontend/build/
 libvips/
+
+# cache 파일
+backend/cache/

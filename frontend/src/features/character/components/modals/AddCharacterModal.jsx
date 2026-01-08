@@ -3,13 +3,13 @@ import { useAddCharacter } from '../../../../hooks/useAddCharacter';
 import { useEscClose } from '../../../../hooks/useEscClose';
 import CharacterForm from '../CharacterForm/CharacterForm';
 
-export default function AddCharacterModal({ serverId, discordId, onClose, onSuccess }) {
+export default function AddCharacterModal({ discordId, onClose, onSuccess }) {
   const { addCharacter, loading, error } = useAddCharacter();
   useEscClose(onClose, loading);
 
   const handleFormSubmit = async (data) => {
     try {
-      await addCharacter(data, serverId, discordId);
+      await addCharacter(data, discordId);
       onSuccess?.();
       onClose();
     } catch {

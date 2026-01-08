@@ -3,25 +3,22 @@ import { RiDeleteBinLine } from 'react-icons/ri';
 import { GrUpdate } from 'react-icons/gr';
 import jobImg from '../../utils/jobImg';
 
-
-
 export default function CharacterCard({
   character,
-  serverId,
   discordId,
   onDeleted,
   onEdit,
 }) {
   const { deleteCharacter } = useDeleteCharacter();
-  console.log(">>> jobImg loaded!", jobImg);
-  console.log("=== USING CharacterCard.jsx VERSION A ===");
-console.log("jobName:", character.jobName);
+  console.log('>>> jobImg loaded!', jobImg);
+  console.log('=== USING CharacterCard.jsx VERSION A ===');
+  console.log('jobName:', character.jobName);
 
   const handleDelete = async () => {
     if (!window.confirm(`${character.ign} 캐릭터를 삭제하시겠습니까?`)) return;
 
     try {
-      await deleteCharacter(serverId, discordId, character.id);
+      await deleteCharacter(discordId, character.id);
       if (onDeleted) onDeleted(); // 삭제 후 목록 리페치
     } catch (err) {
       alert('삭제 중 오류 발생');
@@ -52,7 +49,6 @@ console.log("jobName:", character.jobName);
         alt={character.ign}
         className="w-16 h-16 rounded-full border border-gray-300 mb-2"
       />
-      
 
       {/* 인게임 닉네임 */}
       <h3 className="text-gray-900 font-semibold text-lg mb-2">

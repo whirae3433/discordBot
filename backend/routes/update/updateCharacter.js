@@ -1,18 +1,8 @@
 const pool = require('../../pg/db');
-const { updateProfileChannel } = require('../../pg/updateProfileChannel');
 
 module.exports = async function updateCharacter(req, res) {
-  const { serverId, discordId, characterId } = req.params;
-  const {
-    ign,
-    level,
-    hp,
-    acc,
-    job,
-    atk,
-    bossDmg,
-    mapleWarrior,
-  } = req.body;
+  const { discordId, characterId } = req.params;
+  const { ign, level, hp, acc, job, atk, bossDmg, mapleWarrior } = req.body;
 
   const client = await pool.connect();
 
@@ -43,7 +33,9 @@ module.exports = async function updateCharacter(req, res) {
 
     if (prevRes.rowCount === 0) {
       await client.query('ROLLBACK');
-      return res.status(404).json({ error: '수정할 캐릭터를 찾을 수 없습니다.' });
+      return res
+        .status(404)
+        .json({ error: '수정할 캐릭터를 찾을 수 없습니다.' });
     }
 
     const prev = prevRes.rows[0];
@@ -51,10 +43,10 @@ module.exports = async function updateCharacter(req, res) {
     // 본인만 수정 가능
     if (String(prev.discord_id) !== String(discordId)) {
       await client.query('ROLLBACK');
-      return res.status(403).json({ error: '본인이 등록한 캐릭터만 수정할 수 있습니다.' });
+      return res
+        .status(403)
+        .json({ error: '본인이 등록한 캐릭터만 수정할 수 있습니다.' });
     }
-
-    const oldIGN = prev.ign;
 
     // job_name → job_id 변환
     let jobId = prev.job_id;
@@ -87,6 +79,7 @@ module.exports = async function updateCharacter(req, res) {
         maple_warrior = COALESCE($8, maple_warrior),
         updated_at  = $9
       WHERE character_uuid = $10
+        AND discord_id = $11
       `,
       [
         ign ?? null,
@@ -99,20 +92,17 @@ module.exports = async function updateCharacter(req, res) {
         mapleWarrior ?? null,
         today,
         characterId,
+        discordId,
       ]
     );
 
     await client.query('COMMIT');
 
-    // IGN 변경 여부 체크
-    const newIGN = ign ?? oldIGN;
-
-    // 프로필 채널 갱신
-    updateProfileChannel(global.botClient, serverId, newIGN)
-      .catch(err => console.error('[프로필 채널 자동 갱신 실패]', err));
+    // // 프로필 채널 갱신
+    // updateProfileChannel(global.botClient, serverId, newIGN)
+    //   .catch(err => console.error('[프로필 채널 자동 갱신 실패]', err));
 
     return res.json({ success: true, message: '캐릭터 수정 완료' });
-
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('[ERROR updateCharacter]', err);
