@@ -6,22 +6,16 @@ const {
 } = require('discord.js');
 const pool = require('../../pg/db');
 const { safeReply } = require('../../utils/safeReply');
+const { ensureAdmin } = require('../../utils/ensureAdmin');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
   const userId = interaction.user.id;
 
   try {
-    //  관리자 권한 확인
-    const adminRes = await pool.query(
-      `
-      SELECT 1 FROM bot_admins 
-      WHERE server_id = $1 AND discord_id = $2
-      `,
-      [serverId, userId]
-    );
-
-    if (adminRes.rowCount === 0) {
+    // 관리자 권한 확인 (bot_admins OR super_admin)
+    const isAdmin = await ensureAdmin(serverId, userId);
+    if (!isAdmin) {
       return safeReply(interaction, '⚠️ 관리자 전용 버튼입니다.', {
         ephemeral: true,
         deleteAfter: 3000,

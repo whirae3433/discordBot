@@ -9,21 +9,9 @@ const {
 const pool = require('../../pg/db');
 const { createPanelMessage } = require('../../utils/createPannel');
 const { safeReply } = require('../../utils/safeReply');
+const { ensureAdmin } = require('../../utils/ensureAdmin');
 
 // ---------------- Helper ---------------- //
-
-// 관리자 권한 확인
-async function ensureAdmin(serverId, userId) {
-  const check = await pool.query(
-    `
-    SELECT 1 
-    FROM bot_admins 
-    WHERE server_id = $1 AND discord_id = $2
-    `,
-    [serverId, userId]
-  );
-  return check.rowCount > 0;
-}
 
 // panel 채널 존재 여부 조회
 async function getPanelChannel(serverId, guild) {

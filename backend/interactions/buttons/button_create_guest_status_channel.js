@@ -1,20 +1,9 @@
 const { ChannelType, PermissionsBitField } = require('discord.js');
 const pool = require('../../pg/db');
 const { safeReply } = require('../../utils/safeReply');
+const { ensureAdmin } = require('../../utils/ensureAdmin');
 
 // ---------------- Helper functions ---------------- //
-
-// 관리자 권한 체크
-async function ensureAdmin(serverId, userId) {
-  const check = await pool.query(
-    `
-    SELECT 1 FROM bot_admins 
-    WHERE server_id = $1 AND discord_id = $2
-    `,
-    [serverId, userId]
-  );
-  return check.rowCount > 0;
-}
 
 // 등록된 채널 조회
 async function getRegisteredChannel(serverId, guild) {
