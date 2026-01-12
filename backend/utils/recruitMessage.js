@@ -69,6 +69,7 @@ async function buildRecruitMessage(client, serverId) {
 
   // 메시지 문자열만 생성해서
   return `
+# 👑 독재 카혼목 공대 👑
 \`\`\`
 🐲 카혼목 먹자 🐲
 
@@ -78,9 +79,9 @@ async function buildRecruitMessage(client, serverId) {
 ✨ 격수 보공 M |  메30 파티 ✨
 ⭕ 예약 가능   |  ✅ 구인 완료 
 
-1️⃣ 순위 ${rankMap[1] || '?억'} | [${iconForRank(1, reservedRanks)}]
-2️⃣ 순위 ${rankMap[2] || '?억'} | [${iconForRank(2, reservedRanks)}]
-3️⃣ 순위 ${rankMap[3] || '?억'} | [${iconForRank(3, reservedRanks)}]
+1️⃣ 순위 ${rankMap[1] || '?억'} | [${iconForRank(1, reservedRanks)}] 목걸이 100% + 알
+2️⃣ 순위 ${rankMap[2] || '?억'} | [${iconForRank(2, reservedRanks)}] 목걸이 100%
+3️⃣ 순위 ${rankMap[3] || '?억'} | [${iconForRank(3, reservedRanks)}] 목걸이 90%
   
 📣 3 순위 미드랍시 수수료 포함 전액환불 📣            
 🌈 초행인 분들도 친절하게 설명 드립니다 🌈
