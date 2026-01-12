@@ -75,7 +75,7 @@ async function buildRecruitMessage(client, serverId) {
 📆 ${dateText}
 ⏰ 금일 23:40 출발
 
-✨ 격수 보공 M |  메 30파티 ✨
+✨ 격수 보공 M |  메30 파티 ✨
 ⭕ 예약 가능   |  ✅ 구인 완료 
 
 1️⃣ 순위 ${rankMap[1] || '?억'} | [${iconForRank(1, reservedRanks)}]
