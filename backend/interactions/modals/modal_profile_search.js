@@ -51,15 +51,15 @@ module.exports = async (interaction) => {
     const ignSet = new Set(profiles.map((p) => p.ign).filter(Boolean));
     const ignList = [...ignSet].sort((a, b) => a.localeCompare(b, 'ko'));
 
-    // ✅ 먼저 응답(타임아웃 방지)
+    // 먼저 응답(타임아웃 방지)
     await interaction.reply({
       content:
-        `🔎 검색 결과를 조회중이에요 ...\n` +
-        `(${ignList.length}명) 잠시만 기다려줘!`,
+        `🔎 **"${query}"** 의 검색 결과를 조회 중이에요...\n` +
+        `잠시만 기다려줘!`,
       flags: MessageFlags.Ephemeral,
     });
 
-    // ✅ 프로필 채널에 "IGN별로" 갱신(추가)
+    // 프로필 채널에 "IGN별로" 갱신(추가)
     // (검색은 IGN의 모든 캐릭터가 나와야 하니 jobFilter는 넘기지 않음)
     for (const ign of ignList) {
       try {
