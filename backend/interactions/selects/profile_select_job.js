@@ -22,8 +22,11 @@ module.exports = async (interaction) => {
     // 전체 프로필 가져오기
     const allProfiles = await getProfileObjects(serverId);
 
-    const embeds = [];
     const ignToUpdate = new Set();
+    let sentAny = false; // reply를 했는지 여부 (첫 전송 제어)
+
+    // 우리가 보낸 메시지들 저장(20초 뒤 전부 삭제)
+    const followUpMessageIds = [];
 
     // 직업 순서대로 반복
     for (const jobName of jobOrder) {
@@ -41,27 +44,37 @@ module.exports = async (interaction) => {
       // IGN 순서대로 embed 생성
       for (const [ign, chars] of Object.entries(groupedByIgn)) {
         if (!Array.isArray(chars) || chars.length === 0) continue;
-        
+
         const [main, ...rest] = chars;
         const embedObj = await createProfileEmbed(main, rest);
-        embeds.push(...embedObj.embeds);
+
+        if (!sentAny) {
+          // 첫 전송: reply
+          await interaction.reply({
+            ...embedObj,
+            flags: 64, // ephemeral
+          });
+          sentAny = true;
+        } else {
+          // 이후: followUp (메시지 id 저장)
+          const msg = await interaction.followUp({
+            ...embedObj,
+            flags: 64, // ephemeral
+          });
+          followUpMessageIds.push(msg.id);
+        }
 
         ignToUpdate.add(ign);
+        await sleep(150);
       }
     }
 
-    if (!embeds.length) {
+    if (!sentAny) {
       return safeReply(interaction, '❌ 해당 직업 캐릭터가 없습니다.', {
         ephemeral: true,
         deleteAfter: 3000,
       });
     }
-
-    // 응답
-    await interaction.reply({
-      embeds,
-      flags: 64, // ephemeral
-    });
 
     // 프로필 채널 부분 갱신(백그라운드처럼 돌리되 과부하 방지)
     (async () => {
@@ -75,11 +88,24 @@ module.exports = async (interaction) => {
       }
     })();
 
-    // 자동 삭제 20초
+    // 20초 뒤: reply + followUp 전부 삭제
     setTimeout(async () => {
+      // 1) 최초 reply 삭제
       try {
         await interaction.deleteReply();
-      } catch (e) {}
+      } catch (e) {
+        // console.log('deleteReply fail', e);
+      }
+
+      // 2) followUp들 삭제 (웹훅 삭제가 정답)
+      for (const id of followUpMessageIds) {
+        try {
+          await interaction.webhook.deleteMessage(id);
+          await sleep(120);
+        } catch (e) {
+          // console.log('delete followUp fail', id, e);
+        }
+      }
     }, 20000);
   } catch (err) {
     console.error('[직업별 조회 오류]', err);

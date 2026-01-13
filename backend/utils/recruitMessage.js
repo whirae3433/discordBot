@@ -79,13 +79,13 @@ async function buildRecruitMessage(client, serverId) {
 ✨ 격수 보공 M |  메30 파티 ✨
 ⭕ 예약 가능   |  ✅ 구인 완료 
 
-1️⃣ 순위 ${rankMap[1] || '?억'} | [${iconForRank(1, reservedRanks)}] 목걸이 100% + 알
+1️⃣ 순위 ${rankMap[1] || '?억'} | [${iconForRank(1, reservedRanks)}] 목걸이 100% +알
 2️⃣ 순위 ${rankMap[2] || '?억'} | [${iconForRank(2, reservedRanks)}] 목걸이 100%
 3️⃣ 순위 ${rankMap[3] || '?억'} | [${iconForRank(3, reservedRanks)}] 목걸이 90%
   
-📣 3 순위 미드랍시 수수료 포함 전액환불 📣            
-🌈 초행인 분들도 친절하게 설명 드립니다 🌈
-❤️ 서버팅 일 경우 환불 or 내일 재예약  ❤️
+📣 3순위 미드랍 시 수수료 포함 전액환불
+🌈 서버팅 일 경우 환불 또는 내일 재예약
+❤️ 초행인 분들도 친절하게 설명 드려요!!
 
 🕊️ DM 칼 답장 문의 주세요 🕊️
 \`\`\`
