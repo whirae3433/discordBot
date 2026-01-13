@@ -2,7 +2,12 @@ const pool = require('./db');
 const { createProfileEmbed } = require('../utils/embedHelper');
 const { getProfileObjects } = require('../utils/getProfileObjects');
 
-async function updateProfileChannel(client, serverId, targetIGN = null) {
+async function updateProfileChannel(
+  client,
+  serverId,
+  targetIGN = null,
+  jobFilter = null
+) {
   try {
     // DB에서 프로필 채널 ID 찾기
     const res = await pool.query(
@@ -22,13 +27,21 @@ async function updateProfileChannel(client, serverId, targetIGN = null) {
     const channel = guild.channels.cache.get(channelId);
     if (!channel) return;
 
-    const list = await getProfileObjects(serverId);
+    let list = await getProfileObjects(serverId);
+
+    if (Array.isArray(jobFilter) && jobFilter.length > 0) {
+      const set = new Set(jobFilter);
+      list = list.filter((p) => set.has(p.jobName));
+    }
 
     if (!targetIGN) {
-      console.log(`[updateProfileChannel] 전체 갱신 실행`);
+      console.log(
+        `[updateProfileChannel] 전체 갱신 실행${
+          jobFilter?.length ? ` (직업필터 ${jobFilter.length}개)` : ''
+        }`
+      );
 
       const messages = await channel.messages.fetch().catch(() => null);
-
       if (messages) {
         for (const m of messages.values()) {
           await m.delete().catch(() => {});
@@ -41,7 +54,13 @@ async function updateProfileChannel(client, serverId, targetIGN = null) {
         return acc;
       }, {});
 
-      for (const chars of Object.values(grouped)) {
+      // IGN 순 정렬
+      const ignKeys = Object.keys(grouped).sort((a, b) =>
+        a.localeCompare(b, 'ko')
+      );
+
+      for (const ign of ignKeys) {
+        const chars = grouped[ign];
         const [main, ...rest] = chars;
         const embedObj = await createProfileEmbed(main, rest);
         await channel.send(embedObj);
@@ -50,8 +69,12 @@ async function updateProfileChannel(client, serverId, targetIGN = null) {
       return;
     }
 
-    // 특정 IGN만 갱신 모드
-    console.log(`[updateProfileChannel] 부분 갱신: ${targetIGN}`);
+    // ===== 부분 갱신 모드 =====
+    console.log(
+      `[updateProfileChannel] 부분 갱신: ${targetIGN}${
+        jobFilter?.length ? ` (직업필터 ${jobFilter.length}개)` : ''
+      }`
+    );
 
     const messages = await channel.messages.fetch().catch(() => null);
 

@@ -1,10 +1,7 @@
 const { safeReply } = require('../../utils/safeReply');
-const { createProfileEmbed } = require('../../utils/embedHelper');
-const { getProfileObjects } = require('../../utils/getProfileObjects');
 const { updateProfileChannel } = require('../../pg/updateProfileChannel');
 const jobGroups = require('../../utils/jobGroups');
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const pool = require('../../pg/db'); // bot_channels 조회용 (경로 네 프로젝트에 맞춰)
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;
@@ -19,94 +16,55 @@ module.exports = async (interaction) => {
       });
     }
 
-    // 전체 프로필 가져오기
-    const allProfiles = await getProfileObjects(serverId);
+    // 프로필 채널 id 가져오기 (링크용)
+    const res = await pool.query(
+      `
+      SELECT channel_id
+      FROM bot_channels
+      WHERE server_id = $1 AND type = 'profile'
+      `,
+      [serverId]
+    );
 
-    const ignToUpdate = new Set();
-    let sentAny = false; // reply를 했는지 여부 (첫 전송 제어)
-
-    // 우리가 보낸 메시지들 저장(20초 뒤 전부 삭제)
-    const followUpMessageIds = [];
-
-    // 직업 순서대로 반복
-    for (const jobName of jobOrder) {
-      // 1-1) 해당 job 필터
-      const jobFiltered = allProfiles.filter((p) => p.jobName === jobName);
-      if (!jobFiltered.length) continue;
-
-      // IGN으로 그룹화
-      const groupedByIgn = jobFiltered.reduce((acc, p) => {
-        if (!acc[p.ign]) acc[p.ign] = [];
-        acc[p.ign].push(p);
-        return acc;
-      }, {});
-
-      // IGN 순서대로 embed 생성
-      for (const [ign, chars] of Object.entries(groupedByIgn)) {
-        if (!Array.isArray(chars) || chars.length === 0) continue;
-
-        const [main, ...rest] = chars;
-        const embedObj = await createProfileEmbed(main, rest);
-
-        if (!sentAny) {
-          // 첫 전송: reply
-          await interaction.reply({
-            ...embedObj,
-            flags: 64, // ephemeral
-          });
-          sentAny = true;
-        } else {
-          // 이후: followUp (메시지 id 저장)
-          const msg = await interaction.followUp({
-            ...embedObj,
-            flags: 64, // ephemeral
-          });
-          followUpMessageIds.push(msg.id);
+    if (res.rowCount === 0) {
+      return safeReply(
+        interaction,
+        '❌ 프로필 채널이 설정되어 있지 않습니다.',
+        {
+          ephemeral: true,
+          deleteAfter: 3000,
         }
-
-        ignToUpdate.add(ign);
-        await sleep(150);
-      }
+      );
     }
 
-    if (!sentAny) {
-      return safeReply(interaction, '❌ 해당 직업 캐릭터가 없습니다.', {
-        ephemeral: true,
-        deleteAfter: 3000,
-      });
-    }
+    const channelId = res.rows[0].channel_id;
+    const channel = interaction.guild.channels.cache.get(channelId);
+    const channelName = channel?.name ?? '프로필 채널';
 
-    // 프로필 채널 부분 갱신(백그라운드처럼 돌리되 과부하 방지)
-    (async () => {
-      for (const ign of ignToUpdate) {
-        try {
-          await updateProfileChannel(global.botClient, serverId, ign);
-          await sleep(150); // 0.15초 텀(필요하면 300~500으로 늘려)
-        } catch (err) {
-          console.error('[직업 조회 기반 프로필 갱신 오류]', err);
-        }
-      }
-    })();
+    // 갱신 시작 알림 (바로 reply 해서 인터랙션 타임아웃 방지)
+    await interaction.reply({
+      content: `🔄 선택한 직업군 기준으로 정리하고 있어요...\n잠시만 기다려줘!`,
+      flags: 64, // ephemeral
+    });
 
-    // 20초 뒤: reply + followUp 전부 삭제
+    // 프로필 채널 전체 갱신: 선택 직업군만 + IGN 순
+    // (updateProfileChannel에 jobFilter 적용/IGN 정렬 로직 넣은 상태 기준)
+    await updateProfileChannel(global.botClient, serverId, null, jobOrder);
+
+    // 완료 안내 + 채널 바로가기
+    await interaction.editReply({
+      content:
+        ` **${channelName}**에서 확인해줘 → <#${channelId}>\n` +
+        `⏱️ 이 메시지는 10초 후 자동 삭제됩니다.`,
+      flags: 64,
+    });
+
+    // 안내 메시지 자동 삭제 (ephemeral이라 deleteReply 가능)
     setTimeout(async () => {
-      // 1) 최초 reply 삭제
       try {
         await interaction.deleteReply();
-      } catch (e) {
-        // console.log('deleteReply fail', e);
-      }
-
-      // 2) followUp들 삭제 (웹훅 삭제가 정답)
-      for (const id of followUpMessageIds) {
-        try {
-          await interaction.webhook.deleteMessage(id);
-          await sleep(120);
-        } catch (e) {
-          // console.log('delete followUp fail', id, e);
-        }
-      }
-    }, 20000);
+      } catch {}
+    }, 10000);
   } catch (err) {
     console.error('[직업별 조회 오류]', err);
     return safeReply(interaction, '❌ 직업 조회 중 오류가 발생했습니다.', {
