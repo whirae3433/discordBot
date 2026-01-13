@@ -1,19 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { safeReply } = require('../../utils/safeReply');
 const pool = require('../../pg/db');
-
-// 관리자 확인
-async function ensureAdmin(serverId, userId) {
-  const check = await pool.query(
-    `
-    SELECT 1 
-    FROM bot_admins 
-    WHERE server_id = $1 AND discord_id = $2
-    `,
-    [serverId, userId]
-  );
-  return check.rowCount > 0;
-}
+const { ensureAdmin } = require('../../utils/ensureAdmin');
 
 module.exports = async (interaction) => {
   const serverId = interaction.guild.id;

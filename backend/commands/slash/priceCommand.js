@@ -25,12 +25,18 @@ function fixIconUrl(rawUrl, itemId) {
 }
 
 // 가격 Embed 생성 함수
-function buildPriceEmbed(itemName, iconUrl, chartFileName, priceData) {
+function buildPriceEmbed(itemName, iconUrl, chartFileName, priceData, itemId) {
+  const ronaoffUrl = `https://www.ronaoff.com/item/${itemId}`;
+
   const embed = new EmbedBuilder()
     .setColor(0x00aaff)
     .setTitle(`📈 ${itemName} 시세 정보`)
     .setDescription(
-      `🔗 [등록되지 않은 아이템 제보하기](${FRONTEND_BASE_URL}/report-item)\n\u200B`
+      [
+        `👉 [[로나오프 바로가기]](${ronaoffUrl})`,
+        `✏️ [등록되지 않은 아이템 제보하기](${FRONTEND_BASE_URL}/report-item)`,
+        '\u200B',
+      ].join('\n')
     )
     .setThumbnail(iconUrl)
     .setImage(`attachment://${chartFileName}`);
@@ -100,7 +106,7 @@ module.exports = {
       name: chartFileName,
     });
 
-    const embed = buildPriceEmbed(itemName, iconUrl, chartFileName, priceData);
+    const embed = buildPriceEmbed(itemName, iconUrl, chartFileName, priceData, itemId);
 
     return interaction.editReply({
       content: '',

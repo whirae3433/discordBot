@@ -4,8 +4,15 @@ dayjs.locale('ko');
 const pool = require('../pg/db');
 const { getLogicalToday } = require('../utils/getLogicalToday');
 
-function formatToUk(amount) {
-  return (amount / 100000000).toFixed(1).replace(/\.0$/, '') + '억';
+function formatToEokCheon(amount) {
+  const n = Number(amount) || 0;
+  const eok = Math.floor(n / 100000000); // 억
+  const cheon = Math.floor((n % 100000000) / 10000000); // 천(=천만 단위)
+
+  if (eok > 0 && cheon > 0) return `${eok}억${cheon}천`;
+  if (eok > 0) return `${eok}억`;
+  if (cheon > 0) return `${cheon}천`;
+  return '0';
 }
 
 function iconForRank(rank, reservedRanks) {
@@ -30,7 +37,7 @@ async function buildRecruitMessage(client, serverId) {
   const logicalTodayKey = getLogicalToday(2 * 60); // YYYY-MM-DD
   const logicalDay = dayjs(logicalTodayKey); // dayjs 객체로 변환
 
-  const dateText = logicalDay.format('M월 D일 (ddd)');
+  const dateText = logicalDay.format('MM월 DD일  (ddd)');
   const dateKey = logicalDay.format('YYYY-MM-DD');
 
   // 금액 조회
@@ -46,7 +53,7 @@ async function buildRecruitMessage(client, serverId) {
 
   const rankMap = {};
   amountRes.rows.forEach((r) => {
-    rankMap[r.rank] = formatToUk(Number(r.amount));
+    rankMap[r.rank] = formatToEokCheon(Number(r.amount));
   });
 
   // 예약된 순위 조회
@@ -62,23 +69,25 @@ async function buildRecruitMessage(client, serverId) {
 
   // 메시지 문자열만 생성해서
   return `
-# 로나월드 마지막 시간대 "최저가 " 카오스혼테일 먹자
+# 👑 독재 카혼목 공대 👑
 \`\`\`
-🗓️ ${dateText} 🕖 23시 55분 출발
+🐲 카혼목 먹자 🐲
 
-⭕ 모집 중 |  ✅ 예약 완료
+📆 ${dateText}
+⏰ 금일 23:50 출발
 
-🥇 순위 ${rankMap[1] || '?억'} ${iconForRank(1, reservedRanks)}
-🥈 순위 ${rankMap[2] || '?억'} ${iconForRank(2, reservedRanks)}
-🥉 순위 ${rankMap[3] || '?억'} ${iconForRank(3, reservedRanks)}
+✨ 격수 보공 M |  메30 파티 ✨
+⭕ 예약 가능   |  ✅ 구인 완료 
 
-💰 예약금1억
+1️⃣ 순위 ${rankMap[1] || '?억'} | [${iconForRank(1, reservedRanks)}] 목걸이 100% +알
+2️⃣ 순위 ${rankMap[2] || '?억'} | [${iconForRank(2, reservedRanks)}] 목걸이 100%
+3️⃣ 순위 ${rankMap[3] || '?억'} | [${iconForRank(3, reservedRanks)}] 목걸이 90%
+  
+📣 3순위 미드랍 시 수수료 포함 전액환불
+🌈 서버팅 일 경우 환불 또는 내일 재예약
+❤️ 초행인 분들도 친절하게 설명 드려요!!
 
-🍹 포션소모❌ 편하게 잠수 🆗 초행🆗 
-
-⚠️ 서버팅경우 전액 환불 or 내일 다시 먹자⚠️
-
-💌 DM주세요
+🕊️ DM 칼 답장 문의 주세요 🕊️
 \`\`\`
 `;
 }
