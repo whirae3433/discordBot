@@ -55,7 +55,7 @@ module.exports = async (interaction) => {
     await interaction.editReply({
       content:
         ` **${channelName}**에서 확인해줘 → <#${channelId}>\n` +
-        `⏱️ 이 메시지는 10초 후 자동 삭제됩니다.`,
+        `⏱️ 이 메시지는 20초 후 자동 삭제됩니다.`,
       flags: 64,
     });
 
@@ -64,7 +64,7 @@ module.exports = async (interaction) => {
       try {
         await interaction.deleteReply();
       } catch {}
-    }, 10000);
+    }, 20000);
   } catch (err) {
     console.error('[직업별 조회 오류]', err);
     return safeReply(interaction, '❌ 직업 조회 중 오류가 발생했습니다.', {

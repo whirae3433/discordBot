@@ -36,17 +36,10 @@ async function updateProfileChannel(
 
     if (!targetIGN) {
       console.log(
-        `[updateProfileChannel] 전체 갱신 실행${
+        `[updateProfileChannel] 전체(추가) 실행${
           jobFilter?.length ? ` (직업필터 ${jobFilter.length}개)` : ''
         }`
       );
-
-      const messages = await channel.messages.fetch().catch(() => null);
-      if (messages) {
-        for (const m of messages.values()) {
-          await m.delete().catch(() => {});
-        }
-      }
 
       const grouped = list.reduce((acc, p) => {
         if (!acc[p.ign]) acc[p.ign] = [];
@@ -69,23 +62,12 @@ async function updateProfileChannel(
       return;
     }
 
-    // ===== 부분 갱신 모드 =====
+    // ===== 부분 추가 모드 =====
     console.log(
-      `[updateProfileChannel] 부분 갱신: ${targetIGN}${
+      `[updateProfileChannel] 부분(추가) 실행: ${targetIGN}${
         jobFilter?.length ? ` (직업필터 ${jobFilter.length}개)` : ''
       }`
     );
-
-    const messages = await channel.messages.fetch().catch(() => null);
-
-    if (messages) {
-      for (const msg of messages.values()) {
-        const embed = msg.embeds?.[0];
-        if (embed?.title === `${targetIGN}님의 프로필`) {
-          await msg.delete().catch(() => {});
-        }
-      }
-    }
 
     const filtered = list.filter((p) => p.ign === targetIGN);
 
@@ -94,13 +76,11 @@ async function updateProfileChannel(
       return;
     }
 
-    // 새 embed 출력 (IGN 하나 → embed 하나)
     const [main, ...rest] = filtered;
     const embedObj = await createProfileEmbed(main, rest);
-
     await channel.send(embedObj);
 
-    console.log(`[프로필 갱신 완료] ${targetIGN}`);
+    console.log(`[프로필 갱신(추가) 완료] ${targetIGN}`);
   } catch (err) {
     console.error('[updateProfileChannel 오류]', err);
   }
