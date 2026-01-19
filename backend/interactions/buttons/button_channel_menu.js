@@ -19,13 +19,16 @@ module.exports = async (interaction) => {
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('button_create_guest_status_channel')
-      .setLabel('🪪손님현황')
+      .setLabel('🪪 손님현황')
       .setStyle(ButtonStyle.Secondary),
-
+    new ButtonBuilder()
+      .setCustomId('button_create_recruit_channel')
+      .setLabel('📢 구인글')
+      .setStyle(ButtonStyle.Secondary),
     new ButtonBuilder()
       .setCustomId('button_create_profile_channel')
-      .setLabel('🗂️길드원-프로필')
-      .setStyle(ButtonStyle.Secondary)
+      .setLabel('🗂️ 길드원-프로필')
+      .setStyle(ButtonStyle.Secondary),
   );
 
   return safeReply(
@@ -34,6 +37,6 @@ module.exports = async (interaction) => {
       content: '✅ 생성할 채널을 선택하세요.',
       components: [row],
     },
-    { ephemeral: true, deleteAfter: 10000 }
+    { ephemeral: true, deleteAfter: 10000 },
   );
 };

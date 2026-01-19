@@ -16,6 +16,7 @@ const buttonHandlers = {
   button_channel_menu: require('./buttons/button_channel_menu'),
   button_create_guest_status_channel: require('./buttons/button_create_guest_status_channel'),
   button_create_profile_channel: require('./buttons/button_create_profile_channel'),
+  button_create_recruit_channel: require('./buttons/button_create_recruit_channel'),
   set_amount: require('./buttons/set_amount'),
   button_incentive_set: require('./buttons/button_incentive_set'),
   button_profile_menu: require('./buttons/button_profile_menu'),
