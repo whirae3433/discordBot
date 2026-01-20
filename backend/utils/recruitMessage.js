@@ -27,6 +27,10 @@ function iconForRank(rank, reservedRanks) {
   return reservedRanks.includes(rank) ? '✅' : '⭕';
 }
 
+function strikeToken(rank, reservedRanks) {
+  return reservedRanks.includes(rank) ? '~~' : '';
+}
+
 // ---------------- 템플릿 치환 ---------------- //
 // DB contents 에서는 {{dateText}} 처럼 작성하면 됨.
 function applyTemplate(template, vars) {
@@ -55,8 +59,7 @@ async function buildFallbackEmbedPayload(client) {
     .setColor(0x5865f2)
     .setTitle('무영봇 제작자 이케아 입니다')
     .setDescription(
-      '구인글 양식 및 관련 문의는\n' +
-        `아래 **'이케아'로 DM** 부탁드립니다.`,
+      '구인글 양식 및 관련 문의는\n' + `아래 **'이케아'로 DM** 부탁드립니다.`,
     )
     .addFields({
       name: '👉 문의하기',
@@ -152,6 +155,11 @@ async function buildRecruitMessage(client, serverId) {
     icon1: iconForRank(1, reservedRanks),
     icon2: iconForRank(2, reservedRanks),
     icon3: iconForRank(3, reservedRanks),
+
+    // 취소선 토큰
+    s1: strikeToken(1, reservedRanks),
+    s2: strikeToken(2, reservedRanks),
+    s3: strikeToken(3, reservedRanks),
   };
 
   const content = applyTemplate(raw, vars);
