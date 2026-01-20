@@ -56,7 +56,7 @@ async function buildFallbackEmbedPayload(client) {
     .setTitle('무영봇 제작자 이케아 입니다')
     .setDescription(
       '구인글 양식 및 관련 문의는\n' +
-        `아래 '이케아'로 **DM으로** 부탁드립니다.`,
+        `아래 **'이케아'로 DM** 부탁드립니다.`,
     )
     .addFields({
       name: '👉 문의하기',
