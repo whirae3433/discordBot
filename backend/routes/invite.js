@@ -9,7 +9,6 @@ const DISCORD_INVITE_REDIRECT_URI = process.env.DISCORD_INVITE_REDIRECT_URI;
 const BASE_URL = process.env.BASE_URL;
 const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL;
 
-
 router.get('/callback', async (req, res) => {
   const { code, guild_id } = req.query;
   if (!code) return res.status(400).send('Missing code');
@@ -25,7 +24,7 @@ router.get('/callback', async (req, res) => {
         code,
         redirect_uri: DISCORD_INVITE_REDIRECT_URI,
       }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
     );
 
     const accessToken = tokenRes.data.access_token;
@@ -53,7 +52,7 @@ router.get('/callback', async (req, res) => {
         'https://discord.com/api/users/@me/guilds',
         {
           headers: { Authorization: `Bearer ${accessToken}` },
-        }
+        },
       );
       const foundGuild = guildRes.data.find((g) => g.id === guild_id);
       if (foundGuild) {
@@ -66,17 +65,17 @@ router.get('/callback', async (req, res) => {
 
     // servers 테이블에 등록 (이미 존재하면 이름만 갱신)
     await pool.query(
-      `INSERT INTO servers (server_id, server_name)
-       VALUES ($1, $2)
+      `INSERT INTO servers (server_id, server_name, is_enabled)
+       VALUES ($1, $2, FALSE)
        ON CONFLICT (server_id)
        DO UPDATE SET server_name = EXCLUDED.server_name`,
-      [guild_id, serverName || '(이름 불러오기 실패)']
+      [guild_id, serverName || '(이름 불러오기 실패)'],
     );
 
     // 이미 해당 서버에 main_admin이 존재하는지 확인
     const existing = await pool.query(
       `SELECT discord_id FROM bot_admins WHERE server_id = $1 AND is_main_admin = TRUE`,
-      [guild_id]
+      [guild_id],
     );
 
     if (existing.rowCount > 0) {
@@ -89,11 +88,11 @@ router.get('/callback', async (req, res) => {
       `INSERT INTO bot_admins (server_id, discord_id, is_main_admin)
        VALUES ($1, $2, TRUE)
        ON CONFLICT DO NOTHING`,
-      [guild_id, userId]
+      [guild_id, userId],
     );
 
     console.log(
-      `[무영봇 초대] ${guild_id} 서버의 첫 메인 관리자 등록 완료 (${userId})`
+      `[무영봇 초대] ${guild_id} 서버의 첫 메인 관리자 등록 완료 (${userId})`,
     );
 
     // 완료 페이지로 이동
