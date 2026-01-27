@@ -1,13 +1,20 @@
 const { MessageFlags } = require('discord-api-types/v10');
+const { safeReply } = require('../utils/safeReply');
 
 const autocompleteRona = require('./autocomplete/rona_autocomplete');
-const btn_profile_register = require('./buttons/btn_profile_register.js');
-const modal_confirm_profile_redirect = require('./modals/modal_confirm_profile_redirect.js');
+// const btn_profile_register = require('./buttons/btn_profile_register.js');
+// const modal_confirm_profile_redirect = require('./modals/modal_confirm_profile_redirect.js');
+
+const { isServerEnabled } = require('../utils/serverGate');
 
 const slashCommands = new Map();
 slashCommands.set('무영봇', require('../commands/slash/setupMuyeongBot.js'));
 slashCommands.set('로나오프', require('../commands/slash/priceCommand.js'));
 slashCommands.set('정보', require('../commands/slash/info.js'));
+slashCommands.set(
+  '무영봇권한',
+  require('../commands/slash/muyeongPermission.js'),
+);
 
 const buttonHandlers = {
   member_list: require('./buttons/member_list'),
@@ -16,6 +23,7 @@ const buttonHandlers = {
   button_channel_menu: require('./buttons/button_channel_menu'),
   button_create_guest_status_channel: require('./buttons/button_create_guest_status_channel'),
   button_create_profile_channel: require('./buttons/button_create_profile_channel'),
+  button_create_recruit_channel: require('./buttons/button_create_recruit_channel'),
   set_amount: require('./buttons/set_amount'),
   button_incentive_set: require('./buttons/button_incentive_set'),
   button_profile_menu: require('./buttons/button_profile_menu'),
@@ -43,6 +51,27 @@ const modalHandlers = {
   modal_confirm_profile_redirect: require('./modals/modal_confirm_profile_redirect'),
 };
 
+// 서버 OFF여도 통과시킬 예외들. 운영자 토글 커맨드(/무영봇권한)
+function isBypass(interaction) {
+  if (interaction.isChatInputCommand()) {
+    if (interaction.commandName === '무영봇권한') return true; // 운영자 토글
+  }
+  return false;
+}
+
+// 서버 OFF일 때 공통 차단 응답
+async function replyServerDisabled(interaction) {
+  const msg =
+    '⛔ 이 서버는 현재 **비활성화(OFF)** 되어 있어요.\n' +
+    `승인이 필요하면 <@${process.env.OWNER_DISCORD_ID}> 에게 DM 주세요.`;
+    
+  return safeReply(
+    interaction,
+    { content: msg },
+    { deleteAfter: 10000, ephemeral: true },
+  );
+}
+
 module.exports = async (interaction) => {
   try {
     // 자동완성 처리
@@ -51,6 +80,15 @@ module.exports = async (interaction) => {
         return autocompleteRona(interaction);
       }
       return;
+    }
+
+    //  여기서 전체 기능 게이트
+    const guild = interaction.guild;
+    if (guild && !isBypass(interaction)) {
+      const enabled = await isServerEnabled(guild.id);
+      if (!enabled) {
+        return replyServerDisabled(interaction);
+      }
     }
 
     //  슬래시 명령어 처리

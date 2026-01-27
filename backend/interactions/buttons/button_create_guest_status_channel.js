@@ -30,7 +30,7 @@ async function getRegisteredChannel(serverId, guild) {
 // 채널 생성
 async function createGuestStatusChannel(guild, userId) {
   return await guild.channels.create({
-    name: '🪪손님현황',
+    name: '🪪 손님현황',
     type: ChannelType.GuildText,
     topic: '무영봇이 관리하는 손님 예약 현황 채널입니다.',
     permissionOverwrites: [

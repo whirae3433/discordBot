@@ -11,7 +11,7 @@ module.exports = async function updateRecruitMessage(client, serverId) {
       FROM bot_channels 
       WHERE server_id = $1 AND type = 'recruit'
       `,
-      [serverId]
+      [serverId],
     );
 
     if (res.rowCount === 0) return;
