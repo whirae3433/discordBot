@@ -1,7 +1,7 @@
 const pool = require('../../pg/db');
 
 module.exports = async function getCharacters(req, res) {
-  const { discordId } = req.params;
+  const discordId = req.session.user.id;
 
   try {
     // DB에서 serverId + discordId 기준 캐릭터 모두 가져오기

@@ -1,18 +1,24 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
-export default function NavItem({ to, label, activePath }) {
-  const isActive = activePath === to;
-
+export default function NavItem({ to, label }) {
   return (
-    <div className="relative flex flex-col items-center">
-      <Link to={to} className="hover:text-gray-300">
-        {label}
-      </Link>
+    <NavLink to={to} className="relative flex flex-col items-center">
+      {({ isActive }) => (
+        <>
+          <span
+            className={`hover:text-gray-300 ${
+              isActive ? 'text-white font-bold' : 'text-gray-400'
+            }`}
+          >
+            {label}
+          </span>
 
-      {/* 굵은 밑줄 (헤더 구분선과 같은 위치로) */}
-      {isActive && (
-        <div className="absolute -bottom-[22px] w-full border-b-2 border-white"></div>
+          {/* 굵은 밑줄 (헤더 구분선과 같은 위치) */}
+          {isActive && (
+            <div className="absolute -bottom-[22px] w-full border-b-2 border-white" />
+          )}
+        </>
       )}
-    </div>
+    </NavLink>
   );
 }

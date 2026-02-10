@@ -5,21 +5,17 @@ import jobImg from '../../utils/jobImg';
 
 export default function CharacterCard({
   character,
-  discordId,
   onDeleted,
   onEdit,
 }) {
   const { deleteCharacter } = useDeleteCharacter();
-  console.log('>>> jobImg loaded!', jobImg);
-  console.log('=== USING CharacterCard.jsx VERSION A ===');
-  console.log('jobName:', character.jobName);
 
   const handleDelete = async () => {
     if (!window.confirm(`${character.ign} 캐릭터를 삭제하시겠습니까?`)) return;
 
     try {
-      await deleteCharacter(discordId, character.id);
-      if (onDeleted) onDeleted(); // 삭제 후 목록 리페치
+      await deleteCharacter(character.id);
+      onDeleted?.(); // 삭제 후 목록 리페치
     } catch (err) {
       alert('삭제 중 오류 발생');
     }
@@ -29,7 +25,7 @@ export default function CharacterCard({
     <div className="relative bg-gray-100 rounded-none p-4 flex flex-col items-center shadow hover:shadow-md transition">
       {/* 수정 버튼 */}
       <button
-        onClick={() => onEdit && onEdit(character)}
+        onClick={() => onEdit?.(character)}
         className="absolute top-4 left-4 text-gray-400 hover:text-blue-500 text-xl"
       >
         <GrUpdate />

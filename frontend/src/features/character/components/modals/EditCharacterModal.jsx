@@ -4,8 +4,6 @@ import { useUpdateCharacter } from '../../../../hooks/useUpdateCharacter';
 import { useEscClose } from '../../../../hooks/useEscClose';
 
 export default function EditCharacterModal({
-
-  discordId,
   character, // id/characterId 포함
   onClose,
   onSuccess,
@@ -18,7 +16,7 @@ export default function EditCharacterModal({
 
   const handleFormSubmit = async (data) => {
     try {
-      await updateCharacter(data, discordId, characterId);
+      await updateCharacter(data, characterId);
       onSuccess?.();
       onClose();
     } catch {

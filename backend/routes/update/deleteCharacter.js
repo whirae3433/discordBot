@@ -2,7 +2,8 @@ const pool = require('../../pg/db');
 // const { updateProfileChannel } = require('../../pg/updateProfileChannel');
 
 module.exports = async function deleteCharacter(req, res) {
-  const { discordId, characterId } = req.params;
+  const discordId = req.session.user.id;
+  const { characterId } = req.params;
 
   if (!discordId || !characterId) {
     return res

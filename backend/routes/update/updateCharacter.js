@@ -1,7 +1,8 @@
 const pool = require('../../pg/db');
 
 module.exports = async function updateCharacter(req, res) {
-  const { discordId, characterId } = req.params;
+  const discordId = req.session.user.id;
+  const { characterId } = req.params;
   const { ign, level, hp, acc, job, atk, bossDmg, mapleWarrior } = req.body;
 
   const client = await pool.connect();

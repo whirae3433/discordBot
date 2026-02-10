@@ -1,14 +1,18 @@
 const express = require('express');
 const router = express.Router();
 
+const requireLogin = require('../../middleware/requireLogin');
 const addCharacter = require('./addCharacter');
 const getCharacters = require('./getCharacters');
 const deleteCharacter = require('./deleteCharacter');
 const updateCharacter = require('./updateCharacter');
 
-router.post('/characters/:discordId', addCharacter);
-router.get('/characters/:discordId', getCharacters);
-router.patch('/characters/:discordId/:characterId', updateCharacter);
-router.delete('/characters/:discordId/:characterId', deleteCharacter);
+// update 라우트는 전부 로그인 필요
+router.use(requireLogin);
+
+router.post('/characters/me', addCharacter);
+router.get('/characters/me', getCharacters);
+router.patch('/characters/me/:characterId', updateCharacter);
+router.delete('/characters/me/:characterId', deleteCharacter);
 
 module.exports = router;
