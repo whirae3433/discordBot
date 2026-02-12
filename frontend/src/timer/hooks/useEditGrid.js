@@ -19,6 +19,8 @@ export function useEditGrid({ count, timeMode, focusFirst = false }) {
   };
 
   const handleKeyDown = (e, index, field) => {
+    if (e.isComposing || e.nativeEvent?.isComposing) return;
+
     const isEnter = e.key === 'Enter';
     const isTab = e.key === 'Tab';
     if (!isEnter && !isTab) return;
@@ -29,18 +31,8 @@ export function useEditGrid({ count, timeMode, focusFirst = false }) {
     const nextIndex = (index + 1) % count;
     const prevIndex = (index - 1 + count) % count;
 
-    if (timeMode === 'minute-input') {
-      if (forward) {
-        if (field === 'name') focusField(index, 'minute');
-        else focusField(nextIndex, 'name');
-      } else {
-        if (field === 'minute') focusField(index, 'name');
-        else focusField(prevIndex, 'minute');
-      }
-    } else {
-      if (forward) focusField(nextIndex, 'name');
-      else focusField(prevIndex, 'name');
-    }
+    if (forward) focusField(nextIndex, 'name');
+    else focusField(prevIndex, 'name');
   };
 
   return { refs, focusField, handleKeyDown };

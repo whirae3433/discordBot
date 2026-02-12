@@ -3,6 +3,9 @@ export function makeSlotsForSet(set) {
     if (set.timeMode === 'minute-input') {
       return { id: i, name: '', minute: String(set.defaultMinute ?? 20) };
     }
+    if (set.timeMode === 'sec-input') {
+      return { id: i, name: '', sec: String(set.defaultSec ?? 60) }; // 👈 기본 60초
+    }
     return { id: i, name: '' };
   });
 }
@@ -12,7 +15,9 @@ export function buildRunItems(set, slots) {
     const durationSec =
       set.timeMode === 'minute-input'
         ? (Number(s.minute) || 0) * 60
-        : Number(set.fixedSec) || 0;
+        : set.timeMode === 'sec-input'
+          ? Number(s.sec ?? 60) || 60   // 👈 혹시 비어있어도 60초
+          : 0;
 
     const dur = Math.max(0, durationSec);
 
@@ -23,6 +28,7 @@ export function buildRunItems(set, slots) {
       remainingSec: dur,
       running: false,
       endsAt: null,
+      alerted: false,
     };
   });
 }

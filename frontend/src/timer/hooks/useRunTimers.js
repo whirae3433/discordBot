@@ -1,67 +1,84 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useCountdown } from './useCountdown';
+import { useBeep } from './useBeep';
 
-/**
- * 실행 모드에서만 필요한 "타이머 엔진" 훅
- * - items + itemsRef
- * - tick(useCountdown)
- * - click/restart 로직
- * - resetAll
- */
-export function useRunTimers({ enabled }) {
+export function useRunTimers({ enabled, beepSrc = './beep.mp3', muted }) {
   const [items, setItems] = useState([]);
   const itemsRef = useRef(items);
+
+  const { beep, ensureReady } = useBeep({ src: beepSrc, volume: 0.9 });
 
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
 
-  // 실행 모드일 때만 틱
   useCountdown(!!enabled, setItems);
 
-  const resetAll = () => {
-    setItems((prev) =>
-      prev.map((it) => ({
+  const clearBeepTimeout = (it) => {
+    if (it?.beepTimeoutId) clearTimeout(it.beepTimeoutId);
+  };
+
+  const resetPatch = useCallback(
+    (it) => {
+      clearBeepTimeout(it);
+      return {
         ...it,
         running: false,
         remainingSec: it.durationSec,
         endsAt: null,
-      })),
-    );
-  };
+        beepTimeoutId: null,
+      };
+    },
+    [], // clearBeepTimeout는 렌더마다 동일(closure 문제 없음)
+  );
 
-  const clickItem = (id) => {
+  const resetAll = () => setItems((prev) => prev.map(resetPatch));
+  const resetItem = (id) =>
+    setItems((prev) => prev.map((it) => (it.id === id ? resetPatch(it) : it)));
+
+  const clickItem = (id, source = 'mouse') => {
+    ensureReady();
+
     setItems((prev) => {
       const idx = prev.findIndex((x) => x.id === id);
       if (idx === -1) return prev;
 
-      const now = Date.now();
       const clicked = prev[idx];
+      if (source === 'hotkey' && clicked.running) return prev;
+
+      clearBeepTimeout(clicked);
+
+      const now = Date.now();
       const duration = Math.max(0, clicked.durationSec);
+      const endsAt = duration > 0 ? now + duration * 1000 : null;
+
+      let beepTimeoutId = null;
+      if (endsAt && duration >= 10) {
+        const msUntilBeep = endsAt - 11_000 - now;
+        beepTimeoutId = setTimeout(
+          () => {
+            const current = itemsRef.current?.find((x) => x.id === id);
+            if (current?.running && current?.endsAt === endsAt && !muted) {
+              beep();
+            }
+          },
+          Math.max(0, msUntilBeep),
+        );
+      }
 
       const restarted = {
         ...clicked,
         running: duration > 0,
         remainingSec: duration,
-        endsAt: duration > 0 ? now + duration * 1000 : null,
+        endsAt,
+        beepTimeoutId,
       };
 
-      // 클릭한 카드를 맨 뒤로 보내기(너가 원했던 동작 유지)
       const next = prev.slice(0, idx).concat(prev.slice(idx + 1));
       next.push(restarted);
       return next;
     });
   };
 
-  // 자주 쓰는 값들
-  const firstItemId = items.length > 0 ? items[0].id : null;
-
-  return {
-    items,
-    setItems,
-    itemsRef,
-    clickItem,
-    resetAll,
-    firstItemId,
-  };
+  return { items, setItems, itemsRef, clickItem, resetAll, resetItem };
 }

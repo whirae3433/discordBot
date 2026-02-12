@@ -2,13 +2,7 @@ import React, { useMemo } from 'react';
 import { SLOT_GRID_COLS } from '../constants';
 import { clampMinuteStr, useEditGrid } from '../hooks/useEditGrid';
 
-export default function EditGrid({
-  timerSet,
-  slots,
-  setSlotValue,
-  onStart,
-  onReset,
-}) {
+export default function EditGrid({ timerSet, slots, setSlotValue }) {
   const { count, timeMode, defaultMinute, fixedSec } = timerSet;
   const { refs, handleKeyDown } = useEditGrid({ count, timeMode });
 
@@ -17,37 +11,15 @@ export default function EditGrid({
       return slots.filter((s) => String(s.name).trim() && Number(s.minute) > 0)
         .length;
     }
+    if (timeMode === 'sec-input') {
+      return slots.filter((s) => String(s.name).trim() && Number(s.sec) > 0)
+        .length;
+    }
     return slots.filter((s) => String(s.name).trim()).length;
   }, [slots, timeMode]);
 
   return (
     <>
-      <div className="flex items-end justify-between gap-3 mb-4">
-        <div>
-          <div className="text-lg font-bold">{timerSet.label} 세팅</div>
-          <div className="text-sm text-zinc-400">
-            {timeMode === 'minute-input'
-              ? `총 ${count}개 · 기본 ${defaultMinute}분 (분 수정 가능)`
-              : `총 ${count}개 · 고정 ${Math.floor(fixedSec)}초`}
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={onReset}
-            className="rounded-xl border border-zinc-700 px-4 py-2 hover:bg-white/5 transition"
-          >
-            초기화
-          </button>
-          <button
-            onClick={onStart}
-            className="rounded-xl bg-zinc-100 text-zinc-900 px-4 py-2 font-bold hover:bg-white transition"
-          >
-            실행
-          </button>
-        </div>
-      </div>
-
       <div className={`grid gap-3 ${SLOT_GRID_COLS(count)}`}>
         {slots.map((slot, index) => (
           <div
@@ -63,7 +35,7 @@ export default function EditGrid({
               value={slot.name}
               onChange={(e) => setSlotValue(index, 'name', e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, index, 'name')}
-              placeholder="예: 무영"
+              placeholder="예: 이케아"
               className="w-full rounded-lg px-3 py-2 bg-zinc-950/40 border border-zinc-700
                          outline-none focus:border-zinc-300 text-sm text-zinc-100 placeholder:text-zinc-500"
             />
@@ -91,6 +63,32 @@ export default function EditGrid({
                   placeholder={String(defaultMinute)}
                   className="w-full rounded-lg px-3 py-2 bg-zinc-950/40 border border-zinc-700
                              outline-none focus:border-zinc-300 text-sm text-zinc-100 placeholder:text-zinc-500"
+                />
+              </>
+            )}
+            {timeMode === 'sec-input' && (
+              <>
+                <div className="text-xs text-zinc-400 mt-3 mb-1">
+                  타이머 (초)
+                </div>
+                <input
+                  ref={(el) => {
+                    refs.current[index] = refs.current[index] || {};
+                    refs.current[index].sec = el;
+                  }}
+                  value={slot.sec}
+                  onChange={(e) =>
+                    setSlotValue(
+                      index,
+                      'sec',
+                      e.target.value.replace(/[^\d]/g, ''),
+                    )
+                  }
+                  onKeyDown={(e) => handleKeyDown(e, index, 'sec')}
+                  inputMode="numeric"
+                  placeholder={String(timerSet.defaultSec ?? 0)}
+                  className="w-full rounded-lg px-3 py-2 bg-zinc-950/40 border border-zinc-700
+                 outline-none focus:border-zinc-300 text-sm text-zinc-100 placeholder:text-zinc-500"
                 />
               </>
             )}
