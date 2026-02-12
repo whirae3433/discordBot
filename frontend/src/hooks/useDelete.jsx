@@ -4,13 +4,14 @@ export function useDeleteCharacter() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const deleteCharacter = async (discordId, characterId) => {
+  const deleteCharacter = async (characterId) => {
     try {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(`/api/update/characters/${discordId}/${characterId}`, {
+      const res = await fetch(`/api/update/characters/me/${characterId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (!res.ok) throw new Error('삭제 실패');

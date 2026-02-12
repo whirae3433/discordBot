@@ -6,6 +6,15 @@
 /.pnp
 .pnp.js
 
+# production builds
+build/
+release/
+dist/
+
+# electron-builder cache / artifacts
+*.log
+debug.log
+
 # testing
 /coverage
 
@@ -23,3 +32,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

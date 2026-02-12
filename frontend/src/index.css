@@ -12,7 +12,7 @@ body {
   width: 100vw;
   height: 100vh;
   @apply flex flex-col;
-  @apply bg-gray-300 text-gray-50;
+  @apply bg-gray-100 text-gray-900;
 }
 
 #root {

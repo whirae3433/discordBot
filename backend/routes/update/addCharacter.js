@@ -3,7 +3,7 @@ const pool = require('../../pg/db');
 // const { updateProfileChannel } = require('../../pg/updateProfileChannel');
 
 module.exports = async function addCharacter(req, res) {
-  const { discordId } = req.params;
+  const discordId = req.session.user.id;
   const { ign, level, hp, acc, job, atk, bossDmg, mapleWarrior } = req.body;
 
   // 숫자 변환 (함수 내부에서 해야 함)

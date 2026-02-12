@@ -18,8 +18,8 @@ export function useUpdateCharacter() {
   };
 
   const updateCharacter = useCallback(
-    async (data, discordId, characterId) => {
-      if (!discordId || !characterId) {
+    async (data, characterId) => {
+      if (!characterId) {
         throw new Error('discordId/characterId가 필요합니다.');
       }
       setLoading(true);
@@ -40,7 +40,7 @@ export function useUpdateCharacter() {
         };
 
         const res = await axios.patch(
-          `/api/update/characters/${discordId}/${characterId}`,
+          `/api/update/characters/me/${characterId}`,
           payload,
           { withCredentials: true }
         );
