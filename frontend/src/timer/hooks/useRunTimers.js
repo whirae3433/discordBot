@@ -2,11 +2,11 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useCountdown } from './useCountdown';
 import { useBeep } from './useBeep';
 
-export function useRunTimers({ enabled, beepSrc = './beep.mp3', muted }) {
+export function useRunTimers({ enabled, muted }) {
   const [items, setItems] = useState([]);
   const itemsRef = useRef(items);
 
-  const { beep, ensureReady } = useBeep({ src: beepSrc, volume: 0.9 });
+  const { beep, ensureReady } = useBeep({ volume: 0.9 });
 
   useEffect(() => {
     itemsRef.current = items;
@@ -44,7 +44,7 @@ export function useRunTimers({ enabled, beepSrc = './beep.mp3', muted }) {
       if (idx === -1) return prev;
 
       const clicked = prev[idx];
-      if (source === 'hotkey' && clicked.running) return prev;
+      if (clicked.running) return prev;
 
       clearBeepTimeout(clicked);
 

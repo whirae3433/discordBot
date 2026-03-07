@@ -69,7 +69,7 @@ export default function HotkeySetting({
         : 'border border-zinc-700 bg-zinc-900'}
     `}
   >
-    <div className="text-sm font-bold mb-1">단축키 (선택)</div>
+    <div className="text-sm font-bold mb-1">단축키 (앱에서 사용가능)</div>
 
     <div className="flex items-center justify-between mb-2">
       <div

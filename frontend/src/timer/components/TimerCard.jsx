@@ -25,7 +25,7 @@ export default function TimerCard({ item, onClick, onReset }) {
         isDanger ? 'animate-pulse border-red-400' : '',
       ].join(' ')}
     >
-      {/* 🔥 X 버튼 */}
+      {/* X 버튼 */}
       <button
         onClick={(e) => {
           e.stopPropagation(); // 카드 클릭 방지

@@ -1,10 +1,16 @@
-const { app, BrowserWindow, globalShortcut, ipcMain } = require('electron');
+const {
+  app,
+  BrowserWindow,
+  globalShortcut,
+  ipcMain,
+  shell,
+} = require('electron');
 const path = require('path');
 
 let win;
 let currentHotkey = '[';
-let isActive = false; // 실행 모드 여부
-let isRegistered = false; // 실제 등록 성공 여부
+let isActive = false;
+let isRegistered = false;
 
 function registerHotkey() {
   if (!win || win.isDestroyed()) return false;
@@ -41,37 +47,37 @@ function createWindow() {
     },
   });
 
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
   const isDev = !app.isPackaged;
 
+  const baseUrl = isDev ? 'http://localhost:3000' : 'https://muyeong.site';
+  const startUrl = `${baseUrl}/entry`;
+
+  win.loadURL(startUrl);
+
   if (isDev) {
-    // ✅ 개발: CRA dev server
-    const devUrl = process.env.ELECTRON_DEV_URL || 'http://localhost:3000';
-    // 네가 기존에 /others로 붙여놨으니 유지
-    win.loadURL(`${devUrl}/others`);
-    win.webContents.openDevTools({ mode: 'detach' });
-  } else {
-    // ✅ 배포(패키징): CRA build 산출물 로드
-    // main.cjs 위치: frontend/electron/main.cjs
-    // build 위치: frontend/build/index.html
-    const indexPath = path.join(__dirname, '..', 'build', 'index.html');
-    win.loadFile(indexPath);
-    // 배포에서는 DevTools 안 여는 게 기본 (원하면 주석 해제)
     win.webContents.openDevTools({ mode: 'detach' });
   }
 
-  // (선택) 윈도우 닫힐 때 참조 정리
+  // 외부 링크는 기본 브라우저로 열기
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
   win.on('closed', () => {
     win = null;
   });
 }
 
-// ✅ React에서 요청할 IPC 채널
+// ---- IPC (핫키) ----
 ipcMain.handle('hotkey:set', (_, accelerator) => {
   currentHotkey = accelerator || '[';
-
-  if (isActive) {
-    return registerHotkey();
-  }
+  if (isActive) return registerHotkey();
   return true;
 });
 
@@ -96,7 +102,7 @@ ipcMain.handle('hotkey:enable', () => {
 
 app.whenReady().then(() => {
   createWindow();
-  console.log('[preload]', path.join(__dirname, 'preload.cjs'));
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });

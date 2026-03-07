@@ -10,11 +10,11 @@ export default function Navigation() {
 
       <NavItem to={user ? '/profile' : '/entry'} label="Profile" />
 
-      <NavItem to="/servers" label="Servers" />
+      {/* <NavItem to="/servers" label="Servers" /> */}
 
-      <NavItem to="/info" label="Info" />
+      {/* <NavItem to="/info" label="Info" /> */}
 
-      <NavItem to="/others" label="Ohters" />
+      <NavItem to="/timer" label="Timer" />
     </nav>
   );
 }
