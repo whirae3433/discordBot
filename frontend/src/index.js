@@ -17,8 +17,9 @@ import InviteAlreadyExists from './pages/InviteAlreadyExists';
 import InviteSuccess from './pages/InviteSuccess';
 import RequireAuth from './pages/RequireAuth';
 import TimerRoomPage from './timer/pages/TimerRoomPage';
-import TimerApp from './timer/TimerApp';
 import TimerLobbyPage from './timer/pages/TimerLobbyPage';
+import TimerCreatePage from './timer/pages/TimerCreatePage';
+import TimerEditPage from './timer/pages/TimerEditPage';
 
 const router = createBrowserRouter([
   {
@@ -47,7 +48,9 @@ const router = createBrowserRouter([
         children: [
           { path: 'profile', element: <ProfilePage /> },
           { path: 'timer', element: <TimerLobbyPage /> },
-          { path: 'timer/room/:roomId', element: <TimerRoomPage  /> },
+          { path: 'timer/create', element: <TimerCreatePage /> },
+          { path: 'timer/room/:roomId', element: <TimerRoomPage /> },
+          { path: 'timer/room/:roomId/edit', element: <TimerEditPage /> },
         ],
       },
     ],

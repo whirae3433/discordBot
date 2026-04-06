@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import TimerApp from '../TimerApp'; // 경로 확인: pages 폴더 기준이면 ../TimerApp 맞음
+import TimerApp from '../TimerApp';
 
 const API_BASE = process.env.REACT_APP_BASE_URL || '';
 
@@ -8,13 +8,15 @@ export default function TimerRoomPage() {
   const { roomId } = useParams();
 
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState(null); // { roomId, name, isPrivate, createdAt }
+  const [meta, setMeta] = useState(null);
   const [joinCode, setJoinCode] = useState('');
   const [joined, setJoined] = useState(false);
+  const [myRole, setMyRole] = useState(null);
   const [needLogin, setNeedLogin] = useState(false);
+  const [needJoinCode, setNeedJoinCode] = useState(false);
   const [error, setError] = useState('');
 
-  // 1) room meta 조회 (멤버 아니어도 가능)
+  // 1) room meta 조회
   useEffect(() => {
     let cancelled = false;
 
@@ -22,8 +24,10 @@ export default function TimerRoomPage() {
       setLoading(true);
       setError('');
       setNeedLogin(false);
+      setNeedJoinCode(false);
       setMeta(null);
       setJoined(false);
+      setMyRole(null);
 
       try {
         const res = await fetch(`${API_BASE}/timer/rooms/${roomId}/meta`, {
@@ -32,7 +36,7 @@ export default function TimerRoomPage() {
         });
 
         if (res.status === 401) {
-          setNeedLogin(true);
+          if (!cancelled) setNeedLogin(true);
           return;
         }
 
@@ -46,27 +50,35 @@ export default function TimerRoomPage() {
           setMeta(data);
         }
       } catch (e) {
-        if (!cancelled) setError(e?.message || '에러가 발생했습니다.');
+        if (!cancelled) {
+          setError(e?.message || '에러가 발생했습니다.');
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     if (roomId) loadMeta();
+
     return () => {
       cancelled = true;
     };
   }, [roomId]);
 
-  // 2) 공개방이면 자동 join (멤버 등록)
+  // 2) 일단 무조건 join 시도
+  // - 이미 멤버면 private라도 바로 통과
+  // - 새 유저면서 private면 joinCode required -> 그때만 비번창
   useEffect(() => {
     if (!meta) return;
-    if (meta.isPrivate) return; // 비번방은 수동
 
     let cancelled = false;
 
-    async function autoJoin() {
+    async function tryJoinWithoutCode() {
       setError('');
+      setNeedJoinCode(false);
+
       try {
         const res = await fetch(`${API_BASE}/timer/rooms/${roomId}/join`, {
           method: 'POST',
@@ -76,23 +88,39 @@ export default function TimerRoomPage() {
         });
 
         if (res.status === 401) {
-          setNeedLogin(true);
+          if (!cancelled) setNeedLogin(true);
           return;
         }
 
         const data = await res.json().catch(() => null);
 
-        if (!res.ok) {
-          throw new Error(data?.message || '입장에 실패했습니다.');
+        if (res.ok) {
+          if (!cancelled) {
+            setJoined(true);
+            setMyRole(data?.myRole || 'member');
+            setNeedJoinCode(false);
+          }
+          return;
         }
 
-        if (!cancelled) setJoined(true);
+        // private room + 신규 유저
+        if (res.status === 400 && data?.message === 'joinCode required') {
+          if (!cancelled) {
+            setNeedJoinCode(true);
+          }
+          return;
+        }
+
+        throw new Error(data?.message || '입장에 실패했습니다.');
       } catch (e) {
-        if (!cancelled) setError(e?.message || '입장에 실패했습니다.');
+        if (!cancelled) {
+          setError(e?.message || '입장에 실패했습니다.');
+        }
       }
     }
 
-    autoJoin();
+    tryJoinWithoutCode();
+
     return () => {
       cancelled = true;
     };
@@ -100,6 +128,7 @@ export default function TimerRoomPage() {
 
   const onJoinPrivate = async () => {
     setError('');
+
     try {
       const res = await fetch(`${API_BASE}/timer/rooms/${roomId}/join`, {
         method: 'POST',
@@ -114,17 +143,19 @@ export default function TimerRoomPage() {
       }
 
       const data = await res.json().catch(() => null);
+
       if (!res.ok) {
         throw new Error(data?.message || '비밀번호가 올바르지 않습니다.');
       }
 
       setJoined(true);
+      setMyRole(data?.myRole || 'member');
+      setNeedJoinCode(false);
     } catch (e) {
       setError(e?.message || '입장에 실패했습니다.');
     }
   };
 
-  // 로그인 필요하면 entry로 이동
   if (needLogin) {
     return (
       <Navigate to="/entry" replace state={{ from: `/timer/room/${roomId}` }} />
@@ -135,7 +166,6 @@ export default function TimerRoomPage() {
     return <div className="mt-12 text-center text-gray-400">로딩 중...</div>;
   }
 
-  // meta 자체가 실패한 경우(방 없음/삭제됨 등)
   if (!meta) {
     return (
       <div className="mx-auto mt-12 max-w-xl rounded-xl bg-zinc-900 p-6 text-zinc-100">
@@ -150,8 +180,8 @@ export default function TimerRoomPage() {
     );
   }
 
-  // 비번방 & 아직 join 안됨 -> 비번 입력 UI
-  if (meta.isPrivate && !joined) {
+  // private + 아직 멤버 아니면 비번 입력
+  if (needJoinCode && !joined) {
     return (
       <div className="max-w-md mx-auto mt-24 p-6 rounded-2xl border border-zinc-700 bg-zinc-950 text-zinc-100">
         <div className="text-xl font-bold">
@@ -188,7 +218,6 @@ export default function TimerRoomPage() {
     );
   }
 
-  // 공개방은 autoJoin 중일 수 있음
   if (!joined) {
     return (
       <div className="mt-12 text-center text-zinc-400">
@@ -200,6 +229,5 @@ export default function TimerRoomPage() {
     );
   }
 
-  // join 완료되면 TimerApp 렌더 (TimerApp이 socket join + state 받음)
-  return <TimerApp />;
+  return <TimerApp myRole={myRole} />;
 }

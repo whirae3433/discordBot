@@ -29,5 +29,17 @@ export function useTimerApi() {
     if (!res.ok) throw new Error('stop failed');
   };
 
-  return { replaceItems, startItem, stopItem };
+  const setAutoRepeat = async ({ roomId, setKey, autoRepeat }) => {
+    const res = await fetch(`${API_BASE}/timer/items/auto-repeat`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomId, setKey, autoRepeat }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(data?.message || 'auto repeat failed');
+    return data;
+  };
+
+  return { replaceItems, startItem, stopItem, setAutoRepeat };
 }

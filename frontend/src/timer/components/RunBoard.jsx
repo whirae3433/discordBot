@@ -12,14 +12,26 @@ export default function RunBoard({
 
   return (
     <div className={`grid gap-3 ${SLOT_GRID_COLS(count)}`}>
-      {(items || []).map((it) => (
-        <TimerCard
-          key={it.id}
-          item={it}
-          onClick={() => onClickItem(it.id)}
-          onReset={() => onResetItem(it.id)}
-        />
-      ))}
+      {(items || [])
+        .slice() // 원본 보호
+        .sort((a, b) => {
+          // 1. READY 먼저 (running 아닌 애들)
+          if (a.running !== b.running) {
+            return a.running ? 1 : -1;
+          }
+
+          // 2. 둘 다 running이면 쿨타임 짧은 순
+          return a.remainingSec - b.remainingSec;
+        })
+
+        .map((it) => (
+          <TimerCard
+            key={it.id}
+            item={it}
+            onClick={() => onClickItem(it.id)}
+            onReset={() => onResetItem(it.id)}
+          />
+        ))}
     </div>
   );
 }

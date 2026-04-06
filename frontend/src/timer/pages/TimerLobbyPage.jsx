@@ -1,40 +1,43 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LuCrown } from 'react-icons/lu';
+import { BsPersonCheckFill } from 'react-icons/bs';
+import { BsFillPersonXFill } from 'react-icons/bs';
+import { BiSolidLockOpen } from 'react-icons/bi';
 
-const API_BASE = process.env.REACT_APP_BASE_URL || "";
-console.log("API_BASE:", API_BASE);
+const API_BASE = process.env.REACT_APP_BASE_URL || '';
+
 export default function TimerLobbyPage() {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadRooms() {
       setLoading(true);
-      setError("");
+      setError('');
       try {
         const res = await fetch(`${API_BASE}/timer/rooms`, {
-          credentials: "include",
+          credentials: 'include',
         });
 
         if (res.status === 401) {
-          navigate("/entry", { replace: true, state: { from: "/timer" } });
+          navigate('/entry', { replace: true, state: { from: '/timer' } });
           return;
         }
 
         if (!res.ok) {
           const msg = await res.json().catch(() => ({}));
-          throw new Error(msg.message || "방 목록 로드 실패");
+          throw new Error(msg.message || '방 목록 로드 실패');
         }
 
         const data = await res.json();
         if (!cancelled) setRooms(data.rooms || []);
       } catch (e) {
-        if (!cancelled) setError(e.message || "에러 발생");
+        if (!cancelled) setError(e.message || '에러 발생');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -46,40 +49,15 @@ export default function TimerLobbyPage() {
     };
   }, [navigate]);
 
-  const createRoom = async () => {
-    setCreating(true);
-    try {
-      const payload = {
-        guildId: "DEV_GUILD", // 일단 임시
-        name: `타이머방 ${new Date().toLocaleTimeString()}`,
-        isPrivate: false,
-      };
-
-      const res = await fetch(`${API_BASE}/timer/rooms`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.status === 401) {
-        navigate("/entry", { replace: true, state: { from: "/timer" } });
-        return;
-      }
-
-      if (!res.ok) {
-        const msg = await res.json().catch(() => ({}));
-        throw new Error(msg.message || "방 생성 실패");
-      }
-
-      const data = await res.json(); // { roomId, ... }
-      navigate(`/timer/room/${data.roomId}`);
-    } catch (e) {
-      alert(e.message || "방 생성 실패");
-    } finally {
-      setCreating(false);
+  function renderRoleIcon(role) {
+    if (role === 'owner') {
+      return <LuCrown className="text-yellow-400" />;
     }
-  };
+    if (role === 'member') {
+      return <BsPersonCheckFill className="text-green-400" />;
+    }
+    return <BsFillPersonXFill className="text-zinc-500" />;
+  }
 
   return (
     <div className="mx-auto max-w-5xl p-4">
@@ -93,44 +71,60 @@ export default function TimerLobbyPage() {
           </div>
 
           <button
-            onClick={createRoom}
-            disabled={creating}
+            onClick={() => navigate('/timer/create')}
             className="rounded-xl bg-zinc-800 px-4 py-2 text-sm text-zinc-100 disabled:opacity-50"
           >
-            {creating ? "생성 중..." : "방 생성"}
+            방 만들기
           </button>
         </div>
       </div>
 
       <div className="rounded-2xl bg-zinc-900 p-5 text-zinc-100 shadow">
-        <div className="mb-3 text-sm font-semibold text-zinc-200">내 방 목록</div>
+        <div className="mb-3 text-m font-semibold text-zinc-200">
+          [ 방 목록 ]
+        </div>
 
         {loading ? (
           <div className="text-sm text-zinc-400">로딩 중...</div>
         ) : error ? (
           <div className="text-sm text-red-300">{error}</div>
         ) : rooms.length === 0 ? (
-          <div className="text-sm text-zinc-400">아직 참여 중인 방이 없습니다.</div>
+          <div className="text-sm text-zinc-400">
+            아직 참여 중인 방이 없습니다.
+          </div>
         ) : (
           <ul className="space-y-2">
             {rooms.map((r) => (
               <li
                 key={r.roomId}
-                className="flex items-center justify-between rounded-xl bg-zinc-800 px-4 py-3"
+                className="flex items-center justify-between rounded-xl bg-zinc-800 px-4 py-4 hover:bg-zinc-700 transition"
               >
-                <div>
-                  <div className="font-semibold">{r.name}</div>
-                  <div className="mt-1 text-xs text-zinc-300">
-                    roomId: <span className="font-mono">{r.roomId}</span>{" "}
-                    <span className="ml-2 rounded bg-zinc-700 px-2 py-0.5">
-                      {r.myRole}
+                {/* 좌측 */}
+                <div className="flex flex-col gap-1">
+                  {/* 상단: 아이콘 + 제목 + 자물쇠 */}
+                  <div className="flex items-center gap-2">
+                    {renderRoleIcon(r.myRole)}
+
+                    <span className="font-semibold text-base">{r.name}</span>
+
+                    {r.isPrivate && (
+                      <BiSolidLockOpen className="text-zinc-400 text-sm" />
+                    )}
+                  </div>
+
+                  {/* 하단: 방장 닉네임 */}
+                  <div className="text-xs text-zinc-400">
+                    방장:{' '}
+                    <span className="text-zinc-300">
+                      {r.ownerName || '알 수 없음'}
                     </span>
                   </div>
                 </div>
 
+                {/* 우측 버튼 */}
                 <button
                   onClick={() => navigate(`/timer/room/${r.roomId}`)}
-                  className="rounded-lg bg-zinc-700 px-3 py-1.5 text-sm"
+                  className="rounded-lg bg-zinc-700 px-3 py-1.5 text-sm hover:bg-zinc-600 transition"
                 >
                   입장
                 </button>

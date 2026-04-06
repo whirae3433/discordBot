@@ -19,6 +19,9 @@ export default function EditGrid({ timerSet, slots, setSlotValue }) {
     [slots, timeMode],
   );
 
+  console.log('EditGrid timerSet:', timerSet);
+  console.log('EditGrid timeMode:', timerSet?.timeMode);
+
   return (
     <>
       <div className={`grid gap-3 ${SLOT_GRID_COLS(count)}`}>

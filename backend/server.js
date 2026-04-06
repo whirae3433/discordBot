@@ -7,6 +7,7 @@ const session = require('express-session');
 const http = require('http');
 const { Server } = require('socket.io');
 const pool = require('./pg/db');
+const { buildRoomState } = require('./services/timer/buildRoomState');
 
 const { Client, GatewayIntentBits } = require('discord.js');
 const handleInteraction = require('./interactions');
@@ -99,36 +100,6 @@ io.use((socket, next) => {
 });
 
 global.io = io;
-
-// room 상태 만들기(서버 authoritative)
-async function buildRoomState(roomId) {
-  const itemsRes = await pool.query(
-    `
-    select
-      id,
-      room_id as "roomId",
-      set_key as "setKey",
-      title,
-      duration_sec as "durationSec",
-      running,
-      started_at as "startedAt",
-      ends_at as "endsAt",
-      created_by as "createdBy",
-      created_at as "createdAt",
-      updated_at as "updatedAt"
-    from timer_items
-    where room_id = $1
-    order by created_at asc
-    `,
-    [roomId],
-  );
-
-  return {
-    roomId,
-    items: itemsRes.rows,
-    serverTime: new Date().toISOString(),
-  };
-}
 
 io.on('connection', (socket) => {
   socket.on('room:join', async ({ roomId }) => {
