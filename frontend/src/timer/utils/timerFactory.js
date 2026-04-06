@@ -16,14 +16,16 @@ export function buildRunItems(set, slots) {
       set.timeMode === 'minute-input'
         ? (Number(s.minute) || 0) * 60
         : set.timeMode === 'sec-input'
-          ? Number(s.sec ?? 60) || 60   // 👈 혹시 비어있어도 60초
-          : 0;
+          ? Number(s.sec ?? 60) || 60
+          : set.timeMode === 'fixed-sec'
+            ? Number(set.fixedSec || 0)
+            : 0;
 
     const dur = Math.max(0, durationSec);
 
     return {
-      id: s.id,
-      name: String(s.name || '').trim() || `Slot ${s.id + 1}`,
+      id: `${set.key}-${s.id}`,
+      title: String(s.title ?? s.name ?? '').trim(),
       durationSec: dur,
       remainingSec: dur,
       running: false,

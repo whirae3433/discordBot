@@ -1,10 +1,9 @@
 import React from 'react';
-import { TIMER_SETS } from '../constants';
 
-export default function SetSelector({ selectedKey, onSelect }) {
+export default function SetSelector({ sets, selectedKey, onSelect }) {
   return (
     <div className="flex gap-2">
-      {TIMER_SETS.map((s) => (
+      {sets.map((s) => (
         <button
           key={s.key}
           onClick={() => onSelect(s.key)}

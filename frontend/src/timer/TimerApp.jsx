@@ -1,133 +1,196 @@
-import React, { useMemo, useState, useCallback } from 'react';
-import { APP_SHELL, TIMER_SETS } from './constants';
-import SetSelector from './components/SetSelector';
-import EditGrid from './components/EditGrid';
+import React, {
+  useMemo,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { socket } from './socket';
+import { APP_SHELL } from './constants';
+
 import RunBoard from './components/RunBoard';
-import HotkeySetting from './HotKeySetting';
 import TopActions from './components/TopActions';
+import TimerAppHeader from './components/TimerAppHeader';
+import RoomClosedModal from './components/RoomClosedModal';
 
-import { makeSlotsForSet, buildRunItems } from './utils/timerFactory';
-import { useRunTimers } from './hooks/useRunTimers';
 import { useElectronHotKey } from './hooks/useElectronHotKey';
+import { useTimerRoomSocket } from './hooks/useTimerRoomSocket';
+import { useTimerItemsView } from './hooks/useTimerItemsView';
+import { useTimerApi } from './hooks/useTimerApi';
+import { useRoomClosed } from './hooks/useRoomClosed';
+import { useNowTick } from './hooks/useNowTick';
+import { useTimerPermissions } from './hooks/useTimerPermissions';
+import { useTimerActions } from './hooks/useTimerActions';
+import { useSmokeAutoRepeat } from './hooks/useSmokeAutoRepeat';
+import { useSmokeDangerBeep } from './hooks/useSmokeDangerBeep';
 
-export default function TimerApp() {
-  const [selectedKey, setSelectedKey] = useState('t1');
+import {
+  getTimerSet,
+  getViewItems,
+  getSmokeWatchItems,
+  getExtraTimers,
+} from './selectors/timerSelectors';
+
+export default function TimerApp({ myRole = 'member' }) {
+  const { roomId } = useParams();
+  const navigate = useNavigate();
+  const { roomClosed, clearRoomClosed } = useRoomClosed(roomId);
+  const nowTick = useNowTick(250);
+
+  const [selectedKey, setSelectedKey] = useState(
+    myRole === 'owner' ? 't1' : 't2',
+  );
   const [hotkeyEnabled, setHotkeyEnabled] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(() => {
+    const saved = localStorage.getItem('timer_volume');
+    return saved != null ? Number(saved) : 0.8;
+  });
+  const [resetting, setResetting] = useState(false);
 
-  const timerSet = useMemo(
-    () => TIMER_SETS.find((s) => s.key === selectedKey),
-    [selectedKey],
+  const isMuted = volume <= 0;
+
+  useEffect(() => {
+    localStorage.setItem('timer_volume', String(volume));
+  }, [volume]);
+
+  const { canAccessSet, visibleSetKeys, visibleSets, canManageSelectedSet } =
+    useTimerPermissions(myRole, selectedKey);
+
+  useEffect(() => {
+    if (!visibleSetKeys.includes(selectedKey) && visibleSetKeys.length > 0) {
+      setSelectedKey(visibleSetKeys[0]);
+    }
+  }, [selectedKey, visibleSetKeys]);
+
+  useEffect(() => {
+    if (roomId) {
+      localStorage.setItem('currentTimerRoomId', roomId);
+    }
+  }, [roomId]);
+
+  const { roomState } = useTimerRoomSocket({ socket, roomId });
+  const { items } = useTimerItemsView({ roomState, selectedKey });
+  const { startItem, stopItem, setAutoRepeat } = useTimerApi();
+  const itemsRef = useRef(items);
+
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
+
+  const timerSet = useMemo(() => getTimerSet(selectedKey), [selectedKey]);
+  const viewItems = useMemo(
+    () => getViewItems(items, nowTick),
+    [items, nowTick],
+  );
+  const smokeWatchItems = useMemo(
+    () => getSmokeWatchItems(roomState, nowTick),
+    [roomState, nowTick],
+  );
+  const extraTimers = useMemo(
+    () => getExtraTimers(roomState, selectedKey, nowTick, myRole),
+    [roomState, selectedKey, nowTick, myRole],
   );
 
-  const [mode, setMode] = useState('edit'); // edit | run
+  const autoRepeatEnabled = !!roomState?.autoRepeatBySet?.t2;
 
-  const [slotsBySet, setSlotsBySet] = useState(() => {
-    const obj = {};
-    for (const s of TIMER_SETS) obj[s.key] = makeSlotsForSet(s);
-    return obj;
+  useSmokeAutoRepeat({
+    enabled: autoRepeatEnabled,
+    items: smokeWatchItems,
+    startItem,
   });
 
-  const slots = slotsBySet[selectedKey];
+  useSmokeDangerBeep({
+    items: smokeWatchItems,
+    volume,
+    muted: isMuted,
+  });
 
-  const { items, setItems, clickItem, resetAll, resetItem, itemsRef } =
-    useRunTimers({ enabled: mode === 'run', muted });
+  const {
+    onServerToggle,
+    onServerStop,
+    onResetCurrentSet,
+    onOpenSettings,
+    onDeleteRoom,
+    onConfirmRoomClosed,
+  } = useTimerActions({
+    myRole,
+    roomId,
+    roomState,
+    selectedKey,
+    canAccessSet,
+    startItem,
+    stopItem,
+    navigate,
+    clearRoomClosed,
+    setResetting,
+  });
 
   const onGlobalTrigger = useCallback(() => {
-    if (mode !== 'run') return;
     const current = itemsRef.current || [];
     if (!current.length) return;
-    clickItem(current[0].id, 'hotkey');
-  }, [mode, clickItem, itemsRef]);
+    onServerToggle(current[0].id);
+  }, [onServerToggle]);
+
+  const onExitLobby = useCallback(() => {
+    if (window.confirm('로비로 나가시겠습니까?')) {
+      localStorage.removeItem('currentTimerRoomId');
+      navigate('/timer');
+    }
+  }, [navigate]);
 
   useElectronHotKey({
-    enabled: mode === 'run' && hotkeyEnabled,
+    enabled: hotkeyEnabled,
     onTrigger: onGlobalTrigger,
   });
 
-  const setSlotValue = (index, field, value) => {
-    setSlotsBySet((prev) => ({
-      ...prev,
-      [selectedKey]: prev[selectedKey].map((s, i) =>
-        i === index ? { ...s, [field]: value } : s,
-      ),
-    }));
-  };
-
-  const onResetCurrent = () => {
-    setSlotsBySet((prev) => ({
-      ...prev,
-      [selectedKey]: makeSlotsForSet(timerSet),
-    }));
-  };
-
-  const onStart = () => {
-    setItems(buildRunItems(timerSet, slots));
-    setMode('run');
-  };
-
-  const onBack = () => {
-    setMode('edit');
-    setItems([]);
-  };
-
-  const onSelectSet = (key) => {
-    setSelectedKey(key);
-    setMode('edit');
-    setItems([]);
-  };
-
-  // ✅ 공용 액션바 핸들러 결정
-  const actionReset = mode === 'edit' ? onResetCurrent : resetAll;
-  const actionPrimary = mode === 'edit' ? onStart : onBack;
-  const primaryLabel = mode === 'edit' ? '실행' : '세팅';
-
   return (
-    <div className={APP_SHELL}>
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-start justify-between gap-6 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">로나 타이머</h1>
-            <div className="mt-2">
-              <SetSelector selectedKey={selectedKey} onSelect={onSelectSet} />
-            </div>
-          </div>
-
-          <div className="shrink-0">
-            <HotkeySetting
-              active={mode === 'run'}
-              enabled={hotkeyEnabled}
-              setEnabled={setHotkeyEnabled}
-            />
-          </div>
-        </div>
-
-        {/* ✅ 여기서 공용 버튼 */}
-        <TopActions
-          mode={mode}
-          onReset={actionReset}
-          onPrimary={actionPrimary}
-          primaryLabel={primaryLabel}
-          muted={muted}
-          onToggleMute={() => setMuted((v) => !v)}
-        />
-
-        {/* 본문 */}
-        {mode === 'edit' ? (
-          <EditGrid
-            timerSet={timerSet}
-            slots={slots}
-            setSlotValue={setSlotValue}
+    <>
+      <div className={APP_SHELL}>
+        <div className="max-w-5xl mx-auto">
+          <TimerAppHeader
+            roomTitle={roomState?.name}
+            myRole={myRole}
+            visibleSets={visibleSets}
+            selectedKey={selectedKey}
+            onSelectSet={setSelectedKey}
+            onExitLobby={onExitLobby}
+            onDeleteRoom={onDeleteRoom}
+            hotkeyEnabled={hotkeyEnabled}
+            setHotkeyEnabled={setHotkeyEnabled}
           />
-        ) : (
+
+          <TopActions
+            onReset={onResetCurrentSet}
+            resetDisabled={!canManageSelectedSet || resetting}
+            onPrimary={onOpenSettings}
+            primaryLabel="세팅"
+            primaryDisabled={!canManageSelectedSet}
+            volume={volume}
+            onChangeVolume={setVolume}
+            extraTimers={extraTimers}
+            onClickExtra={onServerToggle}
+            autoRepeatEnabled={autoRepeatEnabled}
+            onToggleAutoRepeat={() =>
+              setAutoRepeat({
+                roomId,
+                setKey: 't2',
+                autoRepeat: !autoRepeatEnabled,
+              })
+            }
+            showAutoRepeat={selectedKey === 't2'}
+          />
+
           <RunBoard
             timerSet={timerSet}
-            items={items}
-            onClickItem={(id) => clickItem(id, 'mouse')}
-            onResetItem={resetItem}
+            items={viewItems}
+            onClickItem={onServerToggle}
+            onResetItem={onServerStop}
           />
-        )}
+        </div>
       </div>
-    </div>
+
+      <RoomClosedModal open={roomClosed} onConfirm={onConfirmRoomClosed} />
+    </>
   );
 }

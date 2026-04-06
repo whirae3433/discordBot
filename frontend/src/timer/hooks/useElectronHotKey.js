@@ -12,7 +12,7 @@ export function useElectronHotKey({ enabled, onTrigger }) {
     enabledRef.current = enabled;
   }, [enabled]);
 
-  // ✅ global-key 리스너는 1번만 등록
+  //  global-key 리스너는 1번만 등록
   useEffect(() => {
     if (!window?.muyeong?.isDesktopApp) return;
     if (!window.muyeong.onGlobalKey) return;
@@ -25,7 +25,7 @@ export function useElectronHotKey({ enabled, onTrigger }) {
     window.muyeong.onGlobalKey(handler);
   }, []);
 
-  // ✅ 실제 전역키 등록/해제는 enabled 변화에 맞춰 처리
+  //  실제 전역키 등록/해제는 enabled 변화에 맞춰 처리
   useEffect(() => {
     if (!window?.muyeong?.isDesktopApp) return;
 
