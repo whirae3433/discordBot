@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import TimerApp from '../TimerApp';
 
 const API_BASE = process.env.REACT_APP_BASE_URL || '';
 
+// 네 프로젝트에서 마지막 방 경로 저장 키가 따로 있으면 이 이름만 맞춰주면 됨.
+const LAST_TIMER_ROOM_KEY = 'currentTimerRoomId';
+
 export default function TimerRoomPage() {
   const { roomId } = useParams();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState(null);
@@ -16,6 +20,31 @@ export default function TimerRoomPage() {
   const [needJoinCode, setNeedJoinCode] = useState(false);
   const [error, setError] = useState('');
 
+  // 삭제되었거나 더 이상 유효하지 않은 방인지
+  const [needInvalidRoomModal, setNeedInvalidRoomModal] = useState(false);
+
+  function clearSavedTimerRoomPath() {
+    try {
+      localStorage.removeItem(LAST_TIMER_ROOM_KEY);
+    } catch (e) {
+      console.error('마지막 타이머 방 경로 삭제 실패:', e);
+    }
+  }
+
+  function handleInvalidRoom(message = '더 이상 존재하지 않는 방입니다.') {
+    clearSavedTimerRoomPath();
+    setError(message);
+    setNeedInvalidRoomModal(true);
+    setMeta(null);
+    setJoined(false);
+    setNeedJoinCode(false);
+  }
+
+  const onConfirmInvalidRoom = () => {
+    setNeedInvalidRoomModal(false);
+    navigate('/timer', { replace: true });
+  };
+
   // 1) room meta 조회
   useEffect(() => {
     let cancelled = false;
@@ -25,6 +54,7 @@ export default function TimerRoomPage() {
       setError('');
       setNeedLogin(false);
       setNeedJoinCode(false);
+      setNeedInvalidRoomModal(false);
       setMeta(null);
       setJoined(false);
       setMyRole(null);
@@ -43,7 +73,24 @@ export default function TimerRoomPage() {
         const data = await res.json().catch(() => null);
 
         if (!res.ok) {
+          // 삭제된 방 / 존재하지 않는 방 처리
+          if (res.status === 404) {
+            if (!cancelled) {
+              handleInvalidRoom(
+                data?.message || '더 이상 존재하지 않는 방입니다.',
+              );
+            }
+            return;
+          }
+
           throw new Error(data?.message || '방 정보를 불러오지 못했습니다.');
+        }
+
+        if (!data) {
+          if (!cancelled) {
+            handleInvalidRoom('더 이상 존재하지 않는 방입니다.');
+          }
+          return;
         }
 
         if (!cancelled) {
@@ -72,6 +119,7 @@ export default function TimerRoomPage() {
   // - 새 유저면서 private면 joinCode required -> 그때만 비번창
   useEffect(() => {
     if (!meta) return;
+    if (needInvalidRoomModal) return;
 
     let cancelled = false;
 
@@ -111,6 +159,16 @@ export default function TimerRoomPage() {
           return;
         }
 
+        // join 시점에 이미 삭제되었거나 유효하지 않은 방일 수도 있음
+        if (res.status === 404) {
+          if (!cancelled) {
+            handleInvalidRoom(
+              data?.message || '더 이상 존재하지 않는 방입니다.',
+            );
+          }
+          return;
+        }
+
         throw new Error(data?.message || '입장에 실패했습니다.');
       } catch (e) {
         if (!cancelled) {
@@ -124,7 +182,7 @@ export default function TimerRoomPage() {
     return () => {
       cancelled = true;
     };
-  }, [meta, roomId]);
+  }, [meta, roomId, needInvalidRoomModal]);
 
   const onJoinPrivate = async () => {
     setError('');
@@ -143,6 +201,11 @@ export default function TimerRoomPage() {
       }
 
       const data = await res.json().catch(() => null);
+
+      if (res.status === 404) {
+        handleInvalidRoom(data?.message || '더 이상 존재하지 않는 방입니다.');
+        return;
+      }
 
       if (!res.ok) {
         throw new Error(data?.message || '비밀번호가 올바르지 않습니다.');
@@ -164,6 +227,32 @@ export default function TimerRoomPage() {
 
   if (loading) {
     return <div className="mt-12 text-center text-gray-400">로딩 중...</div>;
+  }
+
+  if (needInvalidRoomModal) {
+    return (
+      <div className="mx-auto mt-20 max-w-xl rounded-2xl border border-zinc-700 bg-zinc-950 p-6 text-zinc-100 shadow-2xl">
+        <div className="text-xl font-bold">더 이상 존재하지 않는 방입니다.</div>
+        <div className="mt-3 text-sm text-zinc-300">
+          확인을 누르면 타이머 로비로 이동합니다.
+        </div>
+
+        {error ? (
+          <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            {error}
+          </div>
+        ) : null}
+
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={onConfirmInvalidRoom}
+            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-zinc-100 hover:bg-zinc-800 transition"
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!meta) {

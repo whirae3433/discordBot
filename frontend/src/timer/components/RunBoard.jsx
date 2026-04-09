@@ -7,6 +7,7 @@ export default function RunBoard({
   items,
   onClickItem,
   onResetItem,
+  onToggleDeathTimer,
 }) {
   const { count } = timerSet;
 
@@ -30,6 +31,7 @@ export default function RunBoard({
             item={it}
             onClick={() => onClickItem(it.id)}
             onReset={() => onResetItem(it.id)}
+            onToggleDeathTimer={() => onToggleDeathTimer(it.id)}
           />
         ))}
     </div>

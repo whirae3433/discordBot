@@ -36,11 +36,27 @@ export function getTimerSet(selectedKey) {
   return TIMER_SETS.find((s) => s.key === selectedKey);
 }
 
-export function getViewItems(items, nowMs) {
-  return (items || []).map((it) => ({
-    ...it,
-    remainingSec: calcRemainingSec(it, nowMs),
-  }));
+export function getViewItems(items, nowTick, deathTimers = {}) {
+  const safeItems = Array.isArray(items) ? items : [];
+
+  return safeItems.map((item) => {
+    const remainingMs = item.endsAtMs ? item.endsAtMs - nowTick : 0;
+    const remainingSec = item.running
+      ? Math.max(0, Math.ceil(remainingMs / 1000))
+      : 0;
+
+    const death = deathTimers[item.id];
+    const deathRemainingSec = death?.endsAt
+      ? Math.max(0, Math.floor((death.endsAt - nowTick) / 1000))
+      : 0;
+
+    return {
+      ...item,
+      remainingSec,
+      deathRunning: deathRemainingSec > 0,
+      deathRemainingSec,
+    };
+  });
 }
 
 export function getSmokeWatchItems(roomState, nowMs) {

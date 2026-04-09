@@ -11,10 +11,10 @@ export default function UserInfo() {
       <button
         onClick={() => navigate('/entry')}
         className="
-                   flex items-center gap-2
-                   px-4 py-2 text-sm font-semibold text-white
-                   bg-indigo-600 rounded-md hover:bg-indigo-500
-                   transition"
+        h-9 flex items-center gap-2
+        px-3 text-sm font-semibold text-white
+      bg-indigo-600 rounded-md hover:bg-indigo-500
+        transition"
       >
         <FaDiscord className="text-lg" />
         <span>로그인</span>
@@ -25,15 +25,15 @@ export default function UserInfo() {
   const displayName = user.nickname || user.globalName || user.username;
 
   return (
-    <div className="flex items-center gap-3 text-white">
+    <div className="h-9 flex items-center gap-2 text-zinc-500">
       <button
         onClick={logout}
-        className="text-xs text-gray-300 hover:text-white transition"
+        className="text-xs hover:text-black transition"
         title="로그아웃"
       >
         로그아웃
       </button>
-      <span className="h-3.5 w-px bg-gray-300" />
+      <span className="h-3.5 w-px bg-gray-400" />
       <span className="text-sm font-semibold">{displayName}</span>
       <img
         src={
@@ -42,7 +42,7 @@ export default function UserInfo() {
             : '/images/avatar-placeholder.png'
         }
         alt="avatar"
-        className="w-8 h-8 rounded-full border border-gray-400"
+        className="w-7 h-7 rounded-full border border-gray-400"
       />
     </div>
   );

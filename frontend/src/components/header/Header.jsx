@@ -4,14 +4,14 @@ import UserInfo from './UserInfo';
 
 export default function Header() {
   return (
-    <header className="fixed top-0 left-0 w-full flex flex-col z-20 bg-zinc-900/50 backdrop-blur-md">
+    <header className="w-full flex flex-col bg-white border-b border-zinc-200">
       {/* 모바일 전용: 서치바 위쪽 */}
       <div className="flex justify-center mt-2 md:hidden">
         <SearchBar />
       </div>
 
       {/* 메인 헤더 라인 (3분할) */}
-      <div className="flex items-center px-6 py-4">
+      <div className="flex h-12 items-center px-6 py-2">
         <div className="flex items-center gap-12 flex-1">
           <Navigation />
         </div>
@@ -26,9 +26,6 @@ export default function Header() {
           <UserInfo />
         </div>
       </div>
-
-      {/* 하단 구분선 */}
-      <div className="border-b border-gray-300 opacity-40"></div>
     </header>
   );
 }

@@ -21,6 +21,7 @@ export function useTimerActions({
   navigate,
   clearRoomClosed,
   setResetting,
+  clearDeathTimersByItemIds,
 }) {
   const onServerToggle = useCallback(
     async (itemId) => {
@@ -61,24 +62,35 @@ export function useTimerActions({
     try {
       setResetting(true);
 
-      const runningItems = roomState.items.filter(
-        (it) => it.setKey === selectedKey && isActuallyCooling(it),
+      const selectedItems = roomState.items.filter(
+        (it) => it.setKey === selectedKey,
       );
 
+      const runningItems = selectedItems.filter((it) => isActuallyCooling(it));
+
       await Promise.all(runningItems.map((it) => stopItem(it.id)));
+
+      clearDeathTimersByItemIds?.(selectedItems.map((it) => it.id));
     } catch (e) {
       console.error('세트 리셋 실패:', e);
     } finally {
       setResetting(false);
     }
-  }, [canAccessSet, selectedKey, roomState, stopItem, setResetting]);
+  }, [
+    canAccessSet,
+    selectedKey,
+    roomState,
+    stopItem,
+    setResetting,
+    clearDeathTimersByItemIds,
+  ]);
 
   const onOpenSettings = useCallback(() => {
     if (!canAccessSet(selectedKey)) return;
 
     const ok = window.confirm('세팅 페이지로 이동하시겠습니까?');
     if (!ok) return;
-    
+
     navigate(`/timer/room/${roomId}/edit?setKey=${selectedKey}`);
   }, [canAccessSet, selectedKey, navigate, roomId]);
 

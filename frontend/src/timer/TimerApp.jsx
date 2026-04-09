@@ -31,6 +31,7 @@ import {
   getSmokeWatchItems,
   getExtraTimers,
 } from './selectors/timerSelectors';
+import { useDeathTimers } from './hooks/useDeathTimers';
 
 export default function TimerApp({ myRole = 'member' }) {
   const { roomId } = useParams();
@@ -72,6 +73,9 @@ export default function TimerApp({ myRole = 'member' }) {
   const { roomState } = useTimerRoomSocket({ socket, roomId });
   const { items } = useTimerItemsView({ roomState, selectedKey });
   const { startItem, stopItem, setAutoRepeat } = useTimerApi();
+  const { deathTimers, toggleDeathTimer, clearDeathTimersByItemIds } =
+    useDeathTimers(roomId, nowTick);
+
   const itemsRef = useRef(items);
 
   useEffect(() => {
@@ -79,10 +83,12 @@ export default function TimerApp({ myRole = 'member' }) {
   }, [items]);
 
   const timerSet = useMemo(() => getTimerSet(selectedKey), [selectedKey]);
+
   const viewItems = useMemo(
-    () => getViewItems(items, nowTick),
-    [items, nowTick],
+    () => getViewItems(items, nowTick, deathTimers),
+    [items, nowTick, deathTimers],
   );
+
   const smokeWatchItems = useMemo(
     () => getSmokeWatchItems(roomState, nowTick),
     [roomState, nowTick],
@@ -124,6 +130,7 @@ export default function TimerApp({ myRole = 'member' }) {
     navigate,
     clearRoomClosed,
     setResetting,
+    clearDeathTimersByItemIds,
   });
 
   const onGlobalTrigger = useCallback(() => {
@@ -186,6 +193,7 @@ export default function TimerApp({ myRole = 'member' }) {
             items={viewItems}
             onClickItem={onServerToggle}
             onResetItem={onServerStop}
+            onToggleDeathTimer={toggleDeathTimer}
           />
         </div>
       </div>
