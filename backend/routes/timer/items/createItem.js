@@ -48,7 +48,7 @@ router.post('/', async (req, res) => {
 
     const role = await getRoomRole(client, roomId, discordId);
     if (!canManageSet(role, setKey)) {
-      await client.query('rollback');
+      await client.query('rollback');f
       return res.status(403).json({ message: 'You cannot create in this set' });
     }
 

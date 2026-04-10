@@ -21,7 +21,7 @@ export default function CharacterGroup({ ign, characters, onRefresh }) {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold text-white mb-4">{ign}</h2>
+      <h2 className="text-xl font-bold text-zinc-700 mb-4">{ign}</h2>
 
       {/* 카드 그리드 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

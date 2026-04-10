@@ -20,17 +20,27 @@ export default function Navigation() {
   };
 
   return (
-    <nav className="flex gap-6 font-bold text-sm text-white">
+    <nav className="flex gap-6 font-bold text-sm text-zinc-700">
       <NavItem to="/home" label="Home" />
       <NavItem to={user ? '/profile' : '/entry'} label="Profile" />
 
       <button
         onClick={handleTimerClick}
-        className={`transition ${
-          isTimerActive ? 'text-white' : 'text-white/70 hover:text-white'
-        }`}
+        className="relative flex flex-col items-center"
       >
-        Timer
+        <span
+          className={`transition ${
+            isTimerActive
+              ? 'text-black'
+              : 'text-zinc-500 font-semibold hover:text-black'
+          }`}
+        >
+          Timer
+        </span>
+
+        {isTimerActive && (
+          <div className="absolute left-0 right-0 -bottom-[15px] h-[1.2px] bg-black" />
+        )}
       </button>
     </nav>
   );

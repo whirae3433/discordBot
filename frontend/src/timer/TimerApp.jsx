@@ -22,7 +22,6 @@ import { useRoomClosed } from './hooks/useRoomClosed';
 import { useNowTick } from './hooks/useNowTick';
 import { useTimerPermissions } from './hooks/useTimerPermissions';
 import { useTimerActions } from './hooks/useTimerActions';
-import { useSmokeAutoRepeat } from './hooks/useSmokeAutoRepeat';
 import { useSmokeDangerBeep } from './hooks/useSmokeDangerBeep';
 
 import {
@@ -31,6 +30,7 @@ import {
   getSmokeWatchItems,
   getExtraTimers,
 } from './selectors/timerSelectors';
+import { useDeathTimers } from './hooks/useDeathTimers';
 
 export default function TimerApp({ myRole = 'member' }) {
   const { roomId } = useParams();
@@ -70,8 +70,11 @@ export default function TimerApp({ myRole = 'member' }) {
   }, [roomId]);
 
   const { roomState } = useTimerRoomSocket({ socket, roomId });
-  const { items } = useTimerItemsView({ roomState, selectedKey });
+  const { items } = useTimerItemsView({ roomState, selectedKey, nowTick });
   const { startItem, stopItem, setAutoRepeat } = useTimerApi();
+  const { deathTimers, toggleDeathTimer, clearDeathTimersByItemIds } =
+    useDeathTimers(roomId, nowTick);
+
   const itemsRef = useRef(items);
 
   useEffect(() => {
@@ -79,10 +82,12 @@ export default function TimerApp({ myRole = 'member' }) {
   }, [items]);
 
   const timerSet = useMemo(() => getTimerSet(selectedKey), [selectedKey]);
+
   const viewItems = useMemo(
-    () => getViewItems(items, nowTick),
-    [items, nowTick],
+    () => getViewItems(items, nowTick, deathTimers),
+    [items, nowTick, deathTimers],
   );
+
   const smokeWatchItems = useMemo(
     () => getSmokeWatchItems(roomState, nowTick),
     [roomState, nowTick],
@@ -93,12 +98,6 @@ export default function TimerApp({ myRole = 'member' }) {
   );
 
   const autoRepeatEnabled = !!roomState?.autoRepeatBySet?.t2;
-
-  useSmokeAutoRepeat({
-    enabled: autoRepeatEnabled,
-    items: smokeWatchItems,
-    startItem,
-  });
 
   useSmokeDangerBeep({
     items: smokeWatchItems,
@@ -124,6 +123,7 @@ export default function TimerApp({ myRole = 'member' }) {
     navigate,
     clearRoomClosed,
     setResetting,
+    clearDeathTimersByItemIds,
   });
 
   const onGlobalTrigger = useCallback(() => {
@@ -186,6 +186,7 @@ export default function TimerApp({ myRole = 'member' }) {
             items={viewItems}
             onClickItem={onServerToggle}
             onResetItem={onServerStop}
+            onToggleDeathTimer={toggleDeathTimer}
           />
         </div>
       </div>

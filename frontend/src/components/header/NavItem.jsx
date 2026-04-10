@@ -6,16 +6,18 @@ export default function NavItem({ to, label }) {
       {({ isActive }) => (
         <>
           <span
-            className={`hover:text-gray-300 ${
-              isActive ? 'text-white font-bold' : 'text-gray-400'
+            className={`transition ${
+              isActive
+                ? 'text-black'
+                : 'text-zinc-500 font-semibold hover:text-black'
             }`}
           >
             {label}
           </span>
 
-          {/* 굵은 밑줄 (헤더 구분선과 같은 위치) */}
+          {/* 밑줄 */}
           {isActive && (
-            <div className="absolute -bottom-[22px] w-full border-b-2 border-white" />
+            <div className="absolute left-0 right-0 -bottom-[15px] h-[1.2px] bg-black" />
           )}
         </>
       )}
