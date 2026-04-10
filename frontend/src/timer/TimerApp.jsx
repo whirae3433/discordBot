@@ -22,7 +22,6 @@ import { useRoomClosed } from './hooks/useRoomClosed';
 import { useNowTick } from './hooks/useNowTick';
 import { useTimerPermissions } from './hooks/useTimerPermissions';
 import { useTimerActions } from './hooks/useTimerActions';
-import { useSmokeAutoRepeat } from './hooks/useSmokeAutoRepeat';
 import { useSmokeDangerBeep } from './hooks/useSmokeDangerBeep';
 
 import {
@@ -71,7 +70,7 @@ export default function TimerApp({ myRole = 'member' }) {
   }, [roomId]);
 
   const { roomState } = useTimerRoomSocket({ socket, roomId });
-  const { items } = useTimerItemsView({ roomState, selectedKey });
+  const { items } = useTimerItemsView({ roomState, selectedKey, nowTick });
   const { startItem, stopItem, setAutoRepeat } = useTimerApi();
   const { deathTimers, toggleDeathTimer, clearDeathTimersByItemIds } =
     useDeathTimers(roomId, nowTick);
@@ -99,12 +98,6 @@ export default function TimerApp({ myRole = 'member' }) {
   );
 
   const autoRepeatEnabled = !!roomState?.autoRepeatBySet?.t2;
-
-  useSmokeAutoRepeat({
-    enabled: autoRepeatEnabled,
-    items: smokeWatchItems,
-    startItem,
-  });
 
   useSmokeDangerBeep({
     items: smokeWatchItems,

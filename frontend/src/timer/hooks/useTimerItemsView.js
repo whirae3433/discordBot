@@ -1,16 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { mapServerItemToWatch } from '../selectors/timerSelectors';
 
-function mapServerItemToUi(it) {
-  return {
-    id: it.id,
-    title: it.title,
-    durationSec: it.durationSec,
-    running: !!it.running,
-    endsAtMs: it.endsAt ? new Date(it.endsAt).getTime() : null,
-  };
-}
-
-export function useTimerItemsView({ roomState, selectedKey, mode }) {
+export function useTimerItemsView({ roomState, selectedKey, nowTick }) {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
@@ -21,10 +12,12 @@ export function useTimerItemsView({ roomState, selectedKey, mode }) {
 
     const mapped = (roomState.items || [])
       .filter((it) => it.setKey === selectedKey)
-      .map(mapServerItemToUi);
+      .map((it) =>
+        mapServerItemToWatch(it, nowTick, roomState.autoRepeatBySet),
+      );
 
     setItems(mapped);
-  }, [roomState, selectedKey]);
+  }, [roomState, selectedKey, nowTick]);
 
   return { items, setItems };
 }
