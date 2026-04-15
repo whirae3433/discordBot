@@ -9,7 +9,7 @@ const jobImg = {
   '다크나이트': '/images/warrior.jpg',
   '팔라딘': '/images/warrior.jpg',
 
-  // 궁수 직업
+  // 궁수 직업F
   '보마': '/images/archer.jpg',
   '신궁': '/images/archer.jpg',
 

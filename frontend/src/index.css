@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -19,7 +21,7 @@ body {
 
   @apply bg-gray-100 text-gray-900;
 
-  overflow-x: hidden; 
+  overflow-x: hidden;
 }
 
 #root {
@@ -29,4 +31,27 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* scrollbar */
+.app-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160, 160, 160, 0.35) transparent;
+}
+
+.app-scroll::-webkit-scrollbar {
+  width: 12px;
+}
+
+.app-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-scroll::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.45);
+  border-radius: 9999px;
+}
+
+.app-scroll::-webkit-scrollbar-thumb:hover {
+  background: red;
 }
